@@ -1,96 +1,2270 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Akash Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f5f7fb;color:#172033}
-.hidden{display:none!important}.login{min-height:100vh;display:grid;place-items:center;padding:20px}.loginbox{width:min(420px,100%);background:#fff;border:1px solid #e5e9f0;border-radius:16px;padding:28px;box-shadow:0 15px 50px #0001}.loginbox h1{margin:0 0 6px}.muted{color:#6b7280;font-size:13px}.loginbox input{width:100%;padding:12px;margin:8px 0;border:1px solid #d6dce6;border-radius:8px;font:inherit}.btn{border:0;border-radius:8px;padding:10px 15px;cursor:pointer;font-weight:700}.primary{background:#2563eb;color:white}.secondary{background:white;border:1px solid #dbe1ea}.danger{background:#fee2e2;color:#991b1b}.success{background:#dcfce7;color:#166534}.warning{background:#fef3c7;color:#92400e}
-.app{display:flex;min-height:100vh}.sidebar{width:245px;background:#101827;color:#fff;padding:24px 16px;position:fixed;inset:0 auto 0 0}.brand{font-size:21px;font-weight:800;padding:0 10px 28px}.brand span{font-weight:400;color:#9ca9bd}.nav button{width:100%;background:none;border:0;color:#cbd5e1;text-align:left;padding:12px 14px;border-radius:9px;font-size:14px;cursor:pointer;margin:2px 0}.nav button:hover,.nav button.active{background:#1f2b3d;color:#fff}.logout{position:absolute;bottom:20px;left:16px;right:16px}
-.main{margin-left:245px;flex:1;padding:28px;max-width:1600px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.top h1{margin:0;font-size:28px}.actions{display:flex;gap:8px;flex-wrap:wrap}.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:22px}.card{background:#fff;border:1px solid #e5e9f0;border-radius:12px;padding:16px}.card .n{font-size:25px;font-weight:800;margin-top:7px}.panel{background:#fff;border:1px solid #e5e9f0;border-radius:12px;overflow:hidden}.toolbar{padding:15px;display:flex;gap:9px;flex-wrap:wrap;border-bottom:1px solid #e5e9f0}.search{flex:1;min-width:220px}.toolbar input,.toolbar select{padding:10px;border:1px solid #d6dce6;border-radius:8px;background:#fff}table{width:100%;border-collapse:collapse;min-width:980px}th,td{padding:12px 13px;border-bottom:1px solid #edf0f4;text-align:left;font-size:13px;vertical-align:top}th{background:#f9fafb;color:#4b5563;font-size:12px;text-transform:uppercase}tr.selected td{background:#eff6ff}.table-wrap{overflow:auto}.pill{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700}.imp{background:#fee2e2;color:#991b1b}.med{background:#fef3c7;color:#92400e}.low{background:#e0e7ff;color:#3730a3}.new{background:#dbeafe;color:#1d4ed8}.completed{background:#dcfce7;color:#166534}.cancelled{background:#e5e7eb;color:#374151}.due{background:#fef3c7;color:#92400e}.overdue{background:#fee2e2;color:#991b1b}.empty{text-align:center;padding:40px;color:#6b7280}
-.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}.modal-box{background:white;width:min(680px,100%);border-radius:14px;padding:22px}.form{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:12px;font-weight:700;color:#475569}.field input,.field textarea,.field select{padding:10px;border:1px solid #d6dce6;border-radius:8px;font:inherit}.field textarea{min-height:100px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
-@media(max-width:1000px){.cards{grid-template-columns:repeat(3,1fr)}.sidebar{width:210px}.main{margin-left:210px}}@media(max-width:700px){.app{display:block}.sidebar{position:static;width:100%;min-height:auto}.main{margin-left:0;padding:16px}.cards{grid-template-columns:repeat(2,1fr)}.top{flex-direction:column;align-items:flex-start}.form{grid-template-columns:1fr}.field.full{grid-column:auto}.logout{position:static;margin-top:10px}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Akash Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #222;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font-family: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 230px;
+      background: #111827;
+      color: white;
+      padding: 20px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+    }
+
+    .brand {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 25px;
+    }
+
+    .brand span {
+      color: #60a5fa;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: #d1d5db;
+      text-align: left;
+      padding: 11px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      background: #1f2937;
+      color: white;
+    }
+
+    .logout {
+      margin-top: 25px;
+      width: 100%;
+      border: 1px solid #374151;
+      background: transparent;
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    /* MAIN */
+    .main {
+      margin-left: 230px;
+      width: calc(100% - 230px);
+      padding: 25px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .top h1 {
+      font-size: 28px;
+    }
+
+    .muted {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    /* BUTTONS */
+    .btn {
+      border: 0;
+      padding: 10px 15px;
+      border-radius: 7px;
+      font-size: 14px;
+      margin-left: 6px;
+    }
+
+    .primary {
+      background: #2563eb;
+      color: white;
+    }
+
+    .secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .success {
+      background: #16a34a;
+      color: white;
+    }
+
+    .danger {
+      background: #dc2626;
+      color: white;
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    /* CARDS */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 18px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .card .number {
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 7px;
+    }
+
+    /* PANEL */
+    .panel {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filters input,
+    .filters select {
+      border: 1px solid #d1d5db;
+      border-radius: 7px;
+      padding: 10px;
+      min-width: 180px;
+      outline: none;
+    }
+
+    .filters input:focus,
+    .filters select:focus {
+      border-color: #2563eb;
+    }
+
+    /* TABLE */
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 850px;
+    }
+
+    th,
+    td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f9fafb;
+      font-weight: 600;
+    }
+
+    tr:hover td {
+      background: #fafafa;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 12px;
+      background: #e5e7eb;
+    }
+
+    .badge.new {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .badge.progress {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge.completed {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge.overdue {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .small-btn {
+      border: 0;
+      border-radius: 5px;
+      padding: 6px 8px;
+      font-size: 12px;
+    }
+
+    /* MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .55);
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-box {
+      background: white;
+      width: 100%;
+      max-width: 600px;
+      border-radius: 12px;
+      padding: 22px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .2);
+    }
+
+    .modal-box h2 {
+      margin-bottom: 18px;
+    }
+
+    .form {
+      display: grid;
+      gap: 15px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 7px;
+      padding: 10px;
+      outline: none;
+    }
+
+    .field textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: #2563eb;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 5px;
+    }
+
+    /* MOBILE */
+    @media(max-width: 900px) {
+      .sidebar {
+        width: 190px;
+      }
+
+      .main {
+        margin-left: 190px;
+        width: calc(100% - 190px);
+      }
+
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media(max-width: 650px) {
+      .sidebar {
+        position: static;
+        width: 100%;
+        min-height: auto;
+      }
+
+      .app {
+        display: block;
+      }
+
+      .main {
+        margin-left: 0;
+        width: 100%;
+        padding: 15px;
+      }
+
+      .top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div id="login" class="login">
- <div class="loginbox">
-  <h1>Akash Dashboard</h1><p class="muted">Sign in to manage your tasks.</p>
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <button id="loginBtn" class="btn primary" style="width:100%">Login</button>
-  <p id="loginMsg" class="muted"></p>
- </div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="brand">
+      AKASH <span>DASHBOARD</span>
+    </div>
+
+    <nav class="nav">
+      <button data-view="all" class="active">
+        All Tasks
+      </button>
+
+      <button data-view="new">
+        + New
+      </button>
+
+      <button data-view="due">
+        Due Today
+      </button>
+
+      <button data-view="overdue">
+        Overdue
+      </button>
+
+      <button data-view="upcoming">
+        Upcoming
+      </button>
+    </nav>
+
+    <button id="logoutBtn" class="logout">
+      Logout
+    </button>
+
+  </aside>
+
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="top">
+
+      <div>
+        <h1 id="pageTitle">Akash Dashboard</h1>
+        <div class="muted" id="todayLabel"></div>
+      </div>
+
+      <div>
+        <button
+          id="removeBtn"
+          class="btn secondary"
+          disabled>
+          Remove
+        </button>
+
+        <button
+          id="completeBtn"
+          class="btn success"
+          disabled>
+          ✓ Complete
+        </button>
+
+        <button
+          id="newTaskBtn"
+          class="btn primary">
+          + New Task
+        </button>
+      </div>
+
+    </div>
+
+
+    <!-- CARDS -->
+    <section class="cards">
+
+      <div class="card">
+        <div class="muted">Total Tasks</div>
+        <div class="number" id="total">0</div>
+      </div>
+
+      <div class="card">
+        <div class="muted">New</div>
+        <div class="number" id="newCount">0</div>
+      </div>
+
+      <div class="card">
+        <div class="muted">Due Today</div>
+        <div class="number" id="dueCount">0</div>
+      </div>
+
+      <div class="card">
+        <div class="muted">Overdue</div>
+        <div class="number" id="overdueCount">0</div>
+      </div>
+
+    </section>
+
+
+    <!-- FILTERS -->
+    <section class="panel">
+
+      <div class="filters">
+
+        <input
+          type="text"
+          id="search"
+          placeholder="Search task or details...">
+
+        <select id="typeFilter">
+          <option value="">All Types</option>
+          <option value="Important">Important</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+
+        <select id="statusFilter">
+          <option value="">All Status</option>
+          <option value="New">New</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
+        </select>
+
+      </div>
+
+    </section>
+
+
+    <!-- TASK TABLE -->
+    <section class="panel">
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                <input
+                  type="checkbox"
+                  id="selectAll">
+              </th>
+
+              <th>Task</th>
+              <th>Details</th>
+              <th>Type</th>
+              <th>Due Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="tbody"></tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
 </div>
 
-<div id="app" class="app hidden">
-<aside class="sidebar"><div class="brand">AKASH <span>DASHBOARD</span></div><nav class="nav">
-<button class="active" data-view="dashboard">▣ Dashboard</button><button data-view="all">▤ All Tasks</button><button data-view="new">＋ New</button><button data-view="due">◷ Due Today</button><button data-view="overdue">⚠ Overdue</button><button data-view="upcoming">◫ Upcoming</button><button data-view="completed">✓ Completed</button><button data-view="cancelled">✕ Cancelled</button>
-</nav><button id="logoutBtn" class="btn secondary logout">Logout</button></aside>
-<main class="main">
-<div class="top"><div><h1 id="pageTitle">Akash Dashboard</h1><div class="muted" id="todayLabel"></div></div>
-<div class="actions"><button class="btn secondary" id="editBtn" disabled>Edit</button><button class="btn danger" id="removeBtn" disabled>Remove</button><button class="btn success" id="completeBtn" disabled>✓ Complete</button><button class="btn warning" id="cancelBtn" disabled>✕ Cancel</button><button class="btn primary" id="createBtn">+ Create</button></div></div>
-<section class="cards"><div class="card"><div class="muted">Total Tasks</div><div class="n" id="cTotal">0</div></div><div class="card"><div class="muted">New</div><div class="n" id="cNew">0</div></div><div class="card"><div class="muted">Due Today</div><div class="n" id="cDue">0</div></div><div class="card"><div class="muted">Overdue</div><div class="n" id="cOverdue">0</div></div><div class="card"><div class="muted">Completed</div><div class="n" id="cCompleted">0</div></div><div class="card"><div class="muted">Cancelled</div><div class="n" id="cCancelled">0</div></div></section>
-<section class="panel"><div class="toolbar"><input class="search" id="search" placeholder="Search title or details..."><select id="typeFilter"><option value="">All Types</option><option>Important</option><option>Medium</option><option>Low</option></select><select id="relatedFilter"><option value="">All Related</option><option>Home</option><option>Work</option></select><select id="statusFilter"><option value="">All Status</option><option>New</option><option>Completed</option><option>Cancelled</option></select></div>
-<div class="table-wrap"><table><thead><tr><th><input type="checkbox" id="selectAll"></th><th>Date</th><th>Title</th><th>Details</th><th>Type</th><th>Related</th><th>Due Date</th><th>Status</th></tr></thead><tbody id="tbody"></tbody></table></div></section>
-</main></div>
 
-<div class="modal" id="modal"><div class="modal-box"><h2 id="modalTitle">Create New Task</h2><form id="taskForm"><div class="form">
-<div class="field"><label>Date</label><input id="date" type="date" readonly required></div><div class="field"><label>Title</label><input id="title" required></div>
-<div class="field full"><label>Details</label><textarea id="details"></textarea></div><div class="field"><label>Type</label><select id="type"><option>Important</option><option selected>Medium</option><option>Low</option></select></div><div class="field"><label>Related</label><select id="related"><option>Home</option><option selected>Work</option></select></div><div class="field"><label>Due Date</label><input id="dueDate" type="date" required></div>
-</div><div class="modal-actions"><button type="button" class="btn secondary" id="closeModal">Cancel</button><button class="btn primary" type="submit" id="saveBtn">Create Task</button></div></form></div></div>
+<!-- CREATE / EDIT MODAL -->
+<div class="modal" id="modal">
+
+  <div class="modal-box">
+
+    <h2 id="modalTitle">
+      Create New Task
+    </h2>
+
+    <form id="taskForm" class="form">
+
+      <div class="field">
+
+        <label for="title">
+          Task
+        </label>
+
+        <input
+          id="title"
+          type="text"
+          required
+          placeholder="Enter task title">
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="details">
+          Details
+        </label>
+
+        <textarea
+          id="details"
+          placeholder="Enter task details"></textarea>
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="type">
+          Type
+        </label>
+
+        <select id="type">
+
+          <option value="Important">
+            Important
+          </option>
+
+          <option value="Medium" selected>
+            Medium
+          </option>
+
+          <option value="Low">
+            Low
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="date">
+          Due Date
+        </label>
+
+        <input
+          id="date"
+          type="date"
+          required>
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="status">
+          Status
+        </label>
+
+        <select id="status">
+
+          <option value="New">
+            New
+          </option>
+
+          <option value="In Progress">
+            In Progress
+          </option>
+
+          <option value="Completed">
+            Completed
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <!-- CANCEL BUTTON -->
+        <button
+          type="button"
+          id="closeBtn"
+          class="btn secondary">
+          Cancel
+        </button>
+
+        <!-- SAVE BUTTON -->
+        <button
+          type="submit"
+          id="saveBtn"
+          class="btn primary">
+          Create Task
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
 
 <script>
-/* STEP 1: Replace these two values with your Supabase Project URL and anon/public key. */
-const SUPABASE_URL="https://dadnspgmkymdrpzyvhch.supabase.co";
-const SUPABASE_ANON_KEY="sb_publishable_tBHn0H5ThLff8mApenKTCw_pAfZAiwW";
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-const todayISO=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
-let tasks=[],selected=new Set(),view="dashboard",editingId=null;
+/* =========================================================
+   SUPABASE CONNECTION
+   =========================================================
 
-const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
-const dueState=t=>t.status!=="New"?"":t.due_date<todayISO()?"overdue":t.due_date===todayISO()?"due":"";
-function msg(x){document.getElementById("loginMsg").textContent=x}
+   IMPORTANT:
+   Replace these TWO values with the SAME values
+   you already have in your old working code.
 
-async function loadTasks(){
- const {data,error}=await sb.from("tasks").select("*").order("due_date",{ascending:true}).order("created_at",{ascending:false});
- if(error){alert(error.message);return} tasks=data||[];render();
+========================================================= */
+
+const SUPABASE_URL =
+  "PASTE_YOUR_SUPABASE_PROJECT_URL_HERE";
+
+const SUPABASE_ANON_KEY =
+  "PASTE_YOUR_SUPABASE_ANON_KEY_HERE";
+
+
+const { createClient } =
+  supabase;
+
+const db =
+  createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
+
+
+/* =========================================================
+   GLOBAL VARIABLES
+========================================================= */
+
+let tasks = [];
+
+let editingTaskId = null;
+
+let selected = new Set();
+
+let currentView = "all";
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const modal =
+  document.getElementById("modal");
+
+const closeBtn =
+  document.getElementById("closeBtn");
+
+const taskForm =
+  document.getElementById("taskForm");
+
+const newTaskBtn =
+  document.getElementById("newTaskBtn");
+
+const saveBtn =
+  document.getElementById("saveBtn");
+
+const modalTitle =
+  document.getElementById("modalTitle");
+
+const tbody =
+  document.getElementById("tbody");
+
+const search =
+  document.getElementById("search");
+
+const typeFilter =
+  document.getElementById("typeFilter");
+
+const statusFilter =
+  document.getElementById("statusFilter");
+
+const selectAll =
+  document.getElementById("selectAll");
+
+const removeBtn =
+  document.getElementById("removeBtn");
+
+const completeBtn =
+  document.getElementById("completeBtn");
+
+const logoutBtn =
+  document.getElementById("logoutBtn");
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+function todayISO() {
+
+  const d = new Date();
+
+  const year =
+    d.getFullYear();
+
+  const month =
+    String(d.getMonth() + 1)
+      .padStart(2, "0");
+
+  const day =
+    String(d.getDate())
+      .padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
-function filtered(){
- let a=[...tasks],q=document.getElementById("search").value.toLowerCase(),ty=document.getElementById("typeFilter").value,re=document.getElementById("relatedFilter").value,st=document.getElementById("statusFilter").value;
- if(view==="new")a=a.filter(t=>t.status==="New");if(view==="due")a=a.filter(t=>dueState(t)==="due");if(view==="overdue")a=a.filter(t=>dueState(t)==="overdue");if(view==="upcoming")a=a.filter(t=>t.status==="New"&&t.due_date>todayISO());if(view==="completed")a=a.filter(t=>t.status==="Completed");if(view==="cancelled")a=a.filter(t=>t.status==="Cancelled");
- if(q)a=a.filter(t=>(t.title+" "+(t.details||"")).toLowerCase().includes(q));if(ty)a=a.filter(t=>t.type===ty);if(re)a=a.filter(t=>t.related===re);if(st)a=a.filter(t=>t.status===st);return a;
-}
-function render(){
- cTotal.textContent=tasks.length;cNew.textContent=tasks.filter(t=>t.status==="New").length;cDue.textContent=tasks.filter(t=>dueState(t)==="due").length;cOverdue.textContent=tasks.filter(t=>dueState(t)==="overdue").length;cCompleted.textContent=tasks.filter(t=>t.status==="Completed").length;cCancelled.textContent=tasks.filter(t=>t.status==="Cancelled").length;
- const a=filtered();tbody.innerHTML=a.length?a.map(t=>`<tr class="${selected.has(t.id)?"selected":""}" data-id="${t.id}"><td><input class="rowCheck" type="checkbox" ${selected.has(t.id)?"checked":""}></td><td>${t.task_date}</td><td><b>${esc(t.title)}</b></td><td>${esc(t.details)}</td><td><span class="pill ${t.type==="Important"?"imp":t.type==="Medium"?"med":"low"}">${t.type}</span></td><td>${t.related}</td><td>${t.due_date} ${dueState(t)==="overdue"?'<span class="pill overdue">Overdue</span>':dueState(t)==="due"?'<span class="pill due">Due</span>':""}</td><td><span class="pill ${t.status.toLowerCase()}">${t.status}</span></td></tr>`).join(""):'<tr><td colspan="8" class="empty">No tasks found.</td></tr>';
- document.querySelectorAll(".rowCheck").forEach(x=>x.onchange=e=>{const id=e.target.closest("tr").dataset.id;e.target.checked?selected.add(id):selected.delete(id);render()});updateButtons();
-}
-function updateButtons(){const n=selected.size;editBtn.disabled=n!==1;removeBtn.disabled=n===0;completeBtn.disabled=n!==1;cancelBtn.disabled=n!==1}
-function openModal(t){editingId=t?.id||null;modalTitle.textContent=t?"Edit Task":"Create New Task";saveBtn.textContent=t?"Save Changes":"Create Task";date.value=t?.task_date||todayISO();title.value=t?.title||"";details.value=t?.details||"";type.value=t?.type||"Medium";related.value=t?.related||"Work";dueDate.value=t?.due_date||todayISO();modal.classList.add("show")}
-function closeModal(){modal.classList.remove("show")}
-async function saveTask(e){e.preventDefault();const {data:{user}}=await sb.auth.getUser();if(!user)return;
- const payload={task_date:todayISO(),title:title.value.trim(),details:details.value.trim(),type:type.value,related:related.value,due_date:dueDate.value};
- let res;
- if(editingId)res=await sb.from("tasks").update(payload).eq("id",editingId);
- else res=await sb.from("tasks").insert({...payload,user_id:user.id,status:"New"});
- if(res.error){alert(res.error.message);return}closeModal();selected.clear();await loadTasks()}
-createBtn.onclick=()=>openModal();closeModal.onclick=closeModal;
-taskForm.onsubmit=saveTask;
-editBtn.onclick=()=>openModal(tasks.find(t=>t.id===[...selected][0]));
-removeBtn.onclick=async()=>{if(!confirm(`Remove ${selected.size} selected task(s)?`))return;const ids=[...selected];const r=await sb.from("tasks").delete().in("id",ids);if(r.error)alert(r.error.message);else{selected.clear();await loadTasks()}};
-completeBtn.onclick=async()=>{const id=[...selected][0],r=await sb.from("tasks").update({status:"Completed",completed_at:new Date().toISOString()}).eq("id",id);if(r.error)alert(r.error.message);else{selected.clear();await loadTasks()}};
-cancelBtn.onclick=async()=>{const id=[...selected][0],r=await sb.from("tasks").update({status:"Cancelled",cancelled_at:new Date().toISOString()}).eq("id",id);if(r.error)alert(r.error.message);else{selected.clear();await loadTasks()}};
-["search","typeFilter","relatedFilter","statusFilter"].forEach(id=>document.getElementById(id).oninput=()=>{selected.clear();render()});
-selectAll.onchange=e=>{filtered().forEach(t=>e.target.checked?selected.add(t.id):selected.delete(t.id));render()};
-document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");view=b.dataset.view;pageTitle.textContent=view==="dashboard"?"Akash Dashboard":b.textContent.trim();selected.clear();render()});
-logoutBtn.onclick=()=>sb.auth.signOut();
 
-loginBtn.onclick=async()=>{msg("Signing in...");const r=await sb.auth.signInWithPassword({email:email.value,password:password.value});if(r.error)msg(r.error.message)};
-sb.auth.onAuthStateChange(async(_event,session)=>{if(session){login.classList.add("hidden");app.classList.remove("hidden");todayLabel.textContent=new Date().toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"});await loadTasks()}else{app.classList.add("hidden");login.classList.remove("hidden")}});
+
+document.getElementById("todayLabel")
+  .textContent =
+  new Date().toLocaleDateString(
+    "en-IN",
+    {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    }
+  );
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function esc(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
+/* =========================================================
+   GET STATUS
+========================================================= */
+
+function getDueStatus(task) {
+
+  if (task.status === "Completed") {
+    return "completed";
+  }
+
+  if (task.due_date < todayISO()) {
+    return "overdue";
+  }
+
+  if (task.due_date === todayISO()) {
+    return "today";
+  }
+
+  return "upcoming";
+}
+
+
+/* =========================================================
+   LOAD TASKS
+========================================================= */
+
+async function loadTasks() {
+
+  const {
+    data: {
+      user
+    }
+  } =
+    await db.auth.getUser();
+
+
+  if (!user) {
+
+    alert("Please login first.");
+
+    return;
+
+  }
+
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("tasks")
+      .select("*")
+      .eq("user_id", user.id)
+      .order(
+        "due_date",
+        {
+          ascending: true
+        }
+      )
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
+
+
+  if (error) {
+
+    console.error(error);
+
+    alert(
+      "Unable to load tasks: " +
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  tasks =
+    data || [];
+
+  selected.clear();
+
+  render();
+
+}
+
+
+/* =========================================================
+   FILTER TASKS
+========================================================= */
+
+function filteredTasks() {
+
+  const q =
+    search.value
+      .trim()
+      .toLowerCase();
+
+  const type =
+    typeFilter.value;
+
+  const status =
+    statusFilter.value;
+
+
+  let result =
+    [...tasks];
+
+
+  if (currentView === "new") {
+
+    result =
+      result.filter(
+        t =>
+          t.status === "New"
+      );
+
+  }
+
+
+  if (currentView === "due") {
+
+    result =
+      result.filter(
+        t =>
+          t.due_date === todayISO()
+          &&
+          t.status !== "Completed"
+      );
+
+  }
+
+
+  if (currentView === "overdue") {
+
+    result =
+      result.filter(
+        t =>
+          t.due_date < todayISO()
+          &&
+          t.status !== "Completed"
+      );
+
+  }
+
+
+  if (currentView === "upcoming") {
+
+    result =
+      result.filter(
+        t =>
+          t.due_date > todayISO()
+          &&
+          t.status !== "Completed"
+      );
+
+  }
+
+
+  if (q) {
+
+    result =
+      result.filter(
+        t =>
+          String(t.title || "")
+            .toLowerCase()
+            .includes(q)
+          ||
+          String(t.details || "")
+            .toLowerCase()
+            .includes(q)
+      );
+
+  }
+
+
+  if (type) {
+
+    result =
+      result.filter(
+        t =>
+          t.type === type
+      );
+
+  }
+
+
+  if (status) {
+
+    result =
+      result.filter(
+        t =>
+          t.status === status
+      );
+
+  }
+
+
+  return result;
+
+}
+
+
+/* =========================================================
+   RENDER
+========================================================= */
+
+function render() {
+
+  const result =
+    filteredTasks();
+
+
+  /* COUNTS */
+
+  document.getElementById("total")
+    .textContent =
+    tasks.length;
+
+
+  document.getElementById("newCount")
+    .textContent =
+    tasks.filter(
+      t => t.status === "New"
+    ).length;
+
+
+  document.getElementById("dueCount")
+    .textContent =
+    tasks.filter(
+      t =>
+        t.due_date === todayISO()
+        &&
+        t.status !== "Completed"
+    ).length;
+
+
+  document.getElementById("overdueCount")
+    .textContent =
+    tasks.filter(
+      t =>
+        t.due_date < todayISO()
+        &&
+        t.status !== "Completed"
+    ).length;
+
+
+  /* TABLE */
+
+  tbody.innerHTML = "";
+
+
+  result.forEach(task => {
+
+    const tr =
+      document.createElement("tr");
+
+    tr.dataset.id =
+      task.id;
+
+
+    let badgeClass =
+      "new";
+
+
+    if (
+      task.status ===
+      "In Progress"
+    ) {
+
+      badgeClass =
+        "progress";
+
+    }
+
+
+    if (
+      task.status ===
+      "Completed"
+    ) {
+
+      badgeClass =
+        "completed";
+
+    }
+
+
+    if (
+      getDueStatus(task) ===
+      "overdue"
+    ) {
+
+      badgeClass =
+        "overdue";
+
+    }
+
+
+    tr.innerHTML = `
+
+      <td>
+        <input
+          type="checkbox"
+          class="rowCheck"
+          data-id="${esc(task.id)}"
+          ${selected.has(task.id) ? "checked" : ""}>
+      </td>
+
+      <td>
+        <strong>
+          ${esc(task.title)}
+        </strong>
+      </td>
+
+      <td>
+        ${esc(task.details)}
+      </td>
+
+      <td>
+        ${esc(task.type)}
+      </td>
+
+      <td>
+        ${esc(task.due_date)}
+      </td>
+
+      <td>
+        <span class="badge ${badgeClass}">
+          ${esc(task.status)}
+        </span>
+      </td>
+
+      <td>
+
+        <div class="row-actions">
+
+          <button
+            class="small-btn secondary editBtn"
+            data-id="${esc(task.id)}">
+            Edit
+          </button>
+
+          ${
+            task.status !== "Completed"
+              ?
+              `
+                <button
+                  class="small-btn success completeOneBtn"
+                  data-id="${esc(task.id)}">
+                  ✓
+                </button>
+              `
+              :
+              ""
+          }
+
+          <button
+            class="small-btn danger deleteBtn"
+            data-id="${esc(task.id)}">
+            Delete
+          </button>
+
+        </div>
+
+      </td>
+
+    `;
+
+
+    tbody.appendChild(tr);
+
+  });
+
+
+  updateButtons();
+
+}
+
+
+/* =========================================================
+   BUTTON STATE
+========================================================= */
+
+function updateButtons() {
+
+  const count =
+    selected.size;
+
+
+  removeBtn.disabled =
+    count === 0;
+
+
+  completeBtn.disabled =
+    count === 0;
+
+
+  const visible =
+    filteredTasks();
+
+
+  selectAll.checked =
+    visible.length > 0
+    &&
+    visible.every(
+      t =>
+        selected.has(t.id)
+    );
+
+}
+
+
+/* =========================================================
+   OPEN CREATE MODAL
+========================================================= */
+
+function openCreateModal() {
+
+  editingTaskId =
+    null;
+
+  modalTitle.textContent =
+    "Create New Task";
+
+  saveBtn.textContent =
+    "Create Task";
+
+
+  taskForm.reset();
+
+
+  document.getElementById("date")
+    .value =
+    todayISO();
+
+
+  document.getElementById("status")
+    .value =
+    "New";
+
+
+  modal.classList.add("show");
+
+}
+
+
+/* =========================================================
+   CLOSE MODAL
+========================================================= */
+
+function closeModal() {
+
+  editingTaskId =
+    null;
+
+  taskForm.reset();
+
+  modal.classList.remove("show");
+
+}
+
+
+/* =========================================================
+   NEW TASK BUTTON
+========================================================= */
+
+newTaskBtn.addEventListener(
+  "click",
+  openCreateModal
+);
+
+
+/* =========================================================
+   SIDEBAR NEW BUTTON
+========================================================= */
+
+document
+  .querySelector(
+    '[data-view="new"]'
+  )
+  .addEventListener(
+    "click",
+    openCreateModal
+  );
+
+
+/* =========================================================
+   CANCEL BUTTON
+========================================================= */
+
+closeBtn.addEventListener(
+  "click",
+  function(e) {
+
+    e.preventDefault();
+
+    closeModal();
+
+  }
+);
+
+
+/* =========================================================
+   CLICK OUTSIDE MODAL
+========================================================= */
+
+modal.addEventListener(
+  "click",
+  function(e) {
+
+    if (
+      e.target === modal
+    ) {
+
+      closeModal();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   ESC KEY CLOSE MODAL
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  function(e) {
+
+    if (
+      e.key === "Escape"
+      &&
+      modal.classList.contains("show")
+    ) {
+
+      closeModal();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   CREATE / UPDATE TASK
+========================================================= */
+
+taskForm.addEventListener(
+  "submit",
+  async function(e) {
+
+    e.preventDefault();
+
+
+    const {
+      data: {
+        user
+      }
+    } =
+      await db.auth.getUser();
+
+
+    if (!user) {
+
+      alert("Please login first.");
+
+      return;
+
+    }
+
+
+    const taskData = {
+
+      title:
+        document.getElementById(
+          "title"
+        ).value.trim(),
+
+      details:
+        document.getElementById(
+          "details"
+        ).value.trim(),
+
+      type:
+        document.getElementById(
+          "type"
+        ).value,
+
+      due_date:
+        document.getElementById(
+          "date"
+        ).value,
+
+      status:
+        document.getElementById(
+          "status"
+        ).value
+
+    };
+
+
+    if (!taskData.title) {
+
+      alert(
+        "Please enter task title."
+      );
+
+      return;
+
+    }
+
+
+    if (!taskData.due_date) {
+
+      alert(
+        "Please select due date."
+      );
+
+      return;
+
+    }
+
+
+    saveBtn.disabled =
+      true;
+
+
+    saveBtn.textContent =
+      "Saving...";
+
+
+    let error;
+
+
+    if (editingTaskId) {
+
+      const result =
+        await db
+          .from("tasks")
+          .update(taskData)
+          .eq(
+            "id",
+            editingTaskId
+          )
+          .eq(
+            "user_id",
+            user.id
+          );
+
+
+      error =
+        result.error;
+
+    } else {
+
+      const result =
+        await db
+          .from("tasks")
+          .insert({
+
+            ...taskData,
+
+            user_id:
+              user.id
+
+          });
+
+
+      error =
+        result.error;
+
+    }
+
+
+    saveBtn.disabled =
+      false;
+
+
+    saveBtn.textContent =
+      editingTaskId
+        ?
+        "Update Task"
+        :
+        "Create Task";
+
+
+    if (error) {
+
+      console.error(error);
+
+      alert(
+        "Error saving task:\n" +
+        error.message
+      );
+
+      return;
+
+    }
+
+
+    closeModal();
+
+    await loadTasks();
+
+  }
+);
+
+
+/* =========================================================
+   EDIT TASK
+========================================================= */
+
+async function editTask(id) {
+
+  const task =
+    tasks.find(
+      t =>
+        String(t.id) ===
+        String(id)
+    );
+
+
+  if (!task) {
+
+    return;
+
+  }
+
+
+  editingTaskId =
+    task.id;
+
+
+  modalTitle.textContent =
+    "Edit Task";
+
+
+  saveBtn.textContent =
+    "Update Task";
+
+
+  document.getElementById("title")
+    .value =
+    task.title || "";
+
+
+  document.getElementById("details")
+    .value =
+    task.details || "";
+
+
+  document.getElementById("type")
+    .value =
+    task.type || "Medium";
+
+
+  document.getElementById("date")
+    .value =
+    task.due_date || "";
+
+
+  document.getElementById("status")
+    .value =
+    task.status || "New";
+
+
+  modal.classList.add("show");
+
+}
+
+
+/* =========================================================
+   TABLE BUTTON ACTIONS
+========================================================= */
+
+tbody.addEventListener(
+  "click",
+  async function(e) {
+
+    const editButton =
+      e.target.closest(
+        ".editBtn"
+      );
+
+    const completeButton =
+      e.target.closest(
+        ".completeOneBtn"
+      );
+
+    const deleteButton =
+      e.target.closest(
+        ".deleteBtn"
+      );
+
+
+    if (editButton) {
+
+      await editTask(
+        editButton.dataset.id
+      );
+
+      return;
+
+    }
+
+
+    if (completeButton) {
+
+      await completeTask(
+        completeButton.dataset.id
+      );
+
+      return;
+
+    }
+
+
+    if (deleteButton) {
+
+      await deleteTask(
+        deleteButton.dataset.id
+      );
+
+      return;
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   CHECKBOX
+========================================================= */
+
+tbody.addEventListener(
+  "change",
+  function(e) {
+
+    if (
+      !e.target.classList.contains(
+        "rowCheck"
+      )
+    ) {
+
+      return;
+
+    }
+
+
+    const id =
+      e.target.dataset.id;
+
+
+    if (e.target.checked) {
+
+      selected.add(id);
+
+    } else {
+
+      selected.delete(id);
+
+    }
+
+
+    updateButtons();
+
+  }
+);
+
+
+/* =========================================================
+   SELECT ALL
+========================================================= */
+
+selectAll.addEventListener(
+  "change",
+  function() {
+
+    const visible =
+      filteredTasks();
+
+
+    visible.forEach(
+      task => {
+
+        if (
+          selectAll.checked
+        ) {
+
+          selected.add(
+            task.id
+          );
+
+        } else {
+
+          selected.delete(
+            task.id
+          );
+
+        }
+
+      }
+    );
+
+
+    render();
+
+  }
+);
+
+
+/* =========================================================
+   DELETE ONE TASK
+========================================================= */
+
+async function deleteTask(id) {
+
+  const task =
+    tasks.find(
+      t =>
+        String(t.id) ===
+        String(id)
+    );
+
+
+  if (!task) {
+
+    return;
+
+  }
+
+
+  const ok =
+    confirm(
+      `Delete task "${task.title}"?`
+    );
+
+
+  if (!ok) {
+
+    return;
+
+  }
+
+
+  const {
+    data: {
+      user
+    }
+  } =
+    await db.auth.getUser();
+
+
+  if (!user) {
+
+    alert(
+      "Please login first."
+    );
+
+    return;
+
+  }
+
+
+  const {
+    error
+  } =
+    await db
+      .from("tasks")
+      .delete()
+      .eq(
+        "id",
+        id
+      )
+      .eq(
+        "user_id",
+        user.id
+      );
+
+
+  if (error) {
+
+    alert(
+      "Delete failed:\n" +
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  selected.delete(id);
+
+  await loadTasks();
+
+}
+
+
+/* =========================================================
+   COMPLETE ONE TASK
+========================================================= */
+
+async function completeTask(id) {
+
+  const {
+    data: {
+      user
+    }
+  } =
+    await db.auth.getUser();
+
+
+  if (!user) {
+
+    alert(
+      "Please login first."
+    );
+
+    return;
+
+  }
+
+
+  const {
+    error
+  } =
+    await db
+      .from("tasks")
+      .update({
+        status: "Completed"
+      })
+      .eq(
+        "id",
+        id
+      )
+      .eq(
+        "user_id",
+        user.id
+      );
+
+
+  if (error) {
+
+    alert(
+      "Unable to complete task:\n" +
+      error.message
+    );
+
+    return;
+
+  }
+
+
+  selected.delete(id);
+
+  await loadTasks();
+
+}
+
+
+/* =========================================================
+   BULK DELETE
+========================================================= */
+
+removeBtn.addEventListener(
+  "click",
+  async function() {
+
+    if (
+      selected.size === 0
+    ) {
+
+      return;
+
+    }
+
+
+    const ok =
+      confirm(
+        `Delete ${selected.size} selected task(s)?`
+      );
+
+
+    if (!ok) {
+
+      return;
+
+    }
+
+
+    const {
+      data: {
+        user
+      }
+    } =
+      await db.auth.getUser();
+
+
+    if (!user) {
+
+      alert(
+        "Please login first."
+      );
+
+      return;
+
+    }
+
+
+    for (
+      const id of selected
+    ) {
+
+      const {
+        error
+      } =
+        await db
+          .from("tasks")
+          .delete()
+          .eq(
+            "id",
+            id
+          )
+          .eq(
+            "user_id",
+            user.id
+          );
+
+
+      if (error) {
+
+        console.error(
+          error
+        );
+
+      }
+
+    }
+
+
+    selected.clear();
+
+    await loadTasks();
+
+  }
+);
+
+
+/* =========================================================
+   BULK COMPLETE
+========================================================= */
+
+completeBtn.addEventListener(
+  "click",
+  async function() {
+
+    if (
+      selected.size === 0
+    ) {
+
+      return;
+
+    }
+
+
+    const {
+      data: {
+        user
+      }
+    } =
+      await db.auth.getUser();
+
+
+    if (!user) {
+
+      alert(
+        "Please login first."
+      );
+
+      return;
+
+    }
+
+
+    for (
+      const id of selected
+    ) {
+
+      const {
+        error
+      } =
+        await db
+          .from("tasks")
+          .update({
+            status:
+              "Completed"
+          })
+          .eq(
+            "id",
+            id
+          )
+          .eq(
+            "user_id",
+            user.id
+          );
+
+
+      if (error) {
+
+        console.error(
+          error
+        );
+
+      }
+
+    }
+
+
+    selected.clear();
+
+    await loadTasks();
+
+  }
+);
+
+
+/* =========================================================
+   SEARCH / FILTER
+========================================================= */
+
+search.addEventListener(
+  "input",
+  render
+);
+
+typeFilter.addEventListener(
+  "change",
+  render
+);
+
+statusFilter.addEventListener(
+  "change",
+  render
+);
+
+
+/* =========================================================
+   SIDEBAR VIEWS
+========================================================= */
+
+document
+  .querySelectorAll(
+    ".nav button"
+  )
+  .forEach(
+    button => {
+
+      button.addEventListener(
+        "click",
+        function() {
+
+          const view =
+            this.dataset.view;
+
+
+          if (
+            view === "new"
+          ) {
+
+            return;
+
+          }
+
+
+          currentView =
+            view;
+
+
+          document
+            .querySelectorAll(
+              ".nav button"
+            )
+            .forEach(
+              b =>
+                b.classList.remove(
+                  "active"
+                )
+            );
+
+
+          this.classList.add(
+            "active"
+          );
+
+
+          if (
+            view === "all"
+          ) {
+
+            document.getElementById(
+              "pageTitle"
+            ).textContent =
+              "Akash Dashboard";
+
+          }
+
+
+          if (
+            view === "due"
+          ) {
+
+            document.getElementById(
+              "pageTitle"
+            ).textContent =
+              "Due Today";
+
+          }
+
+
+          if (
+            view === "overdue"
+          ) {
+
+            document.getElementById(
+              "pageTitle"
+            ).textContent =
+              "Overdue Tasks";
+
+          }
+
+
+          if (
+            view === "upcoming"
+          ) {
+
+            document.getElementById(
+              "pageTitle"
+            ).textContent =
+              "Upcoming Tasks";
+
+          }
+
+
+          render();
+
+        }
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+logoutBtn.addEventListener(
+  "click",
+  async function() {
+
+    const {
+      error
+    } =
+      await db.auth.signOut();
+
+
+    if (error) {
+
+      alert(
+        "Logout failed:\n" +
+        error.message
+      );
+
+      return;
+
+    }
+
+
+    location.reload();
+
+  }
+);
+
+
+/* =========================================================
+   AUTH CHECK
+========================================================= */
+
+async function checkAuth() {
+
+  const {
+    data: {
+      session
+    }
+  } =
+    await db.auth.getSession();
+
+
+  if (!session) {
+
+    alert(
+      "Please login to access dashboard."
+    );
+
+    return false;
+
+  }
+
+
+  return true;
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+(async function() {
+
+  const loggedIn =
+    await checkAuth();
+
+
+  if (loggedIn) {
+
+    await loadTasks();
+
+  }
+
+})();
+
 </script>
+
 </body>
 </html>
