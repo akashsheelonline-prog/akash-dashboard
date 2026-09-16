@@ -44,8 +44,8 @@
 
 <script>
 /* STEP 1: Replace these two values with your Supabase Project URL and anon/public key. */
-const SUPABASE_URL="PASTE_YOUR_SUPABASE_URL_HERE";
-const SUPABASE_ANON_KEY="PASTE_YOUR_SUPABASE_ANON_KEY_HERE";
+const SUPABASE_URL="https://dadnspgmkymdrpzyvhch.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_tBHn0H5ThLff8mApenKTCw_pAfZAiwW";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
 const todayISO=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
