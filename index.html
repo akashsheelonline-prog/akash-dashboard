@@ -1,126 +1,75 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
 
   <title>Akash Dashboard</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
+
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
-      font-family: Arial, sans-serif;
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
       background: #f5f7fb;
-      color: #222;
+      color: #172033;
     }
 
-    button,
-    input,
-    textarea,
-    select {
-      font-family: inherit;
+    .hidden {
+      display: none !important;
     }
 
-    button {
-      cursor: pointer;
-    }
+    /* LOGIN */
 
-    .app {
-      display: flex;
+    .login {
       min-height: 100vh;
-    }
-
-    /* SIDEBAR */
-    .sidebar {
-      width: 230px;
-      background: #111827;
-      color: white;
+      display: grid;
+      place-items: center;
       padding: 20px;
-      position: fixed;
-      left: 0;
-      top: 0;
-      bottom: 0;
     }
 
-    .brand {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 25px;
+    .loginbox {
+      width: min(420px, 100%);
+      background: #fff;
+      border: 1px solid #e5e9f0;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 15px 50px #0001;
     }
 
-    .brand span {
-      color: #60a5fa;
-    }
-
-    .nav {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .nav button {
-      border: 0;
-      background: transparent;
-      color: #d1d5db;
-      text-align: left;
-      padding: 11px 12px;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-
-    .nav button:hover,
-    .nav button.active {
-      background: #1f2937;
-      color: white;
-    }
-
-    .logout {
-      margin-top: 25px;
-      width: 100%;
-      border: 1px solid #374151;
-      background: transparent;
-      color: white;
-      padding: 10px;
-      border-radius: 8px;
-    }
-
-    /* MAIN */
-    .main {
-      margin-left: 230px;
-      width: calc(100% - 230px);
-      padding: 25px;
-    }
-
-    .top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .top h1 {
-      font-size: 28px;
+    .loginbox h1 {
+      margin: 0 0 6px;
     }
 
     .muted {
       color: #6b7280;
-      font-size: 14px;
+      font-size: 13px;
+    }
+
+    .loginbox input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #d6dce6;
+      border-radius: 8px;
+      font: inherit;
     }
 
     /* BUTTONS */
+
     .btn {
       border: 0;
+      border-radius: 8px;
       padding: 10px 15px;
-      border-radius: 7px;
-      font-size: 14px;
-      margin-left: 6px;
+      cursor: pointer;
+      font-weight: 700;
     }
 
     .primary {
@@ -129,18 +78,24 @@
     }
 
     .secondary {
-      background: #e5e7eb;
-      color: #111827;
-    }
-
-    .success {
-      background: #16a34a;
-      color: white;
+      background: white;
+      border: 1px solid #dbe1ea;
+      color: #172033;
     }
 
     .danger {
-      background: #dc2626;
-      color: white;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .warning {
+      background: #fef3c7;
+      color: #92400e;
     }
 
     .btn:disabled {
@@ -148,134 +103,235 @@
       cursor: not-allowed;
     }
 
+    /* APP */
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 245px;
+      background: #101827;
+      color: #fff;
+      padding: 24px 16px;
+      position: fixed;
+      inset: 0 auto 0 0;
+    }
+
+    .brand {
+      font-size: 21px;
+      font-weight: 800;
+      padding: 0 10px 28px;
+    }
+
+    .brand span {
+      font-weight: 400;
+      color: #9ca9bd;
+    }
+
+    .nav button {
+      width: 100%;
+      background: none;
+      border: 0;
+      color: #cbd5e1;
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: 9px;
+      font-size: 14px;
+      cursor: pointer;
+      margin: 2px 0;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      background: #1f2b3d;
+      color: #fff;
+    }
+
+    .logout {
+      position: absolute;
+      bottom: 20px;
+      left: 16px;
+      right: 16px;
+    }
+
+    /* MAIN */
+
+    .main {
+      margin-left: 245px;
+      flex: 1;
+      padding: 28px;
+      max-width: 1600px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .top h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     /* CARDS */
+
     .cards {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 15px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+      margin-bottom: 22px;
     }
 
     .card {
-      background: white;
-      padding: 18px;
-      border-radius: 10px;
-      border: 1px solid #e5e7eb;
+      background: #fff;
+      border: 1px solid #e5e9f0;
+      border-radius: 12px;
+      padding: 16px;
     }
 
-    .card .number {
-      font-size: 28px;
-      font-weight: bold;
+    .card .n {
+      font-size: 25px;
+      font-weight: 800;
       margin-top: 7px;
     }
 
     /* PANEL */
+
     .panel {
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
+      background: #fff;
+      border: 1px solid #e5e9f0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .toolbar {
       padding: 15px;
-      margin-bottom: 15px;
-    }
-
-    .filters {
       display: flex;
-      gap: 10px;
+      gap: 9px;
       flex-wrap: wrap;
+      border-bottom: 1px solid #e5e9f0;
     }
 
-    .filters input,
-    .filters select {
-      border: 1px solid #d1d5db;
-      border-radius: 7px;
+    .search {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .toolbar input,
+    .toolbar select {
       padding: 10px;
-      min-width: 180px;
-      outline: none;
-    }
-
-    .filters input:focus,
-    .filters select:focus {
-      border-color: #2563eb;
+      border: 1px solid #d6dce6;
+      border-radius: 8px;
+      background: #fff;
     }
 
     /* TABLE */
-    .table-wrap {
-      overflow-x: auto;
-    }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 850px;
+      min-width: 980px;
     }
 
     th,
     td {
-      padding: 12px 10px;
-      border-bottom: 1px solid #e5e7eb;
+      padding: 12px 13px;
+      border-bottom: 1px solid #edf0f4;
       text-align: left;
-      font-size: 14px;
+      font-size: 13px;
+      vertical-align: top;
     }
 
     th {
       background: #f9fafb;
-      font-weight: 600;
+      color: #4b5563;
+      font-size: 12px;
+      text-transform: uppercase;
     }
 
-    tr:hover td {
-      background: #fafafa;
+    tr.selected td {
+      background: #eff6ff;
     }
 
-    .badge {
+    .table-wrap {
+      overflow: auto;
+    }
+
+    .pill {
       display: inline-block;
       padding: 4px 8px;
-      border-radius: 20px;
-      font-size: 12px;
-      background: #e5e7eb;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
     }
 
-    .badge.new {
-      background: #dbeafe;
-      color: #1d4ed8;
-    }
-
-    .badge.progress {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .badge.completed {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .badge.overdue {
+    .imp {
       background: #fee2e2;
       color: #991b1b;
     }
 
-    .row-actions {
-      display: flex;
-      gap: 5px;
+    .med {
+      background: #fef3c7;
+      color: #92400e;
     }
 
-    .small-btn {
-      border: 0;
-      border-radius: 5px;
-      padding: 6px 8px;
-      font-size: 12px;
+    .low {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    .new {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .completed {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .cancelled {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .due {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .overdue {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: #6b7280;
     }
 
     /* MODAL */
+
     .modal {
-      display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, .55);
+      background: #0008;
+      display: none;
       align-items: center;
       justify-content: center;
-      z-index: 9999;
       padding: 20px;
+      z-index: 9999;
     }
 
     .modal.show {
@@ -284,20 +340,19 @@
 
     .modal-box {
       background: white;
-      width: 100%;
-      max-width: 600px;
-      border-radius: 12px;
+      width: min(680px, 100%);
+      border-radius: 14px;
       padding: 22px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, .2);
     }
 
     .modal-box h2 {
-      margin-bottom: 18px;
+      margin-top: 0;
     }
 
     .form {
       display: grid;
-      gap: 15px;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
     }
 
     .field {
@@ -306,19 +361,24 @@
       gap: 6px;
     }
 
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
     .field label {
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
     }
 
     .field input,
     .field textarea,
     .field select {
-      width: 100%;
-      border: 1px solid #d1d5db;
-      border-radius: 7px;
       padding: 10px;
-      outline: none;
+      border: 1px solid #d6dce6;
+      border-radius: 8px;
+      font: inherit;
+      width: 100%;
     }
 
     .field textarea {
@@ -329,46 +389,52 @@
     .field input:focus,
     .field textarea:focus,
     .field select:focus {
+      outline: none;
       border-color: #2563eb;
     }
 
     .modal-actions {
       display: flex;
       justify-content: flex-end;
-      margin-top: 5px;
+      gap: 8px;
+      margin-top: 18px;
     }
 
-    /* MOBILE */
-    @media(max-width: 900px) {
+    @media(max-width:1000px) {
+
+      .cards {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
       .sidebar {
-        width: 190px;
+        width: 210px;
       }
 
       .main {
-        margin-left: 190px;
-        width: calc(100% - 190px);
+        margin-left: 210px;
       }
 
-      .cards {
-        grid-template-columns: repeat(2, 1fr);
-      }
     }
 
-    @media(max-width: 650px) {
+    @media(max-width:700px) {
+
+      .app {
+        display: block;
+      }
+
       .sidebar {
         position: static;
         width: 100%;
         min-height: auto;
       }
 
-      .app {
-        display: block;
-      }
-
       .main {
         margin-left: 0;
-        width: 100%;
-        padding: 15px;
+        padding: 16px;
+      }
+
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
       }
 
       .top {
@@ -377,18 +443,77 @@
         gap: 12px;
       }
 
-      .cards {
+      .form {
         grid-template-columns: 1fr;
       }
+
+      .field.full {
+        grid-column: auto;
+      }
+
+      .logout {
+        position: static;
+        margin-top: 10px;
+      }
+
     }
+
   </style>
+
 </head>
 
 <body>
 
-<div class="app">
 
-  <!-- SIDEBAR -->
+<!-- =====================================================
+     LOGIN
+===================================================== -->
+
+<div id="login" class="login">
+
+  <div class="loginbox">
+
+    <h1>Akash Dashboard</h1>
+
+    <p class="muted">
+      Sign in to manage your tasks.
+    </p>
+
+    <input
+      id="email"
+      type="email"
+      placeholder="Email"
+      autocomplete="username">
+
+    <input
+      id="password"
+      type="password"
+      placeholder="Password"
+      autocomplete="current-password">
+
+    <button
+      id="loginBtn"
+      class="btn primary"
+      style="width:100%">
+      Login
+    </button>
+
+    <p
+      id="loginMsg"
+      class="muted">
+    </p>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     DASHBOARD
+===================================================== -->
+
+<div id="app" class="app hidden">
+
   <aside class="sidebar">
 
     <div class="brand">
@@ -396,126 +521,268 @@
     </div>
 
     <nav class="nav">
-      <button data-view="all" class="active">
-        All Tasks
+
+      <button
+        class="active"
+        data-view="dashboard">
+        ▣ Dashboard
+      </button>
+
+      <button data-view="all">
+        ▤ All Tasks
       </button>
 
       <button data-view="new">
-        + New
+        ＋ New
       </button>
 
       <button data-view="due">
-        Due Today
+        ◷ Due Today
       </button>
 
       <button data-view="overdue">
-        Overdue
+        ⚠ Overdue
       </button>
 
       <button data-view="upcoming">
-        Upcoming
+        ◫ Upcoming
       </button>
+
+      <button data-view="completed">
+        ✓ Completed
+      </button>
+
+      <button data-view="cancelled">
+        ✕ Cancelled
+      </button>
+
     </nav>
 
-    <button id="logoutBtn" class="logout">
+    <button
+      id="logoutBtn"
+      class="btn secondary logout">
       Logout
     </button>
 
   </aside>
 
 
-  <!-- MAIN -->
   <main class="main">
 
     <div class="top">
 
       <div>
-        <h1 id="pageTitle">Akash Dashboard</h1>
-        <div class="muted" id="todayLabel"></div>
+
+        <h1 id="pageTitle">
+          Akash Dashboard
+        </h1>
+
+        <div
+          class="muted"
+          id="todayLabel">
+        </div>
+
       </div>
 
-      <div>
+
+      <div class="actions">
+
         <button
-          id="removeBtn"
           class="btn secondary"
+          id="editBtn"
+          disabled>
+          Edit
+        </button>
+
+        <button
+          class="btn danger"
+          id="removeBtn"
           disabled>
           Remove
         </button>
 
         <button
-          id="completeBtn"
           class="btn success"
+          id="completeBtn"
           disabled>
           ✓ Complete
         </button>
 
         <button
-          id="newTaskBtn"
-          class="btn primary">
-          + New Task
+          class="btn warning"
+          id="cancelBtn"
+          disabled>
+          ✕ Cancel
         </button>
+
+        <button
+          class="btn primary"
+          id="createBtn">
+          + Create
+        </button>
+
       </div>
 
     </div>
 
 
     <!-- CARDS -->
+
     <section class="cards">
 
       <div class="card">
-        <div class="muted">Total Tasks</div>
-        <div class="number" id="total">0</div>
+        <div class="muted">
+          Total Tasks
+        </div>
+
+        <div
+          class="n"
+          id="cTotal">
+          0
+        </div>
       </div>
 
-      <div class="card">
-        <div class="muted">New</div>
-        <div class="number" id="newCount">0</div>
-      </div>
 
       <div class="card">
-        <div class="muted">Due Today</div>
-        <div class="number" id="dueCount">0</div>
+        <div class="muted">
+          New
+        </div>
+
+        <div
+          class="n"
+          id="cNew">
+          0
+        </div>
       </div>
 
+
       <div class="card">
-        <div class="muted">Overdue</div>
-        <div class="number" id="overdueCount">0</div>
+        <div class="muted">
+          Due Today
+        </div>
+
+        <div
+          class="n"
+          id="cDue">
+          0
+        </div>
+      </div>
+
+
+      <div class="card">
+        <div class="muted">
+          Overdue
+        </div>
+
+        <div
+          class="n"
+          id="cOverdue">
+          0
+        </div>
+      </div>
+
+
+      <div class="card">
+        <div class="muted">
+          Completed
+        </div>
+
+        <div
+          class="n"
+          id="cCompleted">
+          0
+        </div>
+      </div>
+
+
+      <div class="card">
+        <div class="muted">
+          Cancelled
+        </div>
+
+        <div
+          class="n"
+          id="cCancelled">
+          0
+        </div>
       </div>
 
     </section>
 
 
     <!-- FILTERS -->
+
     <section class="panel">
 
-      <div class="filters">
+      <div class="toolbar">
 
         <input
-          type="text"
+          class="search"
           id="search"
-          placeholder="Search task or details...">
+          placeholder="Search title or details...">
 
         <select id="typeFilter">
-          <option value="">All Types</option>
-          <option value="Important">Important</option>
-          <option value="Medium">Medium</option>
-          <option value="Low">Low</option>
+
+          <option value="">
+            All Types
+          </option>
+
+          <option value="Important">
+            Important
+          </option>
+
+          <option value="Medium">
+            Medium
+          </option>
+
+          <option value="Low">
+            Low
+          </option>
+
         </select>
 
+
+        <select id="relatedFilter">
+
+          <option value="">
+            All Related
+          </option>
+
+          <option value="Home">
+            Home
+          </option>
+
+          <option value="Work">
+            Work
+          </option>
+
+        </select>
+
+
         <select id="statusFilter">
-          <option value="">All Status</option>
-          <option value="New">New</option>
-          <option value="In Progress">In Progress</option>
-          <option value="Completed">Completed</option>
+
+          <option value="">
+            All Status
+          </option>
+
+          <option value="New">
+            New
+          </option>
+
+          <option value="Completed">
+            Completed
+          </option>
+
+          <option value="Cancelled">
+            Cancelled
+          </option>
+
         </select>
 
       </div>
 
-    </section>
 
-
-    <!-- TASK TABLE -->
-    <section class="panel">
+      <!-- TABLE -->
 
       <div class="table-wrap">
 
@@ -531,12 +798,33 @@
                   id="selectAll">
               </th>
 
-              <th>Task</th>
-              <th>Details</th>
-              <th>Type</th>
-              <th>Due Date</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th>
+                Date
+              </th>
+
+              <th>
+                Title
+              </th>
+
+              <th>
+                Details
+              </th>
+
+              <th>
+                Type
+              </th>
+
+              <th>
+                Related
+              </th>
+
+              <th>
+                Due Date
+              </th>
+
+              <th>
+                Status
+              </th>
 
             </tr>
 
@@ -555,8 +843,13 @@
 </div>
 
 
-<!-- CREATE / EDIT MODAL -->
-<div class="modal" id="modal">
+<!-- =====================================================
+     CREATE / EDIT MODAL
+===================================================== -->
+
+<div
+  class="modal"
+  id="modal">
 
   <div class="modal-box">
 
@@ -564,115 +857,135 @@
       Create New Task
     </h2>
 
-    <form id="taskForm" class="form">
 
-      <div class="field">
+    <form id="taskForm">
 
-        <label for="title">
-          Task
-        </label>
-
-        <input
-          id="title"
-          type="text"
-          required
-          placeholder="Enter task title">
-
-      </div>
+      <div class="form">
 
 
-      <div class="field">
+        <div class="field">
 
-        <label for="details">
-          Details
-        </label>
+          <label>
+            Date
+          </label>
 
-        <textarea
-          id="details"
-          placeholder="Enter task details"></textarea>
+          <input
+            id="date"
+            type="date"
+            readonly
+            required>
 
-      </div>
-
-
-      <div class="field">
-
-        <label for="type">
-          Type
-        </label>
-
-        <select id="type">
-
-          <option value="Important">
-            Important
-          </option>
-
-          <option value="Medium" selected>
-            Medium
-          </option>
-
-          <option value="Low">
-            Low
-          </option>
-
-        </select>
-
-      </div>
+        </div>
 
 
-      <div class="field">
+        <div class="field">
 
-        <label for="date">
-          Due Date
-        </label>
+          <label>
+            Title
+          </label>
 
-        <input
-          id="date"
-          type="date"
-          required>
+          <input
+            id="title"
+            type="text"
+            required>
 
-      </div>
+        </div>
 
 
-      <div class="field">
+        <div class="field full">
 
-        <label for="status">
-          Status
-        </label>
+          <label>
+            Details
+          </label>
 
-        <select id="status">
+          <textarea
+            id="details"></textarea>
 
-          <option value="New">
-            New
-          </option>
+        </div>
 
-          <option value="In Progress">
-            In Progress
-          </option>
 
-          <option value="Completed">
-            Completed
-          </option>
+        <div class="field">
 
-        </select>
+          <label>
+            Type
+          </label>
+
+          <select id="type">
+
+            <option value="Important">
+              Important
+            </option>
+
+            <option
+              value="Medium"
+              selected>
+              Medium
+            </option>
+
+            <option value="Low">
+              Low
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Related
+          </label>
+
+          <select id="related">
+
+            <option value="Home">
+              Home
+            </option>
+
+            <option
+              value="Work"
+              selected>
+              Work
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Due Date
+          </label>
+
+          <input
+            id="dueDate"
+            type="date"
+            required>
+
+        </div>
+
 
       </div>
 
 
       <div class="modal-actions">
 
-        <!-- CANCEL BUTTON -->
+        <!-- IMPORTANT: type=button -->
         <button
           type="button"
-          id="closeBtn"
-          class="btn secondary">
+          class="btn secondary"
+          id="closeModal">
           Cancel
         </button>
 
-        <!-- SAVE BUTTON -->
+
         <button
+          class="btn primary"
           type="submit"
-          id="saveBtn"
-          class="btn primary">
+          id="saveBtn">
           Create Task
         </button>
 
@@ -687,82 +1000,78 @@
 
 <script>
 
-/* =========================================================
-   SUPABASE CONNECTION
-   =========================================================
+/* =====================================================
+   SUPABASE
+===================================================== */
 
+/*
    IMPORTANT:
-   Replace these TWO values with the SAME values
-   you already have in your old working code.
+   Keep the SAME Supabase URL and public/publishable key
+   that you already had in your working code.
 
-========================================================= */
+   NEVER put the service_role/secret key here.
+*/
 
 const SUPABASE_URL =
   "https://dadnspgmkymdrpzyvhch.supabase.co";
 
 const SUPABASE_ANON_KEY =
-  "sb_publishable_tBHn0H5ThLff8mApenKTCw_pAfZAiwWE";
+  "sb_publishable_tBHn0H5ThLff8mApenKTCw_pAfZAiwW";
 
 
-const { createClient } =
-  supabase;
-
-const db =
-  createClient(
+const sb =
+  supabase.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY
   );
 
 
-/* =========================================================
-   GLOBAL VARIABLES
-========================================================= */
+/* =====================================================
+   VARIABLES
+===================================================== */
 
 let tasks = [];
 
-let editingTaskId = null;
+let selected =
+  new Set();
 
-let selected = new Set();
+let view =
+  "dashboard";
 
-let currentView = "all";
+let editingId =
+  null;
 
 
-/* =========================================================
+/* =====================================================
    ELEMENTS
-========================================================= */
+===================================================== */
 
-const modal =
-  document.getElementById("modal");
+const login =
+  document.getElementById("login");
 
-const closeBtn =
-  document.getElementById("closeBtn");
+const app =
+  document.getElementById("app");
 
-const taskForm =
-  document.getElementById("taskForm");
+const email =
+  document.getElementById("email");
 
-const newTaskBtn =
-  document.getElementById("newTaskBtn");
+const password =
+  document.getElementById("password");
 
-const saveBtn =
-  document.getElementById("saveBtn");
+const loginBtn =
+  document.getElementById("loginBtn");
 
-const modalTitle =
-  document.getElementById("modalTitle");
+const loginMsg =
+  document.getElementById("loginMsg");
 
-const tbody =
-  document.getElementById("tbody");
+const logoutBtn =
+  document.getElementById("logoutBtn");
 
-const search =
-  document.getElementById("search");
+const createBtn =
+  document.getElementById("createBtn");
 
-const typeFilter =
-  document.getElementById("typeFilter");
-
-const statusFilter =
-  document.getElementById("statusFilter");
-
-const selectAll =
-  document.getElementById("selectAll");
+const editBtn =
+  document.getElementById("editBtn");
 
 const removeBtn =
   document.getElementById("removeBtn");
@@ -770,86 +1079,214 @@ const removeBtn =
 const completeBtn =
   document.getElementById("completeBtn");
 
-const logoutBtn =
-  document.getElementById("logoutBtn");
+const cancelBtn =
+  document.getElementById("cancelBtn");
+
+const modal =
+  document.getElementById("modal");
+
+const closeModalBtn =
+  document.getElementById("closeModal");
+
+const taskForm =
+  document.getElementById("taskForm");
+
+const modalTitle =
+  document.getElementById("modalTitle");
+
+const saveBtn =
+  document.getElementById("saveBtn");
+
+const date =
+  document.getElementById("date");
+
+const title =
+  document.getElementById("title");
+
+const details =
+  document.getElementById("details");
+
+const type =
+  document.getElementById("type");
+
+const related =
+  document.getElementById("related");
+
+const dueDate =
+  document.getElementById("dueDate");
+
+const tbody =
+  document.getElementById("tbody");
+
+const selectAll =
+  document.getElementById("selectAll");
+
+const search =
+  document.getElementById("search");
+
+const typeFilter =
+  document.getElementById("typeFilter");
+
+const relatedFilter =
+  document.getElementById("relatedFilter");
+
+const statusFilter =
+  document.getElementById("statusFilter");
+
+const pageTitle =
+  document.getElementById("pageTitle");
+
+const todayLabel =
+  document.getElementById("todayLabel");
 
 
-/* =========================================================
+/* =====================================================
    DATE
-========================================================= */
+===================================================== */
 
 function todayISO() {
 
-  const d = new Date();
+  const d =
+    new Date();
 
-  const year =
-    d.getFullYear();
+  const local =
+    new Date(
+      d.getTime()
+      -
+      d.getTimezoneOffset() * 60000
+    );
 
-  const month =
-    String(d.getMonth() + 1)
-      .padStart(2, "0");
-
-  const day =
-    String(d.getDate())
-      .padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
+  return local
+    .toISOString()
+    .slice(0, 10);
 }
 
 
-document.getElementById("todayLabel")
-  .textContent =
-  new Date().toLocaleDateString(
-    "en-IN",
-    {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric"
-    }
-  );
-
-
-/* =========================================================
+/* =====================================================
    ESCAPE HTML
-========================================================= */
+===================================================== */
 
 function esc(value) {
 
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+  return String(
+    value ?? ""
+  ).replace(
+    /[&<>"']/g,
+    m => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    }[m])
+  );
+
 }
 
 
-/* =========================================================
-   GET STATUS
-========================================================= */
+/* =====================================================
+   DUE STATE
+===================================================== */
 
-function getDueStatus(task) {
+function dueState(task) {
 
-  if (task.status === "Completed") {
-    return "completed";
+  if (
+    task.status !== "New"
+  ) {
+
+    return "";
+
   }
 
-  if (task.due_date < todayISO()) {
+
+  if (
+    task.due_date <
+    todayISO()
+  ) {
+
     return "overdue";
+
   }
 
-  if (task.due_date === todayISO()) {
-    return "today";
+
+  if (
+    task.due_date ===
+    todayISO()
+  ) {
+
+    return "due";
+
   }
 
-  return "upcoming";
+
+  return "";
+
 }
 
 
-/* =========================================================
+/* =====================================================
+   LOGIN MESSAGE
+===================================================== */
+
+function msg(text) {
+
+  loginMsg.textContent =
+    text;
+
+}
+
+
+/* =====================================================
+   SHOW LOGIN
+===================================================== */
+
+function showLogin() {
+
+  app.classList.add(
+    "hidden"
+  );
+
+  login.classList.remove(
+    "hidden"
+  );
+
+  password.value =
+    "";
+
+}
+
+
+/* =====================================================
+   SHOW APP
+===================================================== */
+
+function showApp() {
+
+  login.classList.add(
+    "hidden"
+  );
+
+  app.classList.remove(
+    "hidden"
+  );
+
+  todayLabel.textContent =
+    new Date().toLocaleDateString(
+      undefined,
+      {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      }
+    );
+
+}
+
+
+/* =====================================================
    LOAD TASKS
-========================================================= */
+===================================================== */
 
 async function loadTasks() {
 
@@ -858,26 +1295,35 @@ async function loadTasks() {
       user
     }
   } =
-    await db.auth.getUser();
+    await sb.auth.getUser();
 
 
   if (!user) {
 
-    alert("Please login first.");
+    showLogin();
 
     return;
 
   }
 
 
+  /*
+    IMPORTANT:
+    Only load tasks belonging to
+    the currently logged-in user.
+  */
+
   const {
     data,
     error
   } =
-    await db
+    await sb
       .from("tasks")
       .select("*")
-      .eq("user_id", user.id)
+      .eq(
+        "user_id",
+        user.id
+      )
       .order(
         "due_date",
         {
@@ -894,10 +1340,13 @@ async function loadTasks() {
 
   if (error) {
 
-    console.error(error);
+    console.error(
+      error
+    );
 
     alert(
-      "Unable to load tasks: " +
+      "Unable to load tasks:\n"
+      +
       error.message
     );
 
@@ -916,32 +1365,36 @@ async function loadTasks() {
 }
 
 
-/* =========================================================
-   FILTER TASKS
-========================================================= */
+/* =====================================================
+   FILTER
+===================================================== */
 
-function filteredTasks() {
+function filtered() {
+
+  let a =
+    [...tasks];
 
   const q =
     search.value
       .trim()
       .toLowerCase();
 
-  const type =
+  const ty =
     typeFilter.value;
 
-  const status =
+  const re =
+    relatedFilter.value;
+
+  const st =
     statusFilter.value;
 
 
-  let result =
-    [...tasks];
+  if (
+    view === "new"
+  ) {
 
-
-  if (currentView === "new") {
-
-    result =
-      result.filter(
+    a =
+      a.filter(
         t =>
           t.status === "New"
       );
@@ -949,40 +1402,72 @@ function filteredTasks() {
   }
 
 
-  if (currentView === "due") {
+  if (
+    view === "due"
+  ) {
 
-    result =
-      result.filter(
+    a =
+      a.filter(
         t =>
-          t.due_date === todayISO()
-          &&
-          t.status !== "Completed"
+          dueState(t) === "due"
       );
 
   }
 
 
-  if (currentView === "overdue") {
+  if (
+    view === "overdue"
+  ) {
 
-    result =
-      result.filter(
+    a =
+      a.filter(
         t =>
-          t.due_date < todayISO()
-          &&
-          t.status !== "Completed"
+          dueState(t) ===
+          "overdue"
       );
 
   }
 
 
-  if (currentView === "upcoming") {
+  if (
+    view === "upcoming"
+  ) {
 
-    result =
-      result.filter(
+    a =
+      a.filter(
         t =>
-          t.due_date > todayISO()
+          t.status === "New"
           &&
-          t.status !== "Completed"
+          t.due_date >
+          todayISO()
+      );
+
+  }
+
+
+  if (
+    view === "completed"
+  ) {
+
+    a =
+      a.filter(
+        t =>
+          t.status ===
+          "Completed"
+      );
+
+  }
+
+
+  if (
+    view === "cancelled"
+  ) {
+
+    a =
+      a.filter(
+        t =>
+          t.status ===
+          "Cancelled"
       );
 
   }
@@ -990,217 +1475,354 @@ function filteredTasks() {
 
   if (q) {
 
-    result =
-      result.filter(
+    a =
+      a.filter(
         t =>
-          String(t.title || "")
-            .toLowerCase()
-            .includes(q)
-          ||
-          String(t.details || "")
-            .toLowerCase()
-            .includes(q)
+          (
+            String(
+              t.title || ""
+            )
+            +
+            " "
+            +
+            String(
+              t.details || ""
+            )
+          )
+          .toLowerCase()
+          .includes(q)
       );
 
   }
 
 
-  if (type) {
+  if (ty) {
 
-    result =
-      result.filter(
+    a =
+      a.filter(
         t =>
-          t.type === type
+          t.type === ty
       );
 
   }
 
 
-  if (status) {
+  if (re) {
 
-    result =
-      result.filter(
+    a =
+      a.filter(
         t =>
-          t.status === status
+          t.related === re
       );
 
   }
 
 
-  return result;
+  if (st) {
+
+    a =
+      a.filter(
+        t =>
+          t.status === st
+      );
+
+  }
+
+
+  return a;
 
 }
 
 
-/* =========================================================
+/* =====================================================
    RENDER
-========================================================= */
+===================================================== */
 
 function render() {
 
-  const result =
-    filteredTasks();
-
-
-  /* COUNTS */
-
-  document.getElementById("total")
-    .textContent =
+  document.getElementById(
+    "cTotal"
+  ).textContent =
     tasks.length;
 
 
-  document.getElementById("newCount")
-    .textContent =
-    tasks.filter(
-      t => t.status === "New"
-    ).length;
-
-
-  document.getElementById("dueCount")
-    .textContent =
+  document.getElementById(
+    "cNew"
+  ).textContent =
     tasks.filter(
       t =>
-        t.due_date === todayISO()
-        &&
-        t.status !== "Completed"
+        t.status === "New"
     ).length;
 
 
-  document.getElementById("overdueCount")
-    .textContent =
+  document.getElementById(
+    "cDue"
+  ).textContent =
     tasks.filter(
       t =>
-        t.due_date < todayISO()
-        &&
-        t.status !== "Completed"
+        dueState(t) === "due"
     ).length;
 
 
-  /* TABLE */
-
-  tbody.innerHTML = "";
-
-
-  result.forEach(task => {
-
-    const tr =
-      document.createElement("tr");
-
-    tr.dataset.id =
-      task.id;
+  document.getElementById(
+    "cOverdue"
+  ).textContent =
+    tasks.filter(
+      t =>
+        dueState(t) ===
+        "overdue"
+    ).length;
 
 
-    let badgeClass =
-      "new";
+  document.getElementById(
+    "cCompleted"
+  ).textContent =
+    tasks.filter(
+      t =>
+        t.status ===
+        "Completed"
+    ).length;
 
 
-    if (
-      task.status ===
-      "In Progress"
-    ) {
-
-      badgeClass =
-        "progress";
-
-    }
-
-
-    if (
-      task.status ===
-      "Completed"
-    ) {
-
-      badgeClass =
-        "completed";
-
-    }
+  document.getElementById(
+    "cCancelled"
+  ).textContent =
+    tasks.filter(
+      t =>
+        t.status ===
+        "Cancelled"
+    ).length;
 
 
-    if (
-      getDueStatus(task) ===
-      "overdue"
-    ) {
-
-      badgeClass =
-        "overdue";
-
-    }
+  const a =
+    filtered();
 
 
-    tr.innerHTML = `
+  if (!a.length) {
 
-      <td>
-        <input
-          type="checkbox"
-          class="rowCheck"
-          data-id="${esc(task.id)}"
-          ${selected.has(task.id) ? "checked" : ""}>
-      </td>
+    tbody.innerHTML =
+      `
+      <tr>
+        <td
+          colspan="8"
+          class="empty">
+          No tasks found.
+        </td>
+      </tr>
+      `;
 
-      <td>
-        <strong>
-          ${esc(task.title)}
-        </strong>
-      </td>
+    updateButtons();
 
-      <td>
-        ${esc(task.details)}
-      </td>
+    return;
 
-      <td>
-        ${esc(task.type)}
-      </td>
-
-      <td>
-        ${esc(task.due_date)}
-      </td>
-
-      <td>
-        <span class="badge ${badgeClass}">
-          ${esc(task.status)}
-        </span>
-      </td>
-
-      <td>
-
-        <div class="row-actions">
-
-          <button
-            class="small-btn secondary editBtn"
-            data-id="${esc(task.id)}">
-            Edit
-          </button>
-
-          ${
-            task.status !== "Completed"
-              ?
-              `
-                <button
-                  class="small-btn success completeOneBtn"
-                  data-id="${esc(task.id)}">
-                  ✓
-                </button>
-              `
-              :
-              ""
-          }
-
-          <button
-            class="small-btn danger deleteBtn"
-            data-id="${esc(task.id)}">
-            Delete
-          </button>
-
-        </div>
-
-      </td>
-
-    `;
+  }
 
 
-    tbody.appendChild(tr);
+  tbody.innerHTML =
+    a.map(
+      t => {
 
-  });
+        const selectedClass =
+          selected.has(
+            String(t.id)
+          )
+            ?
+            "selected"
+            :
+            "";
+
+
+        const checked =
+          selected.has(
+            String(t.id)
+          )
+            ?
+            "checked"
+            :
+            "";
+
+
+        let typeClass =
+          "low";
+
+
+        if (
+          t.type ===
+          "Important"
+        ) {
+
+          typeClass =
+            "imp";
+
+        }
+        else if (
+          t.type ===
+          "Medium"
+        ) {
+
+          typeClass =
+            "med";
+
+        }
+
+
+        let statusClass =
+          "new";
+
+
+        if (
+          t.status ===
+          "Completed"
+        ) {
+
+          statusClass =
+            "completed";
+
+        }
+        else if (
+          t.status ===
+          "Cancelled"
+        ) {
+
+          statusClass =
+            "cancelled";
+
+        }
+
+
+        let dueBadge =
+          "";
+
+
+        if (
+          dueState(t) ===
+          "overdue"
+        ) {
+
+          dueBadge =
+            `
+            <span class="pill overdue">
+              Overdue
+            </span>
+            `;
+
+        }
+        else if (
+          dueState(t) ===
+          "due"
+        ) {
+
+          dueBadge =
+            `
+            <span class="pill due">
+              Due
+            </span>
+            `;
+
+        }
+
+
+        return `
+          <tr
+            class="${selectedClass}"
+            data-id="${esc(t.id)}">
+
+            <td>
+              <input
+                class="rowCheck"
+                type="checkbox"
+                ${checked}>
+            </td>
+
+            <td>
+              ${esc(t.task_date)}
+            </td>
+
+            <td>
+              <b>
+                ${esc(t.title)}
+              </b>
+            </td>
+
+            <td>
+              ${esc(t.details)}
+            </td>
+
+            <td>
+              <span
+                class="pill ${typeClass}">
+                ${esc(t.type)}
+              </span>
+            </td>
+
+            <td>
+              ${esc(t.related)}
+            </td>
+
+            <td>
+              ${esc(t.due_date)}
+              ${dueBadge}
+            </td>
+
+            <td>
+              <span
+                class="pill ${statusClass}">
+                ${esc(t.status)}
+              </span>
+            </td>
+
+          </tr>
+        `;
+
+      }
+    ).join("");
+
+
+  document
+    .querySelectorAll(
+      ".rowCheck"
+    )
+    .forEach(
+      checkbox => {
+
+        checkbox.onchange =
+          function() {
+
+            const tr =
+              this.closest(
+                "tr"
+              );
+
+            const id =
+              String(
+                tr.dataset.id
+              );
+
+
+            if (
+              this.checked
+            ) {
+
+              selected.add(
+                id
+              );
+
+            }
+            else {
+
+              selected.delete(
+                id
+              );
+
+            }
+
+
+            render();
+
+          };
+
+      }
+    );
 
 
   updateButtons();
@@ -1208,26 +1830,34 @@ function render() {
 }
 
 
-/* =========================================================
+/* =====================================================
    BUTTON STATE
-========================================================= */
+===================================================== */
 
 function updateButtons() {
 
-  const count =
+  const n =
     selected.size;
 
 
+  editBtn.disabled =
+    n !== 1;
+
+
   removeBtn.disabled =
-    count === 0;
+    n === 0;
 
 
   completeBtn.disabled =
-    count === 0;
+    n !== 1;
+
+
+  cancelBtn.disabled =
+    n !== 1;
 
 
   const visible =
-    filteredTasks();
+    filtered();
 
 
   selectAll.checked =
@@ -1235,23 +1865,27 @@ function updateButtons() {
     &&
     visible.every(
       t =>
-        selected.has(t.id)
+        selected.has(
+          String(t.id)
+        )
     );
 
 }
 
 
-/* =========================================================
+/* =====================================================
    OPEN CREATE MODAL
-========================================================= */
+===================================================== */
 
 function openCreateModal() {
 
-  editingTaskId =
+  editingId =
     null;
+
 
   modalTitle.textContent =
     "Create New Task";
+
 
   saveBtn.textContent =
     "Create Task";
@@ -1260,100 +1894,156 @@ function openCreateModal() {
   taskForm.reset();
 
 
-  document.getElementById("date")
-    .value =
+  date.value =
     todayISO();
 
 
-  document.getElementById("status")
-    .value =
-    "New";
+  dueDate.value =
+    todayISO();
 
 
-  modal.classList.add("show");
+  type.value =
+    "Medium";
+
+
+  related.value =
+    "Work";
+
+
+  modal.classList.add(
+    "show"
+  );
 
 }
 
 
-/* =========================================================
+/* =====================================================
+   OPEN EDIT MODAL
+===================================================== */
+
+function openEditModal(task) {
+
+  if (!task) {
+
+    return;
+
+  }
+
+
+  editingId =
+    task.id;
+
+
+  modalTitle.textContent =
+    "Edit Task";
+
+
+  saveBtn.textContent =
+    "Save Changes";
+
+
+  date.value =
+    task.task_date ||
+    todayISO();
+
+
+  title.value =
+    task.title ||
+    "";
+
+
+  details.value =
+    task.details ||
+    "";
+
+
+  type.value =
+    task.type ||
+    "Medium";
+
+
+  related.value =
+    task.related ||
+    "Work";
+
+
+  dueDate.value =
+    task.due_date ||
+    todayISO();
+
+
+  modal.classList.add(
+    "show"
+  );
+
+}
+
+
+/* =====================================================
    CLOSE MODAL
-========================================================= */
+===================================================== */
 
-function closeModal() {
+function closeTaskModal() {
 
-  editingTaskId =
+  editingId =
     null;
 
   taskForm.reset();
 
-  modal.classList.remove("show");
+  modal.classList.remove(
+    "show"
+  );
 
 }
 
 
-/* =========================================================
-   NEW TASK BUTTON
-========================================================= */
+/* =====================================================
+   CREATE BUTTON
+===================================================== */
 
-newTaskBtn.addEventListener(
-  "click",
-  openCreateModal
-);
+createBtn.onclick =
+  function() {
 
+    openCreateModal();
 
-/* =========================================================
-   SIDEBAR NEW BUTTON
-========================================================= */
-
-document
-  .querySelector(
-    '[data-view="new"]'
-  )
-  .addEventListener(
-    "click",
-    openCreateModal
-  );
+  };
 
 
-/* =========================================================
+/* =====================================================
    CANCEL BUTTON
-========================================================= */
+===================================================== */
 
-closeBtn.addEventListener(
-  "click",
+closeModalBtn.onclick =
   function(e) {
 
     e.preventDefault();
 
-    closeModal();
+    closeTaskModal();
 
-  }
-);
+  };
 
 
-/* =========================================================
+/* =====================================================
    CLICK OUTSIDE MODAL
-========================================================= */
+===================================================== */
 
-modal.addEventListener(
-  "click",
+modal.onclick =
   function(e) {
 
     if (
       e.target === modal
     ) {
 
-      closeModal();
+      closeTaskModal();
 
     }
 
-  }
-);
+  };
 
 
-/* =========================================================
-   ESC KEY CLOSE MODAL
-========================================================= */
+/* =====================================================
+   ESCAPE KEY
+===================================================== */
 
 document.addEventListener(
   "keydown",
@@ -1362,10 +2052,12 @@ document.addEventListener(
     if (
       e.key === "Escape"
       &&
-      modal.classList.contains("show")
+      modal.classList.contains(
+        "show"
+      )
     ) {
 
-      closeModal();
+      closeTaskModal();
 
     }
 
@@ -1373,12 +2065,11 @@ document.addEventListener(
 );
 
 
-/* =========================================================
-   CREATE / UPDATE TASK
-========================================================= */
+/* =====================================================
+   SAVE TASK
+===================================================== */
 
-taskForm.addEventListener(
-  "submit",
+taskForm.onsubmit =
   async function(e) {
 
     e.preventDefault();
@@ -1389,49 +2080,44 @@ taskForm.addEventListener(
         user
       }
     } =
-      await db.auth.getUser();
+      await sb.auth.getUser();
 
 
     if (!user) {
 
-      alert("Please login first.");
+      showLogin();
 
       return;
 
     }
 
 
-    const taskData = {
+    const payload = {
+
+      task_date:
+        date.value,
 
       title:
-        document.getElementById(
-          "title"
-        ).value.trim(),
+        title.value.trim(),
 
       details:
-        document.getElementById(
-          "details"
-        ).value.trim(),
+        details.value.trim(),
 
       type:
-        document.getElementById(
-          "type"
-        ).value,
+        type.value,
+
+      related:
+        related.value,
 
       due_date:
-        document.getElementById(
-          "date"
-        ).value,
-
-      status:
-        document.getElementById(
-          "status"
-        ).value
+        dueDate.value
 
     };
 
 
-    if (!taskData.title) {
+    if (
+      !payload.title
+    ) {
 
       alert(
         "Please enter task title."
@@ -1442,7 +2128,9 @@ taskForm.addEventListener(
     }
 
 
-    if (!taskData.due_date) {
+    if (
+      !payload.due_date
+    ) {
 
       alert(
         "Please select due date."
@@ -1461,45 +2149,46 @@ taskForm.addEventListener(
       "Saving...";
 
 
-    let error;
+    let result;
 
 
-    if (editingTaskId) {
+    if (editingId) {
 
-      const result =
-        await db
+      /*
+        User ID is included in the update condition
+        so another user's task cannot be edited.
+      */
+
+      result =
+        await sb
           .from("tasks")
-          .update(taskData)
+          .update(payload)
           .eq(
             "id",
-            editingTaskId
+            editingId
           )
           .eq(
             "user_id",
             user.id
           );
 
+    }
+    else {
 
-      error =
-        result.error;
-
-    } else {
-
-      const result =
-        await db
+      result =
+        await sb
           .from("tasks")
           .insert({
 
-            ...taskData,
+            ...payload,
 
             user_id:
-              user.id
+              user.id,
+
+            status:
+              "New"
 
           });
-
-
-      error =
-        result.error;
 
     }
 
@@ -1509,20 +2198,21 @@ taskForm.addEventListener(
 
 
     saveBtn.textContent =
-      editingTaskId
+      editingId
         ?
-        "Update Task"
+        "Save Changes"
         :
         "Create Task";
 
 
-    if (error) {
-
-      console.error(error);
+    if (
+      result.error
+    ) {
 
       alert(
-        "Error saving task:\n" +
-        error.message
+        "Unable to save task:\n"
+        +
+        result.error.message
       );
 
       return;
@@ -1530,149 +2220,24 @@ taskForm.addEventListener(
     }
 
 
-    closeModal();
+    closeTaskModal();
+
+    selected.clear();
 
     await loadTasks();
 
-  }
-);
+  };
 
 
-/* =========================================================
-   EDIT TASK
-========================================================= */
+/* =====================================================
+   EDIT BUTTON
+===================================================== */
 
-async function editTask(id) {
-
-  const task =
-    tasks.find(
-      t =>
-        String(t.id) ===
-        String(id)
-    );
-
-
-  if (!task) {
-
-    return;
-
-  }
-
-
-  editingTaskId =
-    task.id;
-
-
-  modalTitle.textContent =
-    "Edit Task";
-
-
-  saveBtn.textContent =
-    "Update Task";
-
-
-  document.getElementById("title")
-    .value =
-    task.title || "";
-
-
-  document.getElementById("details")
-    .value =
-    task.details || "";
-
-
-  document.getElementById("type")
-    .value =
-    task.type || "Medium";
-
-
-  document.getElementById("date")
-    .value =
-    task.due_date || "";
-
-
-  document.getElementById("status")
-    .value =
-    task.status || "New";
-
-
-  modal.classList.add("show");
-
-}
-
-
-/* =========================================================
-   TABLE BUTTON ACTIONS
-========================================================= */
-
-tbody.addEventListener(
-  "click",
-  async function(e) {
-
-    const editButton =
-      e.target.closest(
-        ".editBtn"
-      );
-
-    const completeButton =
-      e.target.closest(
-        ".completeOneBtn"
-      );
-
-    const deleteButton =
-      e.target.closest(
-        ".deleteBtn"
-      );
-
-
-    if (editButton) {
-
-      await editTask(
-        editButton.dataset.id
-      );
-
-      return;
-
-    }
-
-
-    if (completeButton) {
-
-      await completeTask(
-        completeButton.dataset.id
-      );
-
-      return;
-
-    }
-
-
-    if (deleteButton) {
-
-      await deleteTask(
-        deleteButton.dataset.id
-      );
-
-      return;
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   CHECKBOX
-========================================================= */
-
-tbody.addEventListener(
-  "change",
-  function(e) {
+editBtn.onclick =
+  function() {
 
     if (
-      !e.target.classList.contains(
-        "rowCheck"
-      )
+      selected.size !== 1
     ) {
 
       return;
@@ -1681,223 +2246,29 @@ tbody.addEventListener(
 
 
     const id =
-      e.target.dataset.id;
+      [...selected][0];
 
 
-    if (e.target.checked) {
-
-      selected.add(id);
-
-    } else {
-
-      selected.delete(id);
-
-    }
-
-
-    updateButtons();
-
-  }
-);
-
-
-/* =========================================================
-   SELECT ALL
-========================================================= */
-
-selectAll.addEventListener(
-  "change",
-  function() {
-
-    const visible =
-      filteredTasks();
-
-
-    visible.forEach(
-      task => {
-
-        if (
-          selectAll.checked
-        ) {
-
-          selected.add(
-            task.id
-          );
-
-        } else {
-
-          selected.delete(
-            task.id
-          );
-
-        }
-
-      }
-    );
-
-
-    render();
-
-  }
-);
-
-
-/* =========================================================
-   DELETE ONE TASK
-========================================================= */
-
-async function deleteTask(id) {
-
-  const task =
-    tasks.find(
-      t =>
-        String(t.id) ===
-        String(id)
-    );
-
-
-  if (!task) {
-
-    return;
-
-  }
-
-
-  const ok =
-    confirm(
-      `Delete task "${task.title}"?`
-    );
-
-
-  if (!ok) {
-
-    return;
-
-  }
-
-
-  const {
-    data: {
-      user
-    }
-  } =
-    await db.auth.getUser();
-
-
-  if (!user) {
-
-    alert(
-      "Please login first."
-    );
-
-    return;
-
-  }
-
-
-  const {
-    error
-  } =
-    await db
-      .from("tasks")
-      .delete()
-      .eq(
-        "id",
-        id
-      )
-      .eq(
-        "user_id",
-        user.id
+    const task =
+      tasks.find(
+        t =>
+          String(t.id) ===
+          String(id)
       );
 
 
-  if (error) {
-
-    alert(
-      "Delete failed:\n" +
-      error.message
+    openEditModal(
+      task
     );
 
-    return;
-
-  }
+  };
 
 
-  selected.delete(id);
+/* =====================================================
+   REMOVE SELECTED
+===================================================== */
 
-  await loadTasks();
-
-}
-
-
-/* =========================================================
-   COMPLETE ONE TASK
-========================================================= */
-
-async function completeTask(id) {
-
-  const {
-    data: {
-      user
-    }
-  } =
-    await db.auth.getUser();
-
-
-  if (!user) {
-
-    alert(
-      "Please login first."
-    );
-
-    return;
-
-  }
-
-
-  const {
-    error
-  } =
-    await db
-      .from("tasks")
-      .update({
-        status: "Completed"
-      })
-      .eq(
-        "id",
-        id
-      )
-      .eq(
-        "user_id",
-        user.id
-      );
-
-
-  if (error) {
-
-    alert(
-      "Unable to complete task:\n" +
-      error.message
-    );
-
-    return;
-
-  }
-
-
-  selected.delete(id);
-
-  await loadTasks();
-
-}
-
-
-/* =========================================================
-   BULK DELETE
-========================================================= */
-
-removeBtn.addEventListener(
-  "click",
+removeBtn.onclick =
   async function() {
 
     if (
@@ -1911,7 +2282,7 @@ removeBtn.addEventListener(
 
     const ok =
       confirm(
-        `Delete ${selected.size} selected task(s)?`
+        `Remove ${selected.size} selected task(s)?`
       );
 
 
@@ -1927,47 +2298,47 @@ removeBtn.addEventListener(
         user
       }
     } =
-      await db.auth.getUser();
+      await sb.auth.getUser();
 
 
     if (!user) {
 
-      alert(
-        "Please login first."
-      );
+      showLogin();
 
       return;
 
     }
 
 
-    for (
-      const id of selected
-    ) {
-
-      const {
-        error
-      } =
-        await db
-          .from("tasks")
-          .delete()
-          .eq(
-            "id",
-            id
-          )
-          .eq(
-            "user_id",
-            user.id
-          );
+    const ids =
+      [...selected];
 
 
-      if (error) {
-
-        console.error(
-          error
+    const {
+      error
+    } =
+      await sb
+        .from("tasks")
+        .delete()
+        .in(
+          "id",
+          ids
+        )
+        .eq(
+          "user_id",
+          user.id
         );
 
-      }
+
+    if (error) {
+
+      alert(
+        "Remove failed:\n"
+        +
+        error.message
+      );
+
+      return;
 
     }
 
@@ -1976,21 +2347,118 @@ removeBtn.addEventListener(
 
     await loadTasks();
 
-  }
-);
+  };
 
 
-/* =========================================================
-   BULK COMPLETE
-========================================================= */
+/* =====================================================
+   COMPLETE
+===================================================== */
 
-completeBtn.addEventListener(
-  "click",
+completeBtn.onclick =
   async function() {
 
     if (
-      selected.size === 0
+      selected.size !== 1
     ) {
+
+      return;
+
+    }
+
+
+    const id =
+      [...selected][0];
+
+
+    const {
+      data: {
+        user
+      }
+    } =
+      await sb.auth.getUser();
+
+
+    if (!user) {
+
+      showLogin();
+
+      return;
+
+    }
+
+
+    const {
+      error
+    } =
+      await sb
+        .from("tasks")
+        .update({
+
+          status:
+            "Completed",
+
+          completed_at:
+            new Date()
+              .toISOString()
+
+        })
+        .eq(
+          "id",
+          id
+        )
+        .eq(
+          "user_id",
+          user.id
+        );
+
+
+    if (error) {
+
+      alert(
+        "Unable to complete task:\n"
+        +
+        error.message
+      );
+
+      return;
+
+    }
+
+
+    selected.clear();
+
+    await loadTasks();
+
+  };
+
+
+/* =====================================================
+   CANCEL TASK
+===================================================== */
+
+cancelBtn.onclick =
+  async function() {
+
+    if (
+      selected.size !== 1
+    ) {
+
+      return;
+
+    }
+
+
+    const id =
+      [...selected][0];
+
+
+    const ok =
+      confirm(
+        "Cancel the selected task?"
+      );
+
+
+    if (!ok) {
 
       return;
 
@@ -2002,50 +2470,52 @@ completeBtn.addEventListener(
         user
       }
     } =
-      await db.auth.getUser();
+      await sb.auth.getUser();
 
 
     if (!user) {
 
-      alert(
-        "Please login first."
-      );
+      showLogin();
 
       return;
 
     }
 
 
-    for (
-      const id of selected
-    ) {
+    const {
+      error
+    } =
+      await sb
+        .from("tasks")
+        .update({
 
-      const {
-        error
-      } =
-        await db
-          .from("tasks")
-          .update({
-            status:
-              "Completed"
-          })
-          .eq(
-            "id",
-            id
-          )
-          .eq(
-            "user_id",
-            user.id
-          );
+          status:
+            "Cancelled",
 
+          cancelled_at:
+            new Date()
+              .toISOString()
 
-      if (error) {
-
-        console.error(
-          error
+        })
+        .eq(
+          "id",
+          id
+        )
+        .eq(
+          "user_id",
+          user.id
         );
 
-      }
+
+    if (error) {
+
+      alert(
+        "Unable to cancel task:\n"
+        +
+        error.message
+      );
+
+      return;
 
     }
 
@@ -2054,33 +2524,84 @@ completeBtn.addEventListener(
 
     await loadTasks();
 
+  };
+
+
+/* =====================================================
+   SELECT ALL
+===================================================== */
+
+selectAll.onchange =
+  function() {
+
+    const visible =
+      filtered();
+
+
+    visible.forEach(
+      task => {
+
+        const id =
+          String(
+            task.id
+          );
+
+
+        if (
+          selectAll.checked
+        ) {
+
+          selected.add(
+            id
+          );
+
+        }
+        else {
+
+          selected.delete(
+            id
+          );
+
+        }
+
+      }
+    );
+
+
+    render();
+
+  };
+
+
+/* =====================================================
+   SEARCH / FILTER
+===================================================== */
+
+[
+  search,
+  typeFilter,
+  relatedFilter,
+  statusFilter
+]
+.forEach(
+  element => {
+
+    element.oninput =
+      function() {
+
+        selected.clear();
+
+        render();
+
+      };
+
   }
 );
 
 
-/* =========================================================
-   SEARCH / FILTER
-========================================================= */
-
-search.addEventListener(
-  "input",
-  render
-);
-
-typeFilter.addEventListener(
-  "change",
-  render
-);
-
-statusFilter.addEventListener(
-  "change",
-  render
-);
-
-
-/* =========================================================
-   SIDEBAR VIEWS
-========================================================= */
+/* =====================================================
+   NAVIGATION
+===================================================== */
 
 document
   .querySelectorAll(
@@ -2089,25 +2610,26 @@ document
   .forEach(
     button => {
 
-      button.addEventListener(
-        "click",
+      button.onclick =
         function() {
 
-          const view =
+          const newView =
             this.dataset.view;
 
 
+          /*
+            New button opens Create modal.
+          */
+
           if (
-            view === "new"
+            newView === "new"
           ) {
+
+            openCreateModal();
 
             return;
 
           }
-
-
-          currentView =
-            view;
 
 
           document
@@ -2115,8 +2637,8 @@ document
               ".nav button"
             )
             .forEach(
-              b =>
-                b.classList.remove(
+              x =>
+                x.classList.remove(
                   "active"
                 )
             );
@@ -2127,81 +2649,71 @@ document
           );
 
 
-          if (
-            view === "all"
-          ) {
-
-            document.getElementById(
-              "pageTitle"
-            ).textContent =
-              "Akash Dashboard";
-
-          }
+          view =
+            newView;
 
 
-          if (
-            view === "due"
-          ) {
-
-            document.getElementById(
-              "pageTitle"
-            ).textContent =
-              "Due Today";
-
-          }
+          selected.clear();
 
 
-          if (
-            view === "overdue"
-          ) {
+          const titles = {
 
-            document.getElementById(
-              "pageTitle"
-            ).textContent =
-              "Overdue Tasks";
+            dashboard:
+              "Akash Dashboard",
 
-          }
+            all:
+              "All Tasks",
+
+            due:
+              "Due Today",
+
+            overdue:
+              "Overdue",
+
+            upcoming:
+              "Upcoming",
+
+            completed:
+              "Completed",
+
+            cancelled:
+              "Cancelled"
+
+          };
 
 
-          if (
-            view === "upcoming"
-          ) {
-
-            document.getElementById(
-              "pageTitle"
-            ).textContent =
-              "Upcoming Tasks";
-
-          }
+          pageTitle.textContent =
+            titles[view]
+            ||
+            "Akash Dashboard";
 
 
           render();
 
-        }
-      );
+        };
 
     }
   );
 
 
-/* =========================================================
+/* =====================================================
    LOGOUT
-========================================================= */
+===================================================== */
 
-logoutBtn.addEventListener(
-  "click",
+logoutBtn.onclick =
   async function() {
 
     const {
       error
     } =
-      await db.auth.signOut();
+      await sb.auth.signOut();
 
 
     if (error) {
 
       alert(
-        "Logout failed:\n" +
+        "Logout failed:\n"
+        +
         error.message
       );
 
@@ -2210,59 +2722,226 @@ logoutBtn.addEventListener(
     }
 
 
-    location.reload();
+    tasks = [];
+
+    selected.clear();
+
+    showLogin();
+
+    msg("");
+
+  };
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+loginBtn.onclick =
+  async function() {
+
+    const userEmail =
+      email.value.trim();
+
+    const userPassword =
+      password.value;
+
+
+    if (!userEmail) {
+
+      msg(
+        "Please enter your email."
+      );
+
+      return;
+
+    }
+
+
+    if (!userPassword) {
+
+      msg(
+        "Please enter your password."
+      );
+
+      return;
+
+    }
+
+
+    loginBtn.disabled =
+      true;
+
+
+    msg(
+      "Signing in..."
+    );
+
+
+    const {
+      data,
+      error
+    } =
+      await sb.auth
+        .signInWithPassword({
+
+          email:
+            userEmail,
+
+          password:
+            userPassword
+
+        });
+
+
+    loginBtn.disabled =
+      false;
+
+
+    if (error) {
+
+      msg(
+        "Login failed: "
+        +
+        error.message
+      );
+
+      return;
+
+    }
+
+
+    if (!data.session) {
+
+      msg(
+        "Login failed. No session created."
+      );
+
+      return;
+
+    }
+
+
+    msg("");
+
+    showApp();
+
+    await loadTasks();
+
+  };
+
+
+/* =====================================================
+   ENTER KEY LOGIN
+===================================================== */
+
+password.addEventListener(
+  "keydown",
+  function(e) {
+
+    if (
+      e.key === "Enter"
+    ) {
+
+      loginBtn.click();
+
+    }
 
   }
 );
 
 
-/* =========================================================
-   AUTH CHECK
-========================================================= */
+/* =====================================================
+   AUTH STATE LISTENER
+===================================================== */
 
-async function checkAuth() {
+sb.auth.onAuthStateChange(
+  async function(
+    event,
+    session
+  ) {
+
+    if (session) {
+
+      showApp();
+
+      await loadTasks();
+
+    }
+    else {
+
+      tasks = [];
+
+      selected.clear();
+
+      showLogin();
+
+    }
+
+  }
+);
+
+
+/* =====================================================
+   INITIAL AUTH CHECK
+===================================================== */
+
+async function initializeApp() {
+
+  /*
+    This is the important fix.
+
+    Every time the URL is opened, first check whether
+    a valid Supabase session exists.
+
+    No session = login screen.
+    Valid session = dashboard.
+  */
 
   const {
-    data: {
-      session
-    }
+    data,
+    error
   } =
-    await db.auth.getSession();
+    await sb.auth.getSession();
 
 
-  if (!session) {
+  if (error) {
 
-    alert(
-      "Please login to access dashboard."
+    console.error(
+      error
     );
 
-    return false;
+    showLogin();
+
+    return;
 
   }
 
 
-  return true;
+  if (
+    data &&
+    data.session
+  ) {
 
-}
-
-
-/* =========================================================
-   START
-========================================================= */
-
-(async function() {
-
-  const loggedIn =
-    await checkAuth();
-
-
-  if (loggedIn) {
+    showApp();
 
     await loadTasks();
 
   }
+  else {
 
-})();
+    showLogin();
+
+  }
+
+}
+
+
+/* =====================================================
+   START APPLICATION
+===================================================== */
+
+initializeApp();
 
 </script>
 
