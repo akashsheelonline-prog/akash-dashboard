@@ -928,6 +928,7 @@
               <div class="field">
                 <label>Font</label>
                 <select id="wmFont">
+                  <option value="ArialBlack">Arial Black</option>
                   <option value="Helvetica">Helvetica</option>
                   <option value="TimesRoman">Times New Roman</option>
                   <option value="Courier">Courier</option>
@@ -3241,6 +3242,7 @@ function hexToRgb(hex) {
 function getPdfFont(fontName) {
   const { StandardFonts } = PDFLib;
   return {
+    ArialBlack : StandardFonts.ArialBlack,
     Helvetica: StandardFonts.Helvetica,
     HelveticaBold: StandardFonts.HelveticaBold,
     TimesRoman: StandardFonts.TimesRoman,
