@@ -9,6 +9,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <style>
 
@@ -468,6 +469,9 @@
     }
 
     .wm-upload {
+      display: block;
+      width: 100%;
+      min-height: 170px;
       border: 2px dashed #cbd5e1;
       border-radius: 12px;
       padding: 28px;
@@ -477,17 +481,23 @@
       transition: .15s;
     }
 
+    .wm-upload:focus-within,
     .wm-upload:hover {
       border-color: #2563eb;
       background: #eff6ff;
     }
 
     .wm-upload input {
-      display: none;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
     }
 
     .wm-upload-icon {
       font-size: 34px;
+      display: block;
       margin-bottom: 8px;
     }
 
@@ -852,7 +862,8 @@
             <div style="padding:15px">
               <label class="wm-upload" for="wmFiles">
                 <div class="wm-upload-icon">📄</div>
-                <b>Click to select PDF files</b>
+                <b>Select PDF files</b>
+                <div style="margin-top:8px;font-size:12px;color:#64748b">Click here or drag & drop PDFs</div>
                 <div class="muted" style="margin-top:5px">
                   Maximum 10 PDF files
                 </div>
@@ -2960,6 +2971,446 @@ selectAll.onchange =
 
   }
 );
+
+
+/* =====================================================
+   WATERMARK FUNCTIONS
+===================================================== */
+
+let watermarkFiles = [];
+let watermarkedFiles = [];
+
+const watermarkView =
+  document.getElementById("watermarkView");
+
+const wmFiles =
+  document.getElementById("wmFiles");
+
+const wmFileList =
+  document.getElementById("wmFileList");
+
+const wmStatus =
+  document.getElementById("wmStatus");
+
+const wmText =
+  document.getElementById("wmText");
+
+const wmFont =
+  document.getElementById("wmFont");
+
+const wmFontSize =
+  document.getElementById("wmFontSize");
+
+const wmColor =
+  document.getElementById("wmColor");
+
+const wmColorValue =
+  document.getElementById("wmColorValue");
+
+const wmOpacity =
+  document.getElementById("wmOpacity");
+
+const wmOpacityValue =
+  document.getElementById("wmOpacityValue");
+
+const wmAngle =
+  document.getElementById("wmAngle");
+
+const wmAngleValue =
+  document.getElementById("wmAngleValue");
+
+const wmPosition =
+  document.getElementById("wmPosition");
+
+const wmPreviewText =
+  document.getElementById("wmPreviewText");
+
+const applyWm =
+  document.getElementById("applyWm");
+
+const wmProgress =
+  document.getElementById("wmProgress");
+
+const wmProgressFill =
+  document.getElementById("wmProgressFill");
+
+const wmProgressText =
+  document.getElementById("wmProgressText");
+
+const wmResult =
+  document.getElementById("wmResult");
+
+const wmResultList =
+  document.getElementById("wmResultList");
+
+const downloadAllWm =
+  document.getElementById("downloadAllWm");
+
+function formatBytes(bytes) {
+  if (!bytes) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${(bytes / Math.pow(1024, i)).toFixed(i ? 1 : 0)} ${units[i]}`;
+}
+
+function renderWatermarkFiles() {
+  if (!watermarkFiles.length) {
+    wmFileList.innerHTML = "";
+    wmStatus.textContent = "No PDF selected.";
+    return;
+  }
+
+  wmFileList.innerHTML = watermarkFiles.map((file, index) => `
+    <div class="wm-file">
+      <div class="wm-file-name" title="${esc(file.name)}">
+        📄 ${esc(file.name)}
+        <span class="wm-file-size">${formatBytes(file.size)}</span>
+      </div>
+      <button type="button" class="wm-remove" data-wm-index="${index}">Remove</button>
+    </div>
+  `).join("");
+
+  wmStatus.textContent =
+    `${watermarkFiles.length} PDF file${watermarkFiles.length === 1 ? "" : "s"} selected.`;
+}
+
+function resetWatermarkResults() {
+  watermarkedFiles = [];
+  wmResult.classList.remove("show");
+  wmResultList.innerHTML = "";
+  downloadAllWm.disabled = true;
+  wmProgress.classList.remove("show");
+  wmProgressFill.style.width = "0%";
+}
+
+wmFiles.addEventListener("change", function () {
+  const incoming = [...(this.files || [])];
+
+  if (watermarkFiles.length + incoming.length > 10) {
+    alert("Maximum 10 PDF files are allowed.");
+    this.value = "";
+    return;
+  }
+
+  const valid = incoming.filter(file =>
+    file.type === "application/pdf" ||
+    file.name.toLowerCase().endsWith(".pdf")
+  );
+
+  if (valid.length !== incoming.length) {
+    alert("Only PDF files are allowed.");
+  }
+
+  const existing = new Set(
+    watermarkFiles.map(file =>
+      `${file.name}|${file.size}|${file.lastModified}`
+    )
+  );
+
+  valid.forEach(file => {
+    const key = `${file.name}|${file.size}|${file.lastModified}`;
+    if (!existing.has(key)) {
+      watermarkFiles.push(file);
+      existing.add(key);
+    }
+  });
+
+  this.value = "";
+  resetWatermarkResults();
+  renderWatermarkFiles();
+});
+
+const wmUpload = document.querySelector(".wm-upload");
+
+["dragenter", "dragover"].forEach(eventName => {
+  wmUpload.addEventListener(eventName, e => {
+    e.preventDefault();
+    e.stopPropagation();
+    wmUpload.classList.add("wm-dragover");
+  });
+});
+
+["dragleave", "drop"].forEach(eventName => {
+  wmUpload.addEventListener(eventName, e => {
+    e.preventDefault();
+    e.stopPropagation();
+    wmUpload.classList.remove("wm-dragover");
+  });
+});
+
+wmUpload.addEventListener("drop", e => {
+  const dropped = [...(e.dataTransfer?.files || [])];
+  if (!dropped.length) return;
+
+  if (watermarkFiles.length + dropped.length > 10) {
+    alert("Maximum 10 PDF files are allowed.");
+    return;
+  }
+
+  const valid = dropped.filter(file =>
+    file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
+  );
+
+  const existing = new Set(
+    watermarkFiles.map(file => `${file.name}|${file.size}|${file.lastModified}`)
+  );
+
+  valid.forEach(file => {
+    const key = `${file.name}|${file.size}|${file.lastModified}`;
+    if (!existing.has(key)) {
+      watermarkFiles.push(file);
+      existing.add(key);
+    }
+  });
+
+  if (valid.length !== dropped.length) {
+    alert("Only PDF files are allowed.");
+  }
+
+  resetWatermarkResults();
+  renderWatermarkFiles();
+});
+
+wmFileList.addEventListener("click", function (e) {
+  const button = e.target.closest("[data-wm-index]");
+  if (!button) return;
+
+  watermarkFiles.splice(Number(button.dataset.wmIndex), 1);
+  resetWatermarkResults();
+  renderWatermarkFiles();
+});
+
+function updateWatermarkPreview() {
+  const text = wmText.value.trim() || "CONFIDENTIAL";
+  const size = Math.max(6, Math.min(200, Number(wmFontSize.value) || 40));
+  const opacity = Math.max(0.05, Math.min(1, Number(wmOpacity.value) / 100));
+  const angle = Number(wmAngle.value) || 0;
+
+  wmPreviewText.textContent = text;
+  wmPreviewText.style.opacity = opacity;
+  wmPreviewText.style.fontSize = `${Math.max(12, Math.min(64, size * 0.75))}px`;
+  wmPreviewText.style.color = wmColor.value;
+  wmPreviewText.style.transform = `rotate(${angle}deg)`;
+  wmPreviewText.style.fontFamily =
+    wmFont.value.includes("Times") ? "Times New Roman, serif" :
+    wmFont.value.includes("Courier") ? "Courier New, monospace" :
+    "Arial, sans-serif";
+  wmPreviewText.style.fontWeight =
+    wmFont.value.includes("Bold") ? "800" : "600";
+
+  const positions = {
+    "top-left": ["flex-start", "flex-start"],
+    "top-center": ["center", "flex-start"],
+    "top-right": ["flex-end", "flex-start"],
+    "center-left": ["flex-start", "center"],
+    "center": ["center", "center"],
+    "center-right": ["flex-end", "center"],
+    "bottom-left": ["flex-start", "flex-end"],
+    "bottom-center": ["center", "flex-end"],
+    "bottom-right": ["flex-end", "flex-end"]
+  };
+
+  const [justify, align] = positions[wmPosition.value] || positions.center;
+  wmPreviewText.parentElement.style.display = "flex";
+  wmPreviewText.parentElement.style.justifyContent = justify;
+  wmPreviewText.parentElement.style.alignItems = align;
+  wmColorValue.textContent = wmColor.value.toUpperCase();
+  wmOpacityValue.textContent = `${wmOpacity.value}%`;
+  wmAngleValue.textContent = `${wmAngle.value}°`;
+}
+
+[wmText, wmFont, wmFontSize, wmColor, wmOpacity, wmAngle, wmPosition]
+  .forEach(el => {
+    el.addEventListener("input", updateWatermarkPreview);
+    el.addEventListener("change", updateWatermarkPreview);
+  });
+
+function hexToRgb(hex) {
+  const clean = hex.replace("#", "");
+  const full = clean.length === 3
+    ? clean.split("").map(x => x + x).join("")
+    : clean;
+
+  return {
+    r: parseInt(full.slice(0, 2), 16) / 255,
+    g: parseInt(full.slice(2, 4), 16) / 255,
+    b: parseInt(full.slice(4, 6), 16) / 255
+  };
+}
+
+function getPdfFont(fontName) {
+  const { StandardFonts } = PDFLib;
+  return {
+    Helvetica: StandardFonts.Helvetica,
+    HelveticaBold: StandardFonts.HelveticaBold,
+    TimesRoman: StandardFonts.TimesRoman,
+    TimesRomanBold: StandardFonts.TimesRomanBold,
+    Courier: StandardFonts.Courier,
+    CourierBold: StandardFonts.CourierBold
+  }[fontName] || StandardFonts.Helvetica;
+}
+
+function getWatermarkCoordinates(position, width, height, textWidth, textHeight) {
+  const margin = 30;
+  const x = {
+    left: margin,
+    center: (width - textWidth) / 2,
+    right: width - textWidth - margin
+  };
+  const y = {
+    top: height - textHeight - margin,
+    center: (height - textHeight) / 2,
+    bottom: margin
+  };
+
+  return {
+    "top-left": [x.left, y.top],
+    "top-center": [x.center, y.top],
+    "top-right": [x.right, y.top],
+    "center-left": [x.left, y.center],
+    "center": [x.center, y.center],
+    "center-right": [x.right, y.center],
+    "bottom-left": [x.left, y.bottom],
+    "bottom-center": [x.center, y.bottom],
+    "bottom-right": [x.right, y.bottom]
+  }[position] || [x.center, y.center];
+}
+
+async function applyWatermarkToPdf(file) {
+  const { PDFDocument, rgb, degrees } = PDFLib;
+  const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
+  const font = await pdfDoc.embedFont(getPdfFont(wmFont.value));
+  const text = wmText.value.trim() || "CONFIDENTIAL";
+  const fontSize = Math.max(6, Math.min(200, Number(wmFontSize.value) || 40));
+  const opacity = Math.max(0.05, Math.min(1, Number(wmOpacity.value) / 100));
+  const color = hexToRgb(wmColor.value);
+  const angle = Number(wmAngle.value) || 0;
+
+  pdfDoc.getPages().forEach(page => {
+    const { width, height } = page.getSize();
+    const textWidth = font.widthOfTextAtSize(text, fontSize);
+    const textHeight = font.heightAtSize(fontSize);
+    const [x, y] = getWatermarkCoordinates(
+      wmPosition.value, width, height, textWidth, textHeight
+    );
+
+    page.drawText(text, {
+      x,
+      y,
+      size: fontSize,
+      font,
+      color: rgb(color.r, color.g, color.b),
+      opacity,
+      rotate: degrees(angle)
+    });
+  });
+
+  return new Blob([await pdfDoc.save()], { type: "application/pdf" });
+}
+
+applyWm.addEventListener("click", async function () {
+  if (!watermarkFiles.length) {
+    alert("Please select at least 1 PDF file.");
+    return;
+  }
+
+  if (!wmText.value.trim()) {
+    alert("Please enter watermark text.");
+    wmText.focus();
+    return;
+  }
+
+  if (!window.PDFLib) {
+    alert("PDF watermark library could not be loaded. Please refresh the page and try again.");
+    return;
+  }
+
+  applyWm.disabled = true;
+  wmFiles.disabled = true;
+  wmProgress.classList.add("show");
+  wmResult.classList.remove("show");
+  wmResultList.innerHTML = "";
+  wmProgressFill.style.width = "0%";
+  watermarkedFiles = [];
+
+  try {
+    for (let i = 0; i < watermarkFiles.length; i++) {
+      const file = watermarkFiles[i];
+      wmProgressText.textContent =
+        `Processing ${i + 1} of ${watermarkFiles.length}: ${file.name}`;
+
+      const blob = await applyWatermarkToPdf(file);
+      const outputName = file.name.replace(/\.pdf$/i, "") + "_watermarked.pdf";
+
+      watermarkedFiles.push({ name: outputName, blob });
+      wmProgressFill.style.width = `${((i + 1) / watermarkFiles.length) * 100}%`;
+      await new Promise(resolve => setTimeout(resolve, 20));
+    }
+
+    wmProgressText.textContent =
+      `Completed ${watermarkedFiles.length} of ${watermarkFiles.length} PDF files.`;
+
+    wmResultList.innerHTML = watermarkedFiles.map(item => `
+      <div class="wm-result-item">
+        <span title="${esc(item.name)}">✓ ${esc(item.name)}</span>
+      </div>
+    `).join("");
+
+    wmResult.classList.add("show");
+    downloadAllWm.disabled = false;
+  } catch (error) {
+    console.error(error);
+    alert("Unable to apply watermark:\n" + (error?.message || error));
+    wmProgressText.textContent = "Processing failed.";
+  } finally {
+    applyWm.disabled = false;
+    wmFiles.disabled = false;
+  }
+});
+
+downloadAllWm.addEventListener("click", async function () {
+  if (!watermarkedFiles.length) return;
+
+  if (!window.JSZip) {
+    // Fallback: download each PDF if ZIP library is unavailable.
+    watermarkedFiles.forEach((item, index) => {
+      const url = URL.createObjectURL(item.blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = item.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500 + index * 100);
+    });
+    return;
+  }
+
+  downloadAllWm.disabled = true;
+  downloadAllWm.textContent = "Creating ZIP...";
+
+  try {
+    const zip = new JSZip();
+    watermarkedFiles.forEach(item => zip.file(item.name, item.blob));
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Watermarked_PDFs.zip";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  } catch (error) {
+    console.error(error);
+    alert("Unable to create ZIP file:\n" + (error?.message || error));
+  } finally {
+    downloadAllWm.disabled = false;
+    downloadAllWm.textContent = "Download All PDFs";
+  }
+});
+
+updateWatermarkPreview();
 
 
 /* =====================================================
