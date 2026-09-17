@@ -9,6 +9,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <style>
@@ -3289,7 +3290,39 @@ function getWatermarkCoordinates(position, width, height, textWidth, textHeight)
 async function applyWatermarkToPdf(file) {
   const { PDFDocument, rgb, degrees } = PDFLib;
   const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
-  const font = await pdfDoc.embedFont(getPdfFont(wmFont.value));
+  pdfDoc.registerFontkit(fontkit);
+
+let font;
+
+if (wmFont.value === "ArialBlack") {
+
+  const fontResponse =
+    await fetch("./ariblk.ttf");
+
+  if (!fontResponse.ok) {
+    throw new Error(
+      "Arial Black font file could not be loaded."
+    );
+  }
+
+  const fontBytes =
+    await fontResponse.arrayBuffer();
+
+  font =
+    await pdfDoc.embedFont(
+      fontBytes
+    );
+
+} else {
+
+  font =
+    await pdfDoc.embedFont(
+      getPdfFont(wmFont.value)
+    );
+
+}
+
+  
   const text = wmText.value.trim() || "CONFIDENTIAL";
   const fontSize = Math.max(6, Math.min(200, Number(wmFontSize.value) || 40));
   const opacity = Math.max(0.05, Math.min(1, Number(wmOpacity.value) / 100));
