@@ -3096,18 +3096,26 @@ function resetWatermarkResults() {
 wmFiles.addEventListener("change", function () {
   const incoming = [...(this.files || [])];
 
-  if (watermarkFiles.length + incoming.length > 10) {
+  const available = 10 - watermarkFiles.length;
+
+  if (available <= 0) {
     alert("Maximum 10 PDF files are allowed.");
     this.value = "";
     return;
   }
 
-  const valid = incoming.filter(file =>
+  const limitedIncoming = incoming.slice(0, available);
+
+  if (incoming.length > available) {
+    alert(`You can add only ${available} more PDF file${available === 1 ? "" : "s"}. Maximum is 10.`);
+  }
+
+  const valid = limitedIncoming.filter(file =>
     file.type === "application/pdf" ||
     file.name.toLowerCase().endsWith(".pdf")
   );
 
-  if (valid.length !== incoming.length) {
+  if (valid.length !== limitedIncoming.length) {
     alert("Only PDF files are allowed.");
   }
 
@@ -3152,12 +3160,20 @@ wmUpload.addEventListener("drop", e => {
   const dropped = [...(e.dataTransfer?.files || [])];
   if (!dropped.length) return;
 
-  if (watermarkFiles.length + dropped.length > 10) {
+  const available = 10 - watermarkFiles.length;
+
+  if (available <= 0) {
     alert("Maximum 10 PDF files are allowed.");
     return;
   }
 
-  const valid = dropped.filter(file =>
+  const limitedDropped = dropped.slice(0, available);
+
+  if (dropped.length > available) {
+    alert(`You can add only ${available} more PDF file${available === 1 ? "" : "s"}. Maximum is 10.`);
+  }
+
+  const valid = limitedDropped.filter(file =>
     file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
   );
 
@@ -3173,7 +3189,7 @@ wmUpload.addEventListener("drop", e => {
     }
   });
 
-  if (valid.length !== dropped.length) {
+  if (valid.length !== limitedDropped.length) {
     alert("Only PDF files are allowed.");
   }
 
@@ -3201,12 +3217,17 @@ function updateWatermarkPreview() {
   wmPreviewText.style.fontSize = `${Math.max(12, Math.min(64, size * 0.75))}px`;
   wmPreviewText.style.color = wmColor.value;
   wmPreviewText.style.transform = `rotate(${angle}deg)`;
-  wmPreviewText.style.fontFamily =
-    wmFont.value.includes("Times") ? "Times New Roman, serif" :
-    wmFont.value.includes("Courier") ? "Courier New, monospace" :
-    "Arial, sans-serif";
-  wmPreviewText.style.fontWeight =
-    wmFont.value.includes("Bold") ? "800" : "600";
+  if (wmFont.value === "ArialBlack") {
+    wmPreviewText.style.fontFamily = '"Arial Black Custom", Arial, sans-serif';
+    wmPreviewText.style.fontWeight = "900";
+  } else {
+    wmPreviewText.style.fontFamily =
+      wmFont.value.includes("Times") ? "Times New Roman, serif" :
+      wmFont.value.includes("Courier") ? "Courier New, monospace" :
+      "Arial, sans-serif";
+    wmPreviewText.style.fontWeight =
+      wmFont.value.includes("Bold") ? "800" : "600";
+  }
 
   const positions = {
     "top-left": ["flex-start", "flex-start"],
@@ -3251,7 +3272,6 @@ function hexToRgb(hex) {
 function getPdfFont(fontName) {
   const { StandardFonts } = PDFLib;
   return {
-    ArialBlack : StandardFonts.ArialBlack,
     Helvetica: StandardFonts.Helvetica,
     HelveticaBold: StandardFonts.HelveticaBold,
     TimesRoman: StandardFonts.TimesRoman,
@@ -3287,40 +3307,45 @@ function getWatermarkCoordinates(position, width, height, textWidth, textHeight)
   }[position] || [x.center, y.center];
 }
 
+let arialBlackFontBytesPromise = null;
+
+async function getArialBlackFontBytes() {
+  if (!arialBlackFontBytesPromise) {
+    arialBlackFontBytesPromise = fetch("./ariblk.ttf", { cache: "force-cache" })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(
+            "Arial Black font file could not be loaded. Make sure ariblk.ttf is in the same GitHub folder as index.html."
+          );
+        }
+        return response.arrayBuffer();
+      })
+      .catch(error => {
+        arialBlackFontBytesPromise = null;
+        throw error;
+      });
+  }
+  return arialBlackFontBytesPromise;
+}
+
 async function applyWatermarkToPdf(file) {
   const { PDFDocument, rgb, degrees } = PDFLib;
   const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
-  pdfDoc.registerFontkit(fontkit);
 
-let font;
+  let font;
 
-if (wmFont.value === "ArialBlack") {
+  if (wmFont.value === "ArialBlack") {
+    if (!window.fontkit) {
+      throw new Error("Fontkit library could not be loaded. Refresh the page and try again.");
+    }
 
-  const fontResponse =
-    await fetch("./ariblk.ttf");
+    pdfDoc.registerFontkit(window.fontkit);
 
-  if (!fontResponse.ok) {
-    throw new Error(
-      "Arial Black font file could not be loaded."
-    );
+    const fontBytes = await getArialBlackFontBytes();
+    font = await pdfDoc.embedFont(fontBytes);
+  } else {
+    font = await pdfDoc.embedFont(getPdfFont(wmFont.value));
   }
-
-  const fontBytes =
-    await fontResponse.arrayBuffer();
-
-  font =
-    await pdfDoc.embedFont(
-      fontBytes
-    );
-
-} else {
-
-  font =
-    await pdfDoc.embedFont(
-      getPdfFont(wmFont.value)
-    );
-
-}
 
   
   const text = wmText.value.trim() || "CONFIDENTIAL";
