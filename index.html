@@ -560,8 +560,16 @@
       gap: 10px;
     }
 
-    .wm-range-row input {
+    .wm-range-row input[type="range"] {
       flex: 1;
+      min-width: 110px;
+    }
+
+    .wm-range-row .wm-number-input {
+      width: 78px;
+      flex: 0 0 78px;
+      padding: 8px 9px;
+      text-align: center;
     }
 
     .wm-range-value {
@@ -961,20 +969,25 @@
               </div>
 
               <div class="field">
-                <label>Opacity</label>
+                <label>Opacity (%)</label>
                 <div class="wm-range-row">
-                  <input id="wmOpacity" type="range" min="5" max="100" value="35">
+                  <input id="wmOpacityRange" type="range" min="5" max="100" step="1" value="35" aria-label="Opacity slider">
+                  <input id="wmOpacity" class="wm-number-input" type="number" min="5" max="100" step="1" value="35"
+                         aria-label="Opacity percentage" placeholder="35">
                   <span id="wmOpacityValue" class="wm-range-value">35%</span>
                 </div>
+                <div class="muted" style="margin-top:5px">Drag the slider or type a value from 5% to 100%.</div>
               </div>
 
               <div class="field">
-                <label>Angle</label>
+                <label>Angle (degrees)</label>
                 <div class="wm-range-row">
-                  <input id="wmAngle" type="number" min="-360" max="360" step="1" value="45"
-                          placeholder="Enter angle, e.g. 45 or -45">
+                  <input id="wmAngleRange" type="range" min="-360" max="360" step="1" value="45" aria-label="Angle slider">
+                  <input id="wmAngle" class="wm-number-input" type="number" min="-360" max="360" step="1" value="45"
+                         aria-label="Angle in degrees" placeholder="45">
                   <span id="wmAngleValue" class="wm-range-value">45°</span>
                 </div>
+                <div class="muted" style="margin-top:5px">Drag the slider or type +45 / -45. Positive and negative angles are preserved.</div>
               </div>
 
               <div class="field">
@@ -3191,23 +3204,78 @@ wmFileList.addEventListener("click", function (e) {
   renderWatermarkFiles();
 });
 
+function clampWatermarkValue(value, min, max, fallback) {
+  const raw = String(value ?? "").trim();
+  if (raw === "" || raw === "-" || raw === "+") return fallback;
+  const number = Number(raw);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.max(min, Math.min(max, number));
+}
+
+function syncWatermarkControls(source) {
+  if (source === "opacity-range") {
+    wmOpacity.value = wmOpacityRange.value;
+  } else {
+    const value = clampWatermarkValue(wmOpacity.value, 5, 100, 35);
+    wmOpacity.value = value;
+    wmOpacityRange.value = value;
+  }
+
+  if (source === "angle-range") {
+    wmAngle.value = wmAngleRange.value;
+  } else {
+    const raw = String(wmAngle.value ?? "").trim();
+    if (raw !== "" && raw !== "-" && raw !== "+") {
+      const value = clampWatermarkValue(raw, -360, 360, 45);
+      wmAngle.value = value;
+      wmAngleRange.value = value;
+    }
+  }
+}
+
+function getWatermarkAngle() {
+  return clampWatermarkValue(wmAngle.value, -360, 360, 0);
+}
+
+function getWatermarkOpacityPercent() {
+  return clampWatermarkValue(wmOpacity.value, 5, 100, 35);
+}
+
 function updateWatermarkPreview() {
   const text = wmText.value.trim() || "CONFIDENTIAL";
   const size = Math.max(6, Math.min(200, Number(wmFontSize.value) || 40));
-  const opacity = Math.max(0.05, Math.min(1, Number(wmOpacity.value) / 100));
-  const angle = Math.max(-360, Math.min(360, Number(wmAngle.value) || 0));
+  const opacityPercent = getWatermarkOpacityPercent();
+  const opacity = opacityPercent / 100;
+  const angle = getWatermarkAngle();
+
+  // Keep the slider and manual input synchronized.
+  wmOpacityRange.value = opacityPercent;
+  if (String(wmOpacity.value) !== String(opacityPercent)) wmOpacity.value = opacityPercent;
+  if (String(wmAngle.value) !== String(angle)) wmAngle.value = angle;
+  wmAngleRange.value = angle;
 
   wmPreviewText.textContent = text;
   wmPreviewText.style.opacity = opacity;
   wmPreviewText.style.fontSize = `${Math.max(12, Math.min(64, size * 0.75))}px`;
   wmPreviewText.style.color = wmColor.value;
-  wmPreviewText.style.transform = `rotate(${angle}deg)`;
-  wmPreviewText.style.fontFamily =
-    wmFont.value.includes("Times") ? "Times New Roman, serif" :
-    wmFont.value.includes("Courier") ? "Courier New, monospace" :
-    "Arial, sans-serif";
-  wmPreviewText.style.fontWeight =
-    wmFont.value.includes("Bold") ? "800" : "600";
+
+  if (wmFont.value === "ArialBlack") {
+    wmPreviewText.style.fontFamily = '"Arial Black Custom", Arial, sans-serif';
+    wmPreviewText.style.fontWeight = "900";
+  } else {
+    wmPreviewText.style.fontFamily =
+      wmFont.value.includes("Times") ? "Times New Roman, serif" :
+      wmFont.value.includes("Courier") ? "Courier New, monospace" :
+      "Arial, sans-serif";
+    wmPreviewText.style.fontWeight =
+      wmFont.value.includes("Bold") ? "800" : "600";
+  }
+
+  // PDF/page coordinates use the opposite visual rotation direction from CSS.
+  // Negating the CSS angle makes the preview visually match page.drawText(...rotate).
+  wmPreviewText.style.transform = `rotate(${-angle}deg)`;
+  wmPreviewText.style.transformOrigin = "center center";
+  wmPreviewText.style.display = "inline-block";
 
   const positions = {
     "top-left": ["flex-start", "flex-start"],
@@ -3222,19 +3290,49 @@ function updateWatermarkPreview() {
   };
 
   const [justify, align] = positions[wmPosition.value] || positions.center;
-  wmPreviewText.parentElement.style.display = "flex";
-  wmPreviewText.parentElement.style.justifyContent = justify;
-  wmPreviewText.parentElement.style.alignItems = align;
+  const previewContainer = wmPreviewText.parentElement;
+  previewContainer.style.display = "flex";
+  previewContainer.style.justifyContent = justify;
+  previewContainer.style.alignItems = align;
+  previewContainer.style.overflow = "hidden";
   wmColorValue.textContent = wmColor.value.toUpperCase();
-  wmOpacityValue.textContent = `${wmOpacity.value}%`;
+  wmOpacityValue.textContent = `${opacityPercent}%`;
   wmAngleValue.textContent = `${angle}°`;
 }
 
-[wmText, wmFont, wmFontSize, wmColor, wmOpacity, wmAngle, wmPosition]
+wmOpacityRange.addEventListener("input", () => {
+  syncWatermarkControls("opacity-range");
+  updateWatermarkPreview();
+});
+wmOpacity.addEventListener("input", () => {
+  syncWatermarkControls("opacity-number");
+  updateWatermarkPreview();
+});
+wmOpacity.addEventListener("change", () => {
+  syncWatermarkControls("opacity-number");
+  updateWatermarkPreview();
+});
+
+wmAngleRange.addEventListener("input", () => {
+  syncWatermarkControls("angle-range");
+  updateWatermarkPreview();
+});
+wmAngle.addEventListener("input", () => {
+  syncWatermarkControls("angle-number");
+  updateWatermarkPreview();
+});
+wmAngle.addEventListener("change", () => {
+  syncWatermarkControls("angle-number");
+  updateWatermarkPreview();
+});
+
+[wmText, wmFont, wmFontSize, wmColor, wmPosition]
   .forEach(el => {
     el.addEventListener("input", updateWatermarkPreview);
     el.addEventListener("change", updateWatermarkPreview);
   });
+
+updateWatermarkPreview();
 
 function hexToRgb(hex) {
   const clean = hex.replace("#", "");
@@ -3252,7 +3350,6 @@ function hexToRgb(hex) {
 function getPdfFont(fontName) {
   const { StandardFonts } = PDFLib;
   return {
-    ArialBlack : StandardFonts.ArialBlack,
     Helvetica: StandardFonts.Helvetica,
     HelveticaBold: StandardFonts.HelveticaBold,
     TimesRoman: StandardFonts.TimesRoman,
@@ -3326,9 +3423,9 @@ if (wmFont.value === "ArialBlack") {
   
   const text = wmText.value.trim() || "CONFIDENTIAL";
   const fontSize = Math.max(6, Math.min(200, Number(wmFontSize.value) || 40));
-  const opacity = Math.max(0.05, Math.min(1, Number(wmOpacity.value) / 100));
+  const opacity = getWatermarkOpacityPercent() / 100;
   const color = hexToRgb(wmColor.value);
-  const angle = Number(wmAngle.value) || 0;
+  const angle = getWatermarkAngle();
 
   pdfDoc.getPages().forEach(page => {
     const { width, height } = page.getSize();
