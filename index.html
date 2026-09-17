@@ -930,7 +930,7 @@
 
               <div class="field">
                 <label>Watermark Text</label>
-                <input id="wmText" type="text" value="Write Text...."
+                <input id="wmText" type="text" value="CONFIDENTIAL"
                        placeholder="Enter watermark text">
               </div>
 
@@ -971,7 +971,8 @@
               <div class="field">
                 <label>Angle</label>
                 <div class="wm-range-row">
-                  <input id="wmAngle" type="range" min="-90" max="90" value="45">
+                  <input id="wmAngle" type="number" min="-360" max="360" step="1" value="45"
+                          placeholder="Enter angle, e.g. 45 or -45">
                   <span id="wmAngleValue" class="wm-range-value">45°</span>
                 </div>
               </div>
@@ -3096,26 +3097,18 @@ function resetWatermarkResults() {
 wmFiles.addEventListener("change", function () {
   const incoming = [...(this.files || [])];
 
-  const available = 10 - watermarkFiles.length;
-
-  if (available <= 0) {
+  if (watermarkFiles.length + incoming.length > 10) {
     alert("Maximum 10 PDF files are allowed.");
     this.value = "";
     return;
   }
 
-  const limitedIncoming = incoming.slice(0, available);
-
-  if (incoming.length > available) {
-    alert(`You can add only ${available} more PDF file${available === 1 ? "" : "s"}. Maximum is 10.`);
-  }
-
-  const valid = limitedIncoming.filter(file =>
+  const valid = incoming.filter(file =>
     file.type === "application/pdf" ||
     file.name.toLowerCase().endsWith(".pdf")
   );
 
-  if (valid.length !== limitedIncoming.length) {
+  if (valid.length !== incoming.length) {
     alert("Only PDF files are allowed.");
   }
 
@@ -3160,20 +3153,12 @@ wmUpload.addEventListener("drop", e => {
   const dropped = [...(e.dataTransfer?.files || [])];
   if (!dropped.length) return;
 
-  const available = 10 - watermarkFiles.length;
-
-  if (available <= 0) {
+  if (watermarkFiles.length + dropped.length > 10) {
     alert("Maximum 10 PDF files are allowed.");
     return;
   }
 
-  const limitedDropped = dropped.slice(0, available);
-
-  if (dropped.length > available) {
-    alert(`You can add only ${available} more PDF file${available === 1 ? "" : "s"}. Maximum is 10.`);
-  }
-
-  const valid = limitedDropped.filter(file =>
+  const valid = dropped.filter(file =>
     file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
   );
 
@@ -3189,7 +3174,7 @@ wmUpload.addEventListener("drop", e => {
     }
   });
 
-  if (valid.length !== limitedDropped.length) {
+  if (valid.length !== dropped.length) {
     alert("Only PDF files are allowed.");
   }
 
@@ -3210,24 +3195,19 @@ function updateWatermarkPreview() {
   const text = wmText.value.trim() || "CONFIDENTIAL";
   const size = Math.max(6, Math.min(200, Number(wmFontSize.value) || 40));
   const opacity = Math.max(0.05, Math.min(1, Number(wmOpacity.value) / 100));
-  const angle = Number(wmAngle.value) || 0;
+  const angle = Math.max(-360, Math.min(360, Number(wmAngle.value) || 0));
 
   wmPreviewText.textContent = text;
   wmPreviewText.style.opacity = opacity;
   wmPreviewText.style.fontSize = `${Math.max(12, Math.min(64, size * 0.75))}px`;
   wmPreviewText.style.color = wmColor.value;
   wmPreviewText.style.transform = `rotate(${angle}deg)`;
-  if (wmFont.value === "ArialBlack") {
-    wmPreviewText.style.fontFamily = '"Arial Black Custom", Arial, sans-serif';
-    wmPreviewText.style.fontWeight = "900";
-  } else {
-    wmPreviewText.style.fontFamily =
-      wmFont.value.includes("Times") ? "Times New Roman, serif" :
-      wmFont.value.includes("Courier") ? "Courier New, monospace" :
-      "Arial, sans-serif";
-    wmPreviewText.style.fontWeight =
-      wmFont.value.includes("Bold") ? "800" : "600";
-  }
+  wmPreviewText.style.fontFamily =
+    wmFont.value.includes("Times") ? "Times New Roman, serif" :
+    wmFont.value.includes("Courier") ? "Courier New, monospace" :
+    "Arial, sans-serif";
+  wmPreviewText.style.fontWeight =
+    wmFont.value.includes("Bold") ? "800" : "600";
 
   const positions = {
     "top-left": ["flex-start", "flex-start"],
@@ -3247,7 +3227,7 @@ function updateWatermarkPreview() {
   wmPreviewText.parentElement.style.alignItems = align;
   wmColorValue.textContent = wmColor.value.toUpperCase();
   wmOpacityValue.textContent = `${wmOpacity.value}%`;
-  wmAngleValue.textContent = `${wmAngle.value}°`;
+  wmAngleValue.textContent = `${angle}°`;
 }
 
 [wmText, wmFont, wmFontSize, wmColor, wmOpacity, wmAngle, wmPosition]
@@ -3272,6 +3252,7 @@ function hexToRgb(hex) {
 function getPdfFont(fontName) {
   const { StandardFonts } = PDFLib;
   return {
+    ArialBlack : StandardFonts.ArialBlack,
     Helvetica: StandardFonts.Helvetica,
     HelveticaBold: StandardFonts.HelveticaBold,
     TimesRoman: StandardFonts.TimesRoman,
@@ -3307,45 +3288,40 @@ function getWatermarkCoordinates(position, width, height, textWidth, textHeight)
   }[position] || [x.center, y.center];
 }
 
-let arialBlackFontBytesPromise = null;
-
-async function getArialBlackFontBytes() {
-  if (!arialBlackFontBytesPromise) {
-    arialBlackFontBytesPromise = fetch("./ariblk.ttf", { cache: "force-cache" })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(
-            "Arial Black font file could not be loaded. Make sure ariblk.ttf is in the same GitHub folder as index.html."
-          );
-        }
-        return response.arrayBuffer();
-      })
-      .catch(error => {
-        arialBlackFontBytesPromise = null;
-        throw error;
-      });
-  }
-  return arialBlackFontBytesPromise;
-}
-
 async function applyWatermarkToPdf(file) {
   const { PDFDocument, rgb, degrees } = PDFLib;
   const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
+  pdfDoc.registerFontkit(fontkit);
 
-  let font;
+let font;
 
-  if (wmFont.value === "ArialBlack") {
-    if (!window.fontkit) {
-      throw new Error("Fontkit library could not be loaded. Refresh the page and try again.");
-    }
+if (wmFont.value === "ArialBlack") {
 
-    pdfDoc.registerFontkit(window.fontkit);
+  const fontResponse =
+    await fetch("./ariblk.ttf");
 
-    const fontBytes = await getArialBlackFontBytes();
-    font = await pdfDoc.embedFont(fontBytes);
-  } else {
-    font = await pdfDoc.embedFont(getPdfFont(wmFont.value));
+  if (!fontResponse.ok) {
+    throw new Error(
+      "Arial Black font file could not be loaded."
+    );
   }
+
+  const fontBytes =
+    await fontResponse.arrayBuffer();
+
+  font =
+    await pdfDoc.embedFont(
+      fontBytes
+    );
+
+} else {
+
+  font =
+    await pdfDoc.embedFont(
+      getPdfFont(wmFont.value)
+    );
+
+}
 
   
   const text = wmText.value.trim() || "CONFIDENTIAL";
@@ -3358,9 +3334,29 @@ async function applyWatermarkToPdf(file) {
     const { width, height } = page.getSize();
     const textWidth = font.widthOfTextAtSize(text, fontSize);
     const textHeight = font.heightAtSize(fontSize);
-    const [x, y] = getWatermarkCoordinates(
-      wmPosition.value, width, height, textWidth, textHeight
-    );
+    const radians = Math.abs(angle) * Math.PI / 180;
+    const rotatedWidth =
+      Math.abs(textWidth * Math.cos(radians)) +
+      Math.abs(textHeight * Math.sin(radians));
+    const rotatedHeight =
+      Math.abs(textWidth * Math.sin(radians)) +
+      Math.abs(textHeight * Math.cos(radians));
+
+    const margin = 30;
+    const pos = wmPosition.value;
+    let centerX = width / 2;
+    let centerY = height / 2;
+
+    if (pos.includes("left")) centerX = margin + rotatedWidth / 2;
+    if (pos.includes("right")) centerX = width - margin - rotatedWidth / 2;
+    if (pos.includes("top")) centerY = height - margin - rotatedHeight / 2;
+    if (pos.includes("bottom")) centerY = margin + rotatedHeight / 2;
+
+    centerX = Math.max(rotatedWidth / 2, Math.min(width - rotatedWidth / 2, centerX));
+    centerY = Math.max(rotatedHeight / 2, Math.min(height - rotatedHeight / 2, centerY));
+
+    const x = centerX - textWidth / 2;
+    const y = centerY - textHeight / 2;
 
     page.drawText(text, {
       x,
@@ -3408,7 +3404,7 @@ applyWm.addEventListener("click", async function () {
         `Processing ${i + 1} of ${watermarkFiles.length}: ${file.name}`;
 
       const blob = await applyWatermarkToPdf(file);
-      const outputName = file.name.replace(/\.pdf$/i, "") + "_watermarked.pdf";
+      const outputName = file.name;
 
       watermarkedFiles.push({ name: outputName, blob });
       wmProgressFill.style.width = `${((i + 1) / watermarkFiles.length) * 100}%`;
