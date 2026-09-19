@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef4ff"/>
+      <stop offset="0.52" stop-color="#f8f5ef"/>
+      <stop offset="1" stop-color="#e8eef7"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="20%" cy="20%" r="55%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="88%" cy="72%" r="48%">
+      <stop offset="0" stop-color="#dceaff" stop-opacity=".85"/>
+      <stop offset="1" stop-color="#dceaff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="24"/></filter>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#172033" flood-opacity=".13"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#glow1)"/>
+  <rect width="1600" height="900" fill="url(#glow2)"/>
+
+  <!-- soft architectural panels -->
+  <g filter="url(#blur)" opacity=".55">
+    <rect x="-100" y="90" width="520" height="520" rx="70" fill="#dce8fb"/>
+    <rect x="1210" y="40" width="500" height="500" rx="80" fill="#f1dfcc"/>
+    <circle cx="1080" cy="780" r="260" fill="#d9e7f7"/>
+  </g>
+
+  <!-- minimal framed art -->
+  <g transform="translate(1160 125)" opacity=".86" filter="url(#shadow)">
+    <rect width="310" height="390" rx="14" fill="#ffffff"/>
+    <rect x="18" y="18" width="274" height="354" rx="8" fill="#f3f6fb" stroke="#d8dfeb" stroke-width="3"/>
+    <path d="M55 275 C105 230 145 245 180 190 C214 138 242 156 270 110" fill="none" stroke="#6b87b4" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="73" cy="285" r="12" fill="#6b87b4"/>
+    <circle cx="181" cy="190" r="12" fill="#86a9d9"/>
+    <circle cx="270" cy="110" r="12" fill="#9bbce5"/>
+  </g>
+
+  <!-- desk -->
+  <path d="M0 720 Q420 670 800 710 T1600 690 L1600 900 L0 900 Z" fill="#d7c6b4" opacity=".7"/>
+  <path d="M0 760 Q430 715 800 750 T1600 730 L1600 900 L0 900 Z" fill="#f0e5d9" opacity=".78"/>
+
+  <!-- plant silhouette -->
+  <g transform="translate(104 530)" opacity=".62">
+    <path d="M85 170 C25 105 45 42 78 5 C106 46 111 100 85 170Z" fill="#7aa58a"/>
+    <path d="M105 175 C135 95 180 64 220 55 C207 112 168 151 105 175Z" fill="#5f9073"/>
+    <path d="M92 180 C30 145 -4 95 2 52 C52 67 84 110 92 180Z" fill="#87b195"/>
+    <path d="M100 180 C100 95 122 44 153 16 C170 80 148 133 100 180Z" fill="#6d9c7c"/>
+    <path d="M70 170 C34 154 12 136 0 116 C48 109 74 128 92 170Z" fill="#78a88a"/>
+    <rect x="62" y="160" width="82" height="105" rx="20" fill="#d8c0a6"/>
+    <ellipse cx="103" cy="160" rx="42" ry="10" fill="#b79d83"/>
+  </g>
+
+  <!-- subtle laptop -->
+  <g transform="translate(1330 655)" opacity=".28">
+    <rect width="205" height="125" rx="10" fill="#31425b"/>
+    <rect x="12" y="12" width="181" height="98" rx="6" fill="#dbe5f2"/>
+    <path d="M-35 128 H240 L210 150 H-10 Z" fill="#65748a"/>
+  </g>
+
+  <!-- floating soft shapes -->
+  <circle cx="470" cy="180" r="70" fill="#ffffff" opacity=".38"/>
+  <circle cx="930" cy="170" r="42" fill="#ffffff" opacity=".42"/>
+  <circle cx="700" cy="800" r="100" fill="#ffffff" opacity=".28"/>
+</svg>
