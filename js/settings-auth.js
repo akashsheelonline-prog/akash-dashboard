@@ -101,7 +101,6 @@ window.addEventListener("click",e=>{
 ===================================================== */
 
 const SESSION_POLL_MS = 5000;
-const SESSION_ACTIVE_WINDOW_MS = 15000;
 const SESSION_TOKEN_KEY = "akash_dashboard_session_token";
 
 let currentSessionToken = null;
@@ -314,10 +313,9 @@ async function getExistingActiveSession(userId){
     };
   }
 
-  const updatedAt = Date.parse(data.updated_at || "");
-  const active =
-    Number.isFinite(updatedAt) &&
-    (Date.now() - updatedAt) <= SESSION_ACTIVE_WINDOW_MS;
+  // A logged-out session is explicitly marked inactive.
+  // Any other token means a browser/device is currently the owner.
+  const active = !String(data.session_token).startsWith("LOGGED_OUT:");
 
   return {
     error: null,
@@ -369,6 +367,23 @@ logoutBtn.onclick = async function(){
     sessionCheckTimer = null;
   }
 
+  try{
+    const { data: { user } } = await sb.auth.getUser();
+
+    if(user && currentSessionToken){
+      await sb
+        .from("user_sessions")
+        .update({
+          session_token: "LOGGED_OUT:" + currentSessionToken,
+          updated_at: new Date().toISOString()
+        })
+        .eq("user_id", user.id)
+        .eq("session_token", currentSessionToken);
+    }
+  }catch(error){
+    console.warn("Session logout marker failed:", error);
+  }
+
   currentSessionToken = null;
   sessionInvalidated = true;
   sessionStorage.removeItem(SESSION_TOKEN_KEY);
@@ -391,30 +406,93 @@ logoutBtn.onclick = async function(){
 
 /* =====================================================
    SINGLE LOGIN CONFIRMATION MODAL
+   Self-contained: works even if the modal HTML is missing
+   from an older index.html.
 ===================================================== */
 
-const singleLoginModal = document.getElementById("singleLoginModal");
-const singleLoginYes = document.getElementById("singleLoginYes");
-const singleLoginNo = document.getElementById("singleLoginNo");
-
+let singleLoginModal = document.getElementById("singleLoginModal");
+let singleLoginYes = document.getElementById("singleLoginYes");
+let singleLoginNo = document.getElementById("singleLoginNo");
 let singleLoginConfirmResolver = null;
 
+function ensureSingleLoginModal(){
+  if(!singleLoginModal){
+    singleLoginModal = document.createElement("div");
+    singleLoginModal.id = "singleLoginModal";
+    singleLoginModal.className = "single-login-modal";
+    singleLoginModal.setAttribute("role", "dialog");
+    singleLoginModal.setAttribute("aria-modal", "true");
+    singleLoginModal.innerHTML = `
+      <div class="single-login-card">
+        <div class="single-login-icon" aria-hidden="true">!</div>
+        <h3>Account Already Logged In</h3>
+        <p>This account is already logged in on another device or browser. Do you want to log out the existing session and continue here?</p>
+        <div class="single-login-actions">
+          <button id="singleLoginNo" type="button">No</button>
+          <button id="singleLoginYes" type="button">Yes</button>
+        </div>
+      </div>`;
+    document.body.appendChild(singleLoginModal);
+  }
+
+  singleLoginYes = document.getElementById("singleLoginYes");
+  singleLoginNo = document.getElementById("singleLoginNo");
+
+  if(!document.getElementById("singleLoginRuntimeStyles")){
+    const style = document.createElement("style");
+    style.id = "singleLoginRuntimeStyles";
+    style.textContent = `
+      .single-login-modal{
+        position:fixed;inset:0;z-index:99999;display:none;align-items:center;
+        justify-content:center;padding:22px;background:rgba(15,23,42,.58);
+        backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+      }
+      .single-login-modal.show{display:flex;animation:singleLoginFade .16s ease-out}
+      .single-login-card{
+        width:min(470px,calc(100vw - 36px));box-sizing:border-box;background:#fff;
+        border-radius:20px;padding:30px 30px 26px;box-shadow:0 28px 90px rgba(0,0,0,.25);
+        text-align:center;border:1px solid rgba(255,255,255,.9);
+      }
+      .single-login-icon{
+        width:58px;height:58px;margin:0 auto 16px;display:grid;place-items:center;
+        border-radius:50%;background:#fee2e2;color:#dc2626;font-size:30px;font-weight:800;
+      }
+      .single-login-card h3{margin:0 0 12px;color:#14284b;font-size:22px;font-weight:800}
+      .single-login-card p{margin:0 auto;color:#475569;line-height:1.6;font-size:15px;max-width:395px}
+      .single-login-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:26px}
+      .single-login-actions button{min-height:48px;border:0;border-radius:11px;font-size:15px;font-weight:800;cursor:pointer}
+      #singleLoginNo{background:#e5e7eb;color:#1f2937}
+      #singleLoginYes{background:#2563eb;color:#fff}
+      #singleLoginNo:hover,#singleLoginYes:hover{filter:brightness(.96)}
+      body.single-login-open{overflow:hidden}
+      @keyframes singleLoginFade{from{opacity:0}to{opacity:1}}
+      @media(max-width:520px){.single-login-card{padding:24px 18px}.single-login-actions{grid-template-columns:1fr 1fr}}
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Always keep exactly Yes / No as requested.
+  singleLoginYes.textContent = "Yes";
+  singleLoginNo.textContent = "No";
+
+  return Boolean(singleLoginModal && singleLoginYes && singleLoginNo);
+}
+
 function askSingleLoginConfirmation(){
+  if(!ensureSingleLoginModal()) return Promise.resolve(false);
+
   return new Promise(resolve=>{
     singleLoginConfirmResolver = resolve;
-
-    singleLoginYes.textContent = "Yes";
-    singleLoginNo.textContent = "No";
-
     singleLoginModal.classList.add("show");
     document.body.classList.add("single-login-open");
-
-    setTimeout(()=>singleLoginYes.focus(), 0);
+    setTimeout(()=>singleLoginYes.focus(),0);
   });
 }
 
 function closeSingleLoginConfirmation(result){
-  singleLoginModal.classList.remove("show");
+  if(singleLoginModal){
+    singleLoginModal.classList.remove("show");
+  }
   document.body.classList.remove("single-login-open");
 
   if(singleLoginConfirmResolver){
@@ -424,20 +502,16 @@ function closeSingleLoginConfirmation(result){
   }
 }
 
+ensureSingleLoginModal();
 singleLoginYes.onclick = ()=>closeSingleLoginConfirmation(true);
 singleLoginNo.onclick = ()=>closeSingleLoginConfirmation(false);
-
 singleLoginModal.addEventListener("click", e=>{
   if(e.target === singleLoginModal){
     closeSingleLoginConfirmation(false);
   }
 });
-
 document.addEventListener("keydown", e=>{
-  if(
-    e.key === "Escape" &&
-    singleLoginModal.classList.contains("show")
-  ){
+  if(e.key === "Escape" && singleLoginModal.classList.contains("show")){
     closeSingleLoginConfirmation(false);
   }
 });
@@ -506,7 +580,12 @@ loginBtn.onclick = async function(){
     }
 
     if(existing.active){
-      const replaceExisting = await askSingleLoginConfirmation();
+      const replaceExisting = window.confirm(
+        "This account is already logged in.\n\n" +
+        "Do you want to log out the existing device/browser and continue here?\n\n" +
+        "OK = Yes, continue here\n" +
+        "Cancel = No, keep the existing login"
+      );
 
       if(!replaceExisting){
         /*
