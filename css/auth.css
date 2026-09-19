@@ -32,7 +32,7 @@
 
 @font-face {
   font-family: "Arial Black Custom";
-  src: url("../ariblk.ttf") format("truetype");
+  src: url("../fonts/ariblk.ttf") format("truetype");
   font-weight: 900;
   font-style: normal;
 }
