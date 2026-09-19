@@ -17,10 +17,36 @@ const SUPABASE_ANON_KEY =
   "sb_publishable_tBHn0H5ThLff8mApenKTCw_pAfZAiwW";
 
 
+/*
+  Use sessionStorage for Supabase Auth so every browser tab gets its
+  own auth session. This is important for the dashboard's single-login
+  control: a second tab/browser can be checked independently without
+  Supabase automatically sharing the same localStorage session.
+*/
+const tabAuthStorage = {
+  getItem(key){
+    return sessionStorage.getItem(key);
+  },
+  setItem(key, value){
+    sessionStorage.setItem(key, value);
+  },
+  removeItem(key){
+    sessionStorage.removeItem(key);
+  }
+};
+
 const sb =
   supabase.createClient(
     SUPABASE_URL,
-    SUPABASE_ANON_KEY
+    SUPABASE_ANON_KEY,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: tabAuthStorage
+      }
+    }
   );
 
 

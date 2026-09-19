@@ -101,6 +101,7 @@ window.addEventListener("click",e=>{
 ===================================================== */
 
 const SESSION_POLL_MS = 5000;
+const SESSION_ACTIVE_WINDOW_MS = 15000;
 const SESSION_TOKEN_KEY = "akash_dashboard_session_token";
 
 let currentSessionToken = null;
@@ -109,6 +110,7 @@ let sessionCheckRunning = false;
 let sessionInvalidated = false;
 let sessionVisibilityHandlerAdded = false;
 let loginInProgress = false;
+let sessionHeartbeatRunning = false;
 
 function createSessionToken(){
   if(window.crypto && typeof window.crypto.randomUUID === "function"){
@@ -147,6 +149,45 @@ async function registerCurrentSession(userId){
   return true;
 }
 
+async function heartbeatCurrentSession(){
+  if(
+    sessionInvalidated ||
+    !currentSessionToken ||
+    sessionHeartbeatRunning
+  ){
+    return;
+  }
+
+  sessionHeartbeatRunning = true;
+
+  try{
+    const {
+      data: { user },
+      error: userError
+    } = await sb.auth.getUser();
+
+    if(userError || !user){
+      return;
+    }
+
+    const { error } = await sb
+      .from("user_sessions")
+      .update({
+        updated_at: new Date().toISOString()
+      })
+      .eq("user_id", user.id)
+      .eq("session_token", currentSessionToken);
+
+    if(error){
+      console.warn("Session heartbeat failed:", error);
+    }
+  }catch(error){
+    console.warn("Session heartbeat failed:", error);
+  }finally{
+    sessionHeartbeatRunning = false;
+  }
+}
+
 async function checkCurrentSession(){
   if(
     sessionInvalidated ||
@@ -170,7 +211,7 @@ async function checkCurrentSession(){
 
     const { data, error } = await sb
       .from("user_sessions")
-      .select("session_token")
+      .select("session_token, updated_at")
       .eq("user_id", user.id)
       .maybeSingle();
 
@@ -184,7 +225,10 @@ async function checkCurrentSession(){
       data.session_token !== currentSessionToken
     ){
       await invalidateOldSession();
+      return;
     }
+
+    await heartbeatCurrentSession();
   }catch(error){
     console.warn("Session control check failed:", error);
   }finally{
@@ -242,6 +286,44 @@ function startSessionMonitor(){
 
     sessionVisibilityHandlerAdded = true;
   }
+}
+
+async function getExistingActiveSession(userId){
+  const {
+    data,
+    error
+  } = await sb
+    .from("user_sessions")
+    .select("session_token, updated_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if(error){
+    return {
+      error,
+      active: false,
+      data: null
+    };
+  }
+
+  if(!data || !data.session_token){
+    return {
+      error: null,
+      active: false,
+      data: null
+    };
+  }
+
+  const updatedAt = Date.parse(data.updated_at || "");
+  const active =
+    Number.isFinite(updatedAt) &&
+    (Date.now() - updatedAt) <= SESSION_ACTIVE_WINDOW_MS;
+
+  return {
+    error: null,
+    active,
+    data
+  };
 }
 
 async function activateSession(session){
@@ -327,9 +409,14 @@ loginBtn.onclick = async function(){
 
   loginBtn.disabled = true;
   loginInProgress = true;
-  msg("Signing in...");
+  msg("Checking login...");
 
   try{
+    /*
+      Authenticate this tab first, but DO NOT claim the dashboard
+      session yet. This lets us check the database lock before
+      replacing any existing active device.
+    */
     const { data, error } = await sb.auth.signInWithPassword({
       email: userEmail,
       password: userPassword
@@ -347,25 +434,12 @@ loginBtn.onclick = async function(){
 
     const userId = data.session.user.id;
 
-    /*
-      IMPORTANT:
-      Do NOT register the new session yet.
-      First check whether this account already has another
-      active dashboard session.
-    */
-    const {
-      data: existingSession,
-      error: existingSessionError
-    } = await sb
-      .from("user_sessions")
-      .select("session_token")
-      .eq("user_id", userId)
-      .maybeSingle();
+    const existing = await getExistingActiveSession(userId);
 
-    if(existingSessionError){
+    if(existing.error){
       console.error(
         "Existing session check failed:",
-        existingSessionError
+        existing.error
       );
 
       await sb.auth.signOut({ scope: "local" });
@@ -377,25 +451,30 @@ loginBtn.onclick = async function(){
       return;
     }
 
-    if(existingSession?.session_token){
+    if(existing.active){
       const replaceExisting = window.confirm(
-        "This account is already logged in on another device or browser.\n\n" +
-        "Do you want to log out the other session and continue here?\n\n" +
-        "OK = Yes, log out the other session\n" +
-        "Cancel = No, keep the other session"
+        "This account is already logged in.\n\n" +
+        "Do you want to log out the existing device/browser and continue here?\n\n" +
+        "OK = Yes, continue here\n" +
+        "Cancel = No, keep the existing login"
       );
 
       if(!replaceExisting){
+        /*
+          This tab has its own sessionStorage-backed Supabase session,
+          so signing out here does not sign out the existing device/tab.
+        */
         await sb.auth.signOut({ scope: "local" });
 
         currentSessionToken = null;
         sessionStorage.removeItem(SESSION_TOKEN_KEY);
+
         tasks = [];
         selected.clear();
         showLogin();
 
         msg(
-          "Login cancelled. The existing session is still active."
+          "Login cancelled. The existing login is still active."
         );
 
         return;
@@ -403,8 +482,10 @@ loginBtn.onclick = async function(){
     }
 
     /*
-      User explicitly chose Yes, or there was no previous
-      session. Now and only now make this device the active one.
+      YES, or no active session:
+      claim the account for this tab/device.
+      The previous device will detect the changed token on its
+      next check and lock out automatically.
     */
     await activateSession(data.session);
 
@@ -445,22 +526,26 @@ password.addEventListener("keydown", function(e){
 
 sb.auth.onAuthStateChange(async function(event, session){
   /*
-    signInWithPassword() fires this event before/around the
-    login handler. While loginInProgress is true, the login
-    handler must perform the existing-session check first.
-    Otherwise the listener could overwrite the session row
-    before the confirmation dialog is shown.
+    signInWithPassword() triggers this event before the login
+    handler finishes its confirmation check. Never claim a new
+    dashboard session from this callback while login is in progress.
   */
-  if(session && loginInProgress){
+  if(loginInProgress){
     return;
   }
 
   if(session){
-    if(!currentSessionToken){
-      await activateSession(session);
-    }else{
+    if(currentSessionToken){
       showApp();
       await loadTasks();
+      startSessionMonitor();
+    }else{
+      /*
+        A session without our per-tab dashboard token means this
+        is a new tab/session. Do not silently take over an existing
+        device. Show the login screen and require an explicit login.
+      */
+      showLogin();
     }
   }else{
     if(sessionCheckTimer){
@@ -496,7 +581,30 @@ async function initializeApp(){
     }
 
     if(data && data.session){
-      await activateSession(data.session);
+      const savedToken =
+        sessionStorage.getItem(SESSION_TOKEN_KEY);
+
+      if(savedToken){
+        currentSessionToken = savedToken;
+
+        /*
+          Verify this tab's token before showing the dashboard.
+        */
+        await checkCurrentSession();
+
+        if(!sessionInvalidated && currentSessionToken){
+          showApp();
+          await loadTasks();
+          startSessionMonitor();
+        }
+      }else{
+        /*
+          New tab/browser context: do not silently take over
+          the existing account. User must press Login, which
+          will show the confirmation if another session is active.
+        */
+        showLogin();
+      }
     }else{
       showLogin();
     }
