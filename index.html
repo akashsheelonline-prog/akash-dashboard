@@ -118,15 +118,87 @@
       width: 245px;
       background: #101827;
       color: #fff;
-      padding: 24px 16px;
+      padding: 24px 16px 16px;
       position: fixed;
       inset: 0 auto 0 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 50;
+    }
+
+    .menu-search-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      padding: 0 0 12px;
+      background: #101827;
+    }
+
+    .menu-search {
+      width: 100%;
+      height: 40px;
+      border: 1px solid #334155;
+      background: #182235;
+      color: #fff;
+      border-radius: 9px;
+      padding: 0 12px 0 36px;
+      outline: none;
+      font: inherit;
+      font-size: 13px;
+    }
+
+    .menu-search::placeholder {
+      color: #94a3b8;
+    }
+
+    .menu-search:focus {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 2px #2563eb33;
+    }
+
+    .menu-search-icon {
+      position: absolute;
+      left: 12px;
+      top: 11px;
+      color: #94a3b8;
+      pointer-events: none;
+      font-size: 15px;
+    }
+
+    .nav {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 2px;
+      scrollbar-width: thin;
+      scrollbar-color: #334155 transparent;
+    }
+
+    .nav::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .nav::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 10px;
+    }
+
+    .menu-empty {
+      display: none;
+      color: #94a3b8;
+      font-size: 12px;
+      padding: 12px 10px;
+      text-align: center;
     }
 
     .brand {
       font-size: 21px;
       font-weight: 800;
-      padding: 0 10px 28px;
+      padding: 0 10px 16px;
+      flex: 0 0 auto;
     }
 
     .brand span {
@@ -154,10 +226,10 @@
     }
 
     .logout {
-      position: absolute;
-      bottom: 20px;
-      left: 16px;
-      right: 16px;
+      position: static;
+      width: 100%;
+      margin-top: 12px;
+      flex: 0 0 auto;
     }
 
     /* MAIN */
@@ -429,7 +501,15 @@
       .sidebar {
         position: static;
         width: 100%;
+        height: auto;
         min-height: auto;
+        max-height: 58vh;
+        overflow: hidden;
+      }
+
+      .nav {
+        max-height: 36vh;
+        flex: 0 1 auto;
       }
 
       .main {
@@ -873,60 +953,74 @@
       AKASH <span>DASHBOARD</span>
     </div>
 
-    <nav class="nav">
+    <div class="menu-search-wrap">
+      <span class="menu-search-icon">⌕</span>
+      <input
+        id="menuSearch"
+        class="menu-search"
+        type="search"
+        autocomplete="off"
+        placeholder="Search menu..."
+        aria-label="Search dashboard menu">
+    </div>
+
+    <nav class="nav" id="sideNav">
 
       <button
         class="active"
-        data-view="dashboard">
+        data-view="dashboard"
+        data-search="dashboard home">
         ▣ Dashboard
       </button>
 
-      <button data-view="all">
+      <button data-view="all" data-search="all tasks task list">
         ▤ All Tasks
       </button>
 
-      <button data-view="new">
+      <button data-view="new" data-search="new task create add">
         ＋ New
       </button>
       
 
-      <button data-view="due">
+      <button data-view="due" data-search="due today today">
         ◷ Due Today
       </button>
 
-      <button data-view="overdue">
+      <button data-view="overdue" data-search="overdue late">
         ⚠ Overdue
       </button>
 
-      <button data-view="upcoming">
+      <button data-view="upcoming" data-search="upcoming future">
         ◫ Upcoming
       </button>
 
-      <button data-view="completed">
+      <button data-view="completed" data-search="completed done">
         ✓ Completed
       </button>
 
-      <button data-view="cancelled">
+      <button data-view="cancelled" data-search="cancelled canceled">
         ✕ Cancelled
       </button>
 
-      <button data-view="watermark">
+      <button data-view="watermark" data-search="pdf watermark pdf tool pdf converter">
         💧 PDF Watermark
       </button>
 
-      <button data-view="compress">
+      <button data-view="compress" data-search="pdf compress compress pdf tool pdf converter">
         🗜️ PDF Compress
       </button>
 
-      <button data-view="image-converter">
+      <button data-view="image-converter" data-search="image converter image convert jpg jpeg png webp gif bmp svg">
         🖼️ Image Converter
       </button>
 
-      <button data-view="image-resize">
+      <button data-view="image-resize" data-search="image resize resize image size pixel px inch inches cm mm kb mb">
         📐 Image Resize
       </button>
 
     </nav>
+
+    <div id="menuEmpty" class="menu-empty">No menu found</div>
 
     <button
       id="logoutBtn"
@@ -1801,6 +1895,15 @@ const loginMsg =
 
 const logoutBtn =
   document.getElementById("logoutBtn");
+
+const menuSearch =
+  document.getElementById("menuSearch");
+
+const menuEmpty =
+  document.getElementById("menuEmpty");
+
+const sideNav =
+  document.getElementById("sideNav");
 
 const createBtn =
   document.getElementById("createBtn");
@@ -4489,6 +4592,60 @@ function escapeHtml(value) {
 }
 
 /* =====================================================
+   MENU SEARCH
+===================================================== */
+
+const originalMenuButtons = Array.from(
+  sideNav.querySelectorAll("button")
+);
+
+function filterMenu(query) {
+  const q = String(query || "").trim().toLowerCase();
+
+  const ranked = originalMenuButtons.map((button, index) => {
+    const haystack = (
+      (button.textContent || "") + " " +
+      (button.dataset.search || "") + " " +
+      (button.dataset.view || "")
+    ).toLowerCase();
+
+    const match = !q || haystack.includes(q);
+    const words = q ? q.split(/\s+/).filter(Boolean) : [];
+    const wordMatch = words.length && words.every(word => haystack.includes(word));
+
+    return {
+      button,
+      index,
+      match: match || !!wordMatch
+    };
+  });
+
+  const matches = ranked.filter(x => x.match);
+  const misses = ranked.filter(x => !x.match);
+
+  // Matching menus are physically moved to the top while typing.
+  [...matches, ...misses].forEach(x => sideNav.appendChild(x.button));
+  originalMenuButtons.forEach(button => {
+    const item = ranked.find(x => x.button === button);
+    button.classList.toggle("hidden", !!q && !item.match);
+  });
+
+  menuEmpty.style.display = q && matches.length === 0 ? "block" : "none";
+}
+
+menuSearch.addEventListener("input", () => {
+  filterMenu(menuSearch.value);
+});
+
+menuSearch.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
+    menuSearch.value = "";
+    filterMenu("");
+    menuSearch.blur();
+  }
+});
+
+/* =====================================================
    NAVIGATION
 ===================================================== */
 
@@ -4624,11 +4781,105 @@ document
 
 
 /* =====================================================
+   SINGLE-LOGIN LOCK
+===================================================== */
+
+/*
+  Supabase Auth normally allows the same account to have sessions on
+  multiple browsers/devices. This dashboard adds a small singleton lock
+  in public.active_login. Each successful login claims the single slot.
+  Every open dashboard checks the slot every 2 seconds; if another login
+  claims it, the older dashboard signs out immediately.
+
+  Run the SQL supplied with this version once in Supabase SQL Editor.
+*/
+
+let singleLoginToken = null;
+let singleLoginTimer = null;
+let singleLoginBusy = false;
+let singleLoginStopping = false;
+
+function newLoginToken() {
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+}
+
+async function claimSingleLogin(userId) {
+  singleLoginToken = newLoginToken();
+
+  const { error } = await sb
+    .from("active_login")
+    .upsert({
+      id: 1,
+      user_id: userId,
+      session_token: singleLoginToken,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "id" });
+
+  if (error) {
+    console.error("Single-login lock setup error:", error);
+    singleLoginToken = null;
+    throw new Error(
+      "Single-login lock is not configured in Supabase. Please run the SQL setup provided with this version."
+    );
+  }
+}
+
+async function checkSingleLogin() {
+  if (!singleLoginToken || singleLoginBusy || singleLoginStopping) return;
+
+  singleLoginBusy = true;
+  try {
+    const { data: { user } = {} } = await sb.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await sb
+      .from("active_login")
+      .select("user_id,session_token")
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Single-login check failed:", error);
+      return;
+    }
+
+    if (!data || data.session_token !== singleLoginToken || data.user_id !== user.id) {
+      singleLoginStopping = true;
+      singleLoginToken = null;
+      clearInterval(singleLoginTimer);
+      singleLoginTimer = null;
+      tasks = [];
+      selected.clear();
+      showLogin();
+      msg("This dashboard was logged out because another user signed in.");
+      await sb.auth.signOut({ scope: "local" });
+    }
+  } finally {
+    singleLoginBusy = false;
+  }
+}
+
+function startSingleLoginMonitor() {
+  clearInterval(singleLoginTimer);
+  singleLoginTimer = setInterval(checkSingleLogin, 2000);
+  checkSingleLogin();
+}
+
+function stopSingleLoginMonitor() {
+  clearInterval(singleLoginTimer);
+  singleLoginTimer = null;
+  singleLoginToken = null;
+}
+
+/* =====================================================
    LOGOUT
 ===================================================== */
 
 logoutBtn.onclick =
   async function() {
+
+    stopSingleLoginMonitor();
 
     const {
       error
@@ -4748,10 +4999,19 @@ loginBtn.onclick =
 
     }
 
+    try {
+      await claimSingleLogin(data.user.id);
+    } catch (lockError) {
+      await sb.auth.signOut({ scope: "local" });
+      msg(lockError.message);
+      return;
+    }
 
+    singleLoginStopping = false;
     msg("");
 
     showApp();
+    startSingleLoginMonitor();
 
     await loadTasks();
 
@@ -4790,9 +5050,11 @@ sb.auth.onAuthStateChange(
 
     if (session) {
 
-      showApp();
-
-      await loadTasks();
+      if (singleLoginToken) {
+        showApp();
+        startSingleLoginMonitor();
+        await loadTasks();
+      }
 
     }
     else {
@@ -4850,13 +5112,44 @@ async function initializeApp() {
     data.session
   ) {
 
-    showApp();
+    const { data: lockRow, error: lockError } = await sb
+      .from("active_login")
+      .select("user_id,session_token")
+      .eq("id", 1)
+      .maybeSingle();
 
+    if (lockError) {
+      console.error("Single-login lock check failed:", lockError);
+      showLogin();
+      msg("Single-login lock is not configured. Please run the SQL setup provided with this version.");
+      return;
+    }
+
+    if (lockRow && lockRow.user_id !== data.session.user.id) {
+      await sb.auth.signOut({ scope: "local" });
+      showLogin();
+      msg("Another user is currently signed in.");
+      return;
+    }
+
+    try {
+      await claimSingleLogin(data.session.user.id);
+    } catch (lockClaimError) {
+      await sb.auth.signOut({ scope: "local" });
+      showLogin();
+      msg(lockClaimError.message);
+      return;
+    }
+
+    singleLoginStopping = false;
+    showApp();
+    startSingleLoginMonitor();
     await loadTasks();
 
   }
   else {
 
+    stopSingleLoginMonitor();
     showLogin();
 
   }
