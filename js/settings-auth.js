@@ -390,6 +390,60 @@ logoutBtn.onclick = async function(){
 
 
 /* =====================================================
+   SINGLE LOGIN CONFIRMATION MODAL
+===================================================== */
+
+const singleLoginModal = document.getElementById("singleLoginModal");
+const singleLoginYes = document.getElementById("singleLoginYes");
+const singleLoginNo = document.getElementById("singleLoginNo");
+
+let singleLoginConfirmResolver = null;
+
+function askSingleLoginConfirmation(){
+  return new Promise(resolve=>{
+    singleLoginConfirmResolver = resolve;
+
+    singleLoginYes.textContent = "Yes";
+    singleLoginNo.textContent = "No";
+
+    singleLoginModal.classList.add("show");
+    document.body.classList.add("single-login-open");
+
+    setTimeout(()=>singleLoginYes.focus(), 0);
+  });
+}
+
+function closeSingleLoginConfirmation(result){
+  singleLoginModal.classList.remove("show");
+  document.body.classList.remove("single-login-open");
+
+  if(singleLoginConfirmResolver){
+    const resolve = singleLoginConfirmResolver;
+    singleLoginConfirmResolver = null;
+    resolve(result);
+  }
+}
+
+singleLoginYes.onclick = ()=>closeSingleLoginConfirmation(true);
+singleLoginNo.onclick = ()=>closeSingleLoginConfirmation(false);
+
+singleLoginModal.addEventListener("click", e=>{
+  if(e.target === singleLoginModal){
+    closeSingleLoginConfirmation(false);
+  }
+});
+
+document.addEventListener("keydown", e=>{
+  if(
+    e.key === "Escape" &&
+    singleLoginModal.classList.contains("show")
+  ){
+    closeSingleLoginConfirmation(false);
+  }
+});
+
+
+/* =====================================================
    LOGIN
 ===================================================== */
 
@@ -452,12 +506,7 @@ loginBtn.onclick = async function(){
     }
 
     if(existing.active){
-      const replaceExisting = window.confirm(
-        "This account is already logged in.\n\n" +
-        "Do you want to log out the existing device/browser and continue here?\n\n" +
-        "OK = Yes, continue here\n" +
-        "Cancel = No, keep the existing login"
-      );
+      const replaceExisting = await askSingleLoginConfirmation();
 
       if(!replaceExisting){
         /*
