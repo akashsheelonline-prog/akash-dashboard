@@ -5091,7 +5091,7 @@ loginBtn.onclick =
     try {
       const { data: currentLock, error: lockCheckError } = await sb
         .from("active_login")
-        .select("user_id,session_token,updated_at")
+        .select("id,user_id,session_token,updated_at")
         .eq("id", 1)
         .maybeSingle();
 
