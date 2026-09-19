@@ -108,6 +108,7 @@ let sessionCheckTimer = null;
 let sessionCheckRunning = false;
 let sessionInvalidated = false;
 let sessionVisibilityHandlerAdded = false;
+let loginInProgress = false;
 
 function createSessionToken(){
   if(window.crypto && typeof window.crypto.randomUUID === "function"){
@@ -325,6 +326,7 @@ loginBtn.onclick = async function(){
   }
 
   loginBtn.disabled = true;
+  loginInProgress = true;
   msg("Signing in...");
 
   try{
@@ -338,28 +340,19 @@ loginBtn.onclick = async function(){
       return;
     }
 
-    if(!data || !data.session){
+    if(!data || !data.session || !data.session.user){
       msg("Login failed. No session created.");
       return;
     }
 
+    const userId = data.session.user.id;
+
     /*
-      A session may already be active for this account.
-      Ask before replacing it.
-
-      YES  -> this new device becomes active and the old device
-              will be signed out by the session monitor.
-      NO   -> keep the old device active and sign out this
-              newly-created local session.
+      IMPORTANT:
+      Do NOT register the new session yet.
+      First check whether this account already has another
+      active dashboard session.
     */
-    const userId = data.session.user?.id;
-
-    if(!userId){
-      await sb.auth.signOut({ scope: "local" });
-      msg("Login failed. User information was not available.");
-      return;
-    }
-
     const {
       data: existingSession,
       error: existingSessionError
@@ -384,15 +377,12 @@ loginBtn.onclick = async function(){
       return;
     }
 
-    if(
-      existingSession?.session_token &&
-      existingSession.session_token !== currentSessionToken
-    ){
+    if(existingSession?.session_token){
       const replaceExisting = window.confirm(
         "This account is already logged in on another device or browser.\n\n" +
         "Do you want to log out the other session and continue here?\n\n" +
-        "Yes = log out the other device and continue here.\n" +
-        "No = keep the other device logged in."
+        "OK = Yes, log out the other session\n" +
+        "Cancel = No, keep the other session"
       );
 
       if(!replaceExisting){
@@ -400,10 +390,8 @@ loginBtn.onclick = async function(){
 
         currentSessionToken = null;
         sessionStorage.removeItem(SESSION_TOKEN_KEY);
-
         tasks = [];
         selected.clear();
-
         showLogin();
 
         msg(
@@ -414,14 +402,27 @@ loginBtn.onclick = async function(){
       }
     }
 
+    /*
+      User explicitly chose Yes, or there was no previous
+      session. Now and only now make this device the active one.
+    */
     await activateSession(data.session);
+
   }catch(err){
     console.error("Login error:", err);
+
+    try{
+      await sb.auth.signOut({ scope: "local" });
+    }catch(_){
+      // Keep the original login error visible.
+    }
+
     msg(
       "Login failed: " +
       (err?.message || "Unexpected error.")
     );
   }finally{
+    loginInProgress = false;
     loginBtn.disabled = false;
   }
 };
@@ -443,6 +444,17 @@ password.addEventListener("keydown", function(e){
 ===================================================== */
 
 sb.auth.onAuthStateChange(async function(event, session){
+  /*
+    signInWithPassword() fires this event before/around the
+    login handler. While loginInProgress is true, the login
+    handler must perform the existing-session check first.
+    Otherwise the listener could overwrite the session row
+    before the confirmation dialog is shown.
+  */
+  if(session && loginInProgress){
+    return;
+  }
+
   if(session){
     if(!currentSessionToken){
       await activateSession(session);
