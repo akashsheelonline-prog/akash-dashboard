@@ -15,3 +15,7 @@ CSS is split into dashboard, PDF watermark, PDF compress, image tools, and auth 
 Load order is intentionally preserved: libraries → core → PDF tools → shared image helpers → image tools → navigation → settings/auth.
 
 For future changes, edit only the relevant feature file unless the change is a shared utility or shared styling change.
+
+
+## Fonts
+Font files are kept in the `fonts/` folder. The Arial Black font is referenced as `../fonts/ariblk.ttf` from CSS and `./fonts/ariblk.ttf` from the root-level JavaScript module.
