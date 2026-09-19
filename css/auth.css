@@ -1,0 +1,38 @@
+
+    /* SINGLE LOGIN CONFIRM MODAL */
+    .single-login-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(15, 23, 42, .58);
+      backdrop-filter: blur(2px);
+    }
+    .single-login-modal.show { display: flex; }
+    .single-login-card {
+      width: min(460px, 100%);
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      padding: 24px;
+      border: 1px solid #e5e7eb;
+    }
+    .single-login-card h3 { margin: 0 0 10px; font-size: 20px; color: #111827; }
+    .single-login-card p { margin: 0; color: #4b5563; line-height: 1.55; font-size: 14px; }
+    .single-login-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .single-login-actions button { min-width: 100px; }
+
+@font-face {
+  font-family: "Arial Black Custom";
+  src: url("../ariblk.ttf") format("truetype");
+  font-weight: 900;
+  font-style: normal;
+}
