@@ -232,6 +232,48 @@
       flex: 0 0 auto;
     }
 
+    /* ACCOUNT MENU / THEMES */
+    .account-wrap{position:relative;display:flex;align-items:center}
+    .account-btn{display:flex;align-items:center;gap:9px;max-width:260px}
+    .account-avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent,#2563eb);color:#fff;font-weight:800;font-size:12px}
+    .account-label{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .account-menu{position:absolute;right:0;top:calc(100% + 8px);width:245px;background:#fff;border:1px solid #e5e9f0;border-radius:12px;box-shadow:0 18px 45px #0002;padding:8px;z-index:5000}
+    .account-menu button{width:100%;border:0;background:transparent;text-align:left;padding:10px 11px;border-radius:8px;cursor:pointer;font:inherit;color:#172033}
+    .account-menu button:hover{background:#f3f6fb}
+    .theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:8px 6px 4px}
+    .theme-swatch{height:32px;border-radius:8px;border:2px solid #fff;box-shadow:0 0 0 1px #d6dce6;cursor:pointer}
+    .theme-swatch.active{box-shadow:0 0 0 2px #111827}
+    .account-divider{height:1px;background:#edf0f4;margin:6px 0}
+    .profile-modal-box{width:min(560px,100%);background:#fff;border-radius:14px;padding:22px;box-shadow:0 20px 60px #0004}
+    .profile-grid{display:grid;gap:14px}
+    .profile-grid label{font-size:12px;font-weight:700;color:#4b5563}
+    .profile-grid input,.profile-grid select{width:100%;padding:11px;border:1px solid #d6dce6;border-radius:8px;font:inherit;margin-top:6px}
+    .profile-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+    .settings-note{padding:11px;background:#f8fafc;border-radius:9px;color:#475569;font-size:13px;line-height:1.5}
+    .crop-modal-box{width:min(900px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px #0004}
+    .crop-preview-wrap{background:#111827;border-radius:10px;padding:12px;display:grid;place-items:center;min-height:260px}
+    #cropCanvas{max-width:100%;max-height:55vh;background:#fff;cursor:crosshair;touch-action:none}
+    .crop-controls{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+    .crop-controls input{width:100%;padding:9px;border:1px solid #d6dce6;border-radius:8px}
+    .image-file-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    .clean-btn{border-color:#fecaca!important;color:#991b1b!important;background:#fff!important}
+    body.theme-ocean{--accent:#2563eb;--sidebar:#0f172a;--bg:#f5f7fb}
+    body.theme-green{--accent:#059669;--sidebar:#0f2922;--bg:#f3faf7}
+    body.theme-purple{--accent:#7c3aed;--sidebar:#201337;--bg:#f7f5ff}
+    body.theme-orange{--accent:#ea580c;--sidebar:#2a160b;--bg:#fff7f2}
+    body.theme-red{--accent:#dc2626;--sidebar:#2b1111;--bg:#fff5f5}
+    body.theme-dark{--accent:#60a5fa;--sidebar:#020617;--bg:#0f172a;--panel:#111827;--text:#e5e7eb}
+    body{background:var(--bg,#f5f7fb);color:var(--text,#172033)}
+    .sidebar{background:var(--sidebar,#101827)}
+    .menu-search-wrap{background:var(--sidebar,#101827)}
+    .primary{background:var(--accent,#2563eb)}
+    .nav button:hover,.nav button.active{background:color-mix(in srgb,var(--accent,#2563eb) 22%,#1f2b3d);color:#fff}
+    body.theme-dark .panel,body.theme-dark .card,body.theme-dark .account-menu,body.theme-dark .profile-modal-box,body.theme-dark .crop-modal-box{background:#111827;color:#e5e7eb;border-color:#263244}
+    body.theme-dark .toolbar,body.theme-dark th{background:#172033;color:#cbd5e1}
+    body.theme-dark input,body.theme-dark select{background:#0f172a;color:#e5e7eb;border-color:#334155}
+    body.theme-dark .secondary{background:#111827;color:#e5e7eb;border-color:#334155}
+    body.theme-dark .account-menu button{color:#e5e7eb}
+
     /* MAIN */
 
     .main {
@@ -987,6 +1029,44 @@
   </div>
 </div>
 
+<div id="profileModal" class="modal" role="dialog" aria-modal="true">
+  <div class="profile-modal-box">
+    <h2 id="profileModalTitle" style="margin:0 0 6px">Change Profile</h2>
+    <div id="profileModalSub" class="muted">Update your display name and password. Email cannot be changed here.</div>
+    <div class="profile-grid" style="margin-top:18px">
+      <div><label>Display Name</label><input id="profileNameInput" type="text" maxlength="80" placeholder="Your name"></div>
+      <div><label>Email (cannot be changed)</label><input id="profileEmailInput" type="email" disabled></div>
+      <div><label>New Password (optional)</label><input id="profilePasswordInput" type="password" autocomplete="new-password" placeholder="Leave blank to keep current password"></div>
+      <div id="settingsSection" class="settings-note hidden">Settings: You can keep your selected theme for this browser. Your profile name is saved to Supabase. Password changes are handled securely by Supabase Authentication; passwords are not stored as plain text in a SQL table.</div>
+    </div>
+    <div class="profile-actions">
+      <button id="profileCancelBtn" class="btn secondary">Cancel</button>
+      <button id="profileSaveBtn" class="btn primary">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div id="cropModal" class="modal" role="dialog" aria-modal="true">
+  <div class="crop-modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+      <div><h2 style="margin:0">Crop Image</h2><div id="cropFileName" class="muted"></div></div>
+      <button id="cropCloseBtn" class="btn secondary">Close</button>
+    </div>
+    <div class="crop-preview-wrap" style="margin-top:14px"><canvas id="cropCanvas"></canvas></div>
+    <div class="crop-controls">
+      <div><label class="muted">X</label><input id="cropX" type="number" min="0" step="1"></div>
+      <div><label class="muted">Y</label><input id="cropY" type="number" min="0" step="1"></div>
+      <div><label class="muted">Width</label><input id="cropW" type="number" min="1" step="1"></div>
+      <div><label class="muted">Height</label><input id="cropH" type="number" min="1" step="1"></div>
+    </div>
+    <div class="muted" style="margin-top:8px">Enter crop area in original image pixels. The preview updates as you change the values.</div>
+    <div class="profile-actions">
+      <button id="cropResetBtn" class="btn secondary">Reset</button>
+      <button id="cropApplyBtn" class="btn primary">Apply Crop</button>
+    </div>
+  </div>
+</div>
+
 <!-- =====================================================
      DASHBOARD
 ===================================================== -->
@@ -1131,6 +1211,29 @@
           + Create
         </button>
 
+      </div>
+
+      <div class="account-wrap">
+        <button id="accountBtn" class="btn secondary account-btn" type="button">
+          <span id="accountAvatar" class="account-avatar">U</span>
+          <span id="accountLabel" class="account-label">Account</span>
+          ▾
+        </button>
+        <div id="accountMenu" class="account-menu hidden">
+          <button type="button" id="changeProfileBtn">👤 Change Profile</button>
+          <button type="button" id="themeMenuBtn">🎨 Theme</button>
+          <div id="themeGrid" class="theme-grid hidden">
+            <button type="button" class="theme-swatch" title="Ocean" data-theme="ocean" style="background:#2563eb"></button>
+            <button type="button" class="theme-swatch" title="Green" data-theme="green" style="background:#059669"></button>
+            <button type="button" class="theme-swatch" title="Purple" data-theme="purple" style="background:#7c3aed"></button>
+            <button type="button" class="theme-swatch" title="Orange" data-theme="orange" style="background:#ea580c"></button>
+            <button type="button" class="theme-swatch" title="Red" data-theme="red" style="background:#dc2626"></button>
+            <button type="button" class="theme-swatch" title="Dark" data-theme="dark" style="background:#0f172a"></button>
+          </div>
+          <button type="button" id="settingsBtn">⚙️ Settings</button>
+          <div class="account-divider"></div>
+          <button type="button" id="menuLogoutBtn">🚪 Logout</button>
+        </div>
       </div>
 
     </div>
@@ -1290,6 +1393,7 @@
               </div>
 
               <button id="applyWm" class="btn primary">Apply Watermark</button>
+              <button id="cleanWatermarkBtn" class="btn secondary clean-btn">Clean</button>
             </div>
           </section>
         </div>
@@ -1345,6 +1449,7 @@
 
           <div class="wm-compress-actions">
             <button id="compressPdfBtn" class="btn primary">Compress PDFs</button>
+            <button id="cleanCompressBtn" class="btn secondary clean-btn">Clean</button>
             <button id="downloadCompressed" class="btn secondary" disabled>Download Compressed PDFs</button>
           </div>
 
@@ -1410,6 +1515,7 @@
                   </div>
                   <div class="image-actions">
                     <button id="convertImagesBtn" class="btn primary">Convert Images</button>
+                    <button id="cleanConverterBtn" class="btn secondary clean-btn">Clean</button>
                     <button id="downloadConvertedBtn" class="btn secondary" disabled>Download Converted ZIP</button>
                   </div>
                 </div>
@@ -1484,6 +1590,7 @@
                   </div>
                   <div class="image-actions">
                     <button id="resizeImagesBtn" class="btn primary">Resize Images</button>
+                    <button id="cleanResizeBtn" class="btn secondary clean-btn">Clean</button>
                     <button id="downloadResizedBtn" class="btn secondary" disabled>Download Resized ZIP</button>
                   </div>
                 </div>
@@ -4376,6 +4483,16 @@ function renderImageFileList(files, listEl, statusEl, setterName) {
     meta.className = "image-file-meta";
     meta.textContent = formatBytes(file.size);
     main.append(name, meta);
+    const actionWrap = document.createElement("div");
+    actionWrap.className = "image-file-actions";
+    if (setterName === "resize") {
+      const crop = document.createElement("button");
+      crop.className = "btn secondary";
+      crop.type = "button";
+      crop.textContent = "Crop";
+      crop.onclick = () => openCropEditor(index);
+      actionWrap.appendChild(crop);
+    }
     const remove = document.createElement("button");
     remove.className = "image-file-remove";
     remove.type = "button";
@@ -4387,7 +4504,8 @@ function renderImageFileList(files, listEl, statusEl, setterName) {
       if (setterName === "converter") { convertedImageFiles = []; downloadConvertedBtn.disabled = true; }
       else { resizedImageFiles = []; downloadResizedBtn.disabled = true; }
     };
-    row.append(img, main, remove);
+    actionWrap.appendChild(remove);
+    row.append(img, main, actionWrap);
     listEl.appendChild(row);
   });
   statusEl.textContent = files.length ? `${files.length} image${files.length === 1 ? "" : "s"} selected.` : "No images selected.";
@@ -4426,6 +4544,71 @@ addDropZone(document.querySelector('label[for="imageResizeInput"]'), "resize");
 
 imageConvertQuality.oninput = () => imageConvertQualityValue.textContent = imageConvertQuality.value + "%";
 resizeQuality.oninput = () => resizeQualityValue.textContent = resizeQuality.value + "%";
+
+let cropIndex = -1;
+let cropImage = null;
+const cropModal = document.getElementById("cropModal");
+const cropCanvas = document.getElementById("cropCanvas");
+const cropX = document.getElementById("cropX");
+const cropY = document.getElementById("cropY");
+const cropW = document.getElementById("cropW");
+const cropH = document.getElementById("cropH");
+const cropFileName = document.getElementById("cropFileName");
+
+async function openCropEditor(index) {
+  const file = imageResizeFiles[index];
+  if (!file) return;
+  cropIndex = index;
+  cropFileName.textContent = file.name;
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.src = url;
+  await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;});
+  URL.revokeObjectURL(url);
+  cropImage = img;
+  cropX.value = 0; cropY.value = 0; cropW.value = img.naturalWidth; cropH.value = img.naturalHeight;
+  cropModal.classList.add("show");
+  drawCropPreview();
+}
+
+function cropValues() {
+  if (!cropImage) return null;
+  const iw=cropImage.naturalWidth, ih=cropImage.naturalHeight;
+  let x=Math.max(0,Math.min(iw-1,Number(cropX.value)||0));
+  let y=Math.max(0,Math.min(ih-1,Number(cropY.value)||0));
+  let w=Math.max(1,Math.min(iw-x,Number(cropW.value)||iw));
+  let h=Math.max(1,Math.min(ih-y,Number(cropH.value)||ih));
+  cropX.value=Math.round(x); cropY.value=Math.round(y); cropW.value=Math.round(w); cropH.value=Math.round(h);
+  return {x,y,w,h};
+}
+
+function drawCropPreview(){
+  if(!cropImage) return;
+  const c=cropValues(); if(!c) return;
+  const maxW=820,maxH=480,scale=Math.min(maxW/cropImage.naturalWidth,maxH/cropImage.naturalHeight,1);
+  cropCanvas.width=Math.max(1,Math.round(cropImage.naturalWidth*scale));
+  cropCanvas.height=Math.max(1,Math.round(cropImage.naturalHeight*scale));
+  const ctx=cropCanvas.getContext("2d");
+  ctx.drawImage(cropImage,0,0,cropCanvas.width,cropCanvas.height);
+  ctx.fillStyle="rgba(0,0,0,.48)";
+  ctx.fillRect(0,0,cropCanvas.width,cropCanvas.height);
+  ctx.clearRect(c.x*scale,c.y*scale,c.w*scale,c.h*scale);
+  ctx.drawImage(cropImage,c.x,c.y,c.w,c.h,c.x*scale,c.y*scale,c.w*scale,c.h*scale);
+  ctx.strokeStyle="#fff";ctx.lineWidth=2;ctx.strokeRect(c.x*scale,c.y*scale,c.w*scale,c.h*scale);
+}
+[cropX,cropY,cropW,cropH].forEach(el=>el.addEventListener("input",drawCropPreview));
+document.getElementById("cropResetBtn").onclick=()=>{if(!cropImage)return;cropX.value=0;cropY.value=0;cropW.value=cropImage.naturalWidth;cropH.value=cropImage.naturalHeight;drawCropPreview();};
+document.getElementById("cropCloseBtn").onclick=()=>{cropModal.classList.remove("show");cropImage=null;cropIndex=-1;};
+document.getElementById("cropApplyBtn").onclick=async()=>{
+  if(!cropImage||cropIndex<0)return; const c=cropValues(); if(!c)return;
+  const canvas=document.createElement("canvas");canvas.width=c.w;canvas.height=c.h;const ctx=canvas.getContext("2d");ctx.drawImage(cropImage,c.x,c.y,c.w,c.h,0,0,c.w,c.h);
+  const blob=await canvasBlob(canvas,"image/png",1);
+  const old=imageResizeFiles[cropIndex];
+  imageResizeFiles[cropIndex]=new File([blob],baseName(old.name)+"_cropped.png",{type:"image/png",lastModified:Date.now()});
+  renderImageFileList(imageResizeFiles,imageResizeList,imageResizeStatus,"resize");
+  resizedImageFiles=[];downloadResizedBtn.disabled=true;imageResizeResult.classList.remove("show");
+  cropModal.classList.remove("show");cropImage=null;cropIndex=-1;
+};
 
 async function loadImageFile(file) {
   const url = URL.createObjectURL(file);
@@ -4642,6 +4825,14 @@ downloadResizedBtn.onclick = async () => {
   finally { downloadResizedBtn.disabled = false; }
 };
 
+function cleanWatermarkTool(){
+  watermarkFiles=[];watermarkedFiles=[];wmFiles.value="";wmFileList.innerHTML="";wmStatus.textContent="No PDF selected.";wmResult.classList.remove("show");wmResultList.innerHTML="";downloadAllWm.disabled=true;wmProgress.classList.remove("show");wmProgressFill.style.width="0%";
+}
+document.getElementById("cleanWatermarkBtn").onclick=cleanWatermarkTool;
+document.getElementById("cleanCompressBtn").onclick=()=>{compressInputFiles=[];compressedFiles=[];compressFilesInput.value="";renderCompressFiles();compressResult.classList.remove("show");compressResultList.innerHTML="";downloadCompressed.disabled=true;compressProgress.classList.remove("show");compressProgressFill.style.width="0%";};
+document.getElementById("cleanConverterBtn").onclick=()=>{imageConverterFiles=[];convertedImageFiles=[];imageConverterInput.value="";renderImageFileList(imageConverterFiles,imageConverterList,imageConverterStatus,"converter");imageConverterResult.classList.remove("show");imageConverterResultList.innerHTML="";downloadConvertedBtn.disabled=true;imageConverterProgress.classList.remove("show");imageConverterProgressFill.style.width="0%";};
+document.getElementById("cleanResizeBtn").onclick=()=>{imageResizeFiles=[];resizedImageFiles=[];imageResizeInput.value="";renderImageFileList(imageResizeFiles,imageResizeList,imageResizeStatus,"resize");imageResizeResult.classList.remove("show");imageResizeResultList.innerHTML="";downloadResizedBtn.disabled=true;imageResizeProgress.classList.remove("show");imageResizeProgressFill.style.width="0%";};
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
 }
@@ -4836,96 +5027,99 @@ document
 
 
 /* =====================================================
+   ACCOUNT / PROFILE / THEME
+===================================================== */
+const accountBtn=document.getElementById("accountBtn");
+const accountMenu=document.getElementById("accountMenu");
+const accountLabel=document.getElementById("accountLabel");
+const accountAvatar=document.getElementById("accountAvatar");
+const profileModal=document.getElementById("profileModal");
+const profileNameInput=document.getElementById("profileNameInput");
+const profileEmailInput=document.getElementById("profileEmailInput");
+const profilePasswordInput=document.getElementById("profilePasswordInput");
+const settingsSection=document.getElementById("settingsSection");
+const profileSaveBtn=document.getElementById("profileSaveBtn");
+const profileCancelBtn=document.getElementById("profileCancelBtn");
+
+function applyTheme(theme){
+  document.body.classList.remove("theme-ocean","theme-green","theme-purple","theme-orange","theme-red","theme-dark");
+  document.body.classList.add("theme-"+(theme||"ocean"));
+  localStorage.setItem("akash_theme",theme||"ocean");
+  document.querySelectorAll(".theme-swatch").forEach(x=>x.classList.toggle("active",x.dataset.theme===(theme||"ocean")));
+}
+applyTheme(localStorage.getItem("akash_theme")||"ocean");
+
+function openProfileModal(settings=false){
+  accountMenu.classList.add("hidden");
+  profileModal.classList.add("show");
+  settingsSection.classList.toggle("hidden",!settings);
+  profileSaveBtn.classList.toggle("hidden",settings);
+  profileNameInput.disabled=settings;profilePasswordInput.disabled=settings;
+  if(settings){profileNameInput.value="";profilePasswordInput.value="";}
+}
+document.getElementById("changeProfileBtn").onclick=()=>openProfileModal(false);
+document.getElementById("settingsBtn").onclick=()=>openProfileModal(true);
+accountBtn.onclick=()=>accountMenu.classList.toggle("hidden");
+document.getElementById("themeMenuBtn").onclick=()=>document.getElementById("themeGrid").classList.toggle("hidden");
+document.querySelectorAll(".theme-swatch").forEach(btn=>btn.onclick=async()=>{
+  applyTheme(btn.dataset.theme);
+  try{const {data:{user}}=await sb.auth.getUser();if(user)await sb.from("profiles").upsert({id:user.id,email:user.email,theme:btn.dataset.theme,updated_at:new Date().toISOString()},{onConflict:"id"});}catch(e){console.warn("Theme preference could not be saved:",e);}
+});
+document.getElementById("menuLogoutBtn").onclick=()=>logoutBtn.click();
+profileCancelBtn.onclick=()=>profileModal.classList.remove("show");
+window.addEventListener("click",e=>{if(!e.target.closest(".account-wrap"))accountMenu.classList.add("hidden");if(e.target===profileModal)profileModal.classList.remove("show");});
+
+async function loadProfile(user){
+  if(!user)return;
+  profileEmailInput.value=user.email||"";
+  let name=user.user_metadata?.display_name||user.user_metadata?.full_name||"";
+  const {data}=await sb.from("profiles").select("full_name,theme").eq("id",user.id).maybeSingle();
+  if(data?.full_name)name=data.full_name;
+  if(data?.theme)applyTheme(data.theme);
+  accountLabel.textContent=name||user.email||"Account";
+  accountAvatar.textContent=(name||user.email||"U").trim().charAt(0).toUpperCase();
+  profileNameInput.value=name;profileEmailInput.value=user.email||"";
+}
+profileSaveBtn.onclick=async()=>{
+  const {data:{user}}=await sb.auth.getUser();if(!user)return;
+  const name=profileNameInput.value.trim();const newPassword=profilePasswordInput.value;
+  profileSaveBtn.disabled=true;
+  try{
+    const {error:profileError}=await sb.from("profiles").upsert({id:user.id,email:user.email,full_name:name,theme:localStorage.getItem("akash_theme")||"ocean",updated_at:new Date().toISOString()},{onConflict:"id"});
+    if(profileError)throw profileError;
+    const updates={data:{display_name:name}};
+    if(newPassword){if(newPassword.length<6)throw new Error("Password must be at least 6 characters.");updates.password=newPassword;}
+    const {error:authError}=await sb.auth.updateUser(updates);if(authError)throw authError;
+    await loadProfile({...user,user_metadata:{...(user.user_metadata||{}),display_name:name}});
+    profilePasswordInput.value="";profileModal.classList.remove("show");alert("Profile updated successfully.");
+  }catch(e){alert("Unable to update profile:\n"+(e.message||e));}
+  finally{profileSaveBtn.disabled=false;}
+};
+
+/* =====================================================
    SINGLE-LOGIN LOCK
 ===================================================== */
-
-/*
-  The single-login decision is handled by a SECURITY DEFINER RPC in
-  Supabase. This is important because RLS must not prevent the new login
-  from checking whether the single slot is already occupied.
-*/
-let singleLoginToken = null;
-let singleLoginTimer = null;
-let singleLoginBusy = false;
-let singleLoginStopping = false;
-
-function newLoginToken() {
-  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+let singleLoginToken=null;let singleLoginTimer=null;let singleLoginBusy=false;let singleLoginStopping=false;
+const LOGIN_TOKEN_KEY="akash_single_login_token";
+function newLoginToken(){return window.crypto?.randomUUID?window.crypto.randomUUID():`${Date.now()}-${Math.random().toString(36).slice(2)}`;}
+async function singleLoginRPC(token,takeover=false){const {data,error}=await sb.rpc("single_login_claim",{p_session_token:token,p_takeover:takeover});if(error)throw error;return data||{};}
+async function claimSingleLogin(takeover=false,token=null){
+  singleLoginToken=token||newLoginToken();
+  const result=await singleLoginRPC(singleLoginToken,takeover);
+  if(result.conflict){singleLoginToken=null;return {conflict:true};}
+  if(!result.ok){singleLoginToken=null;throw new Error(result.message||"Unable to start the login session.");}
+  localStorage.setItem(LOGIN_TOKEN_KEY,singleLoginToken);return {conflict:false};
 }
-
-async function singleLoginRPC(sessionToken, takeover = false) {
-  const { data, error } = await sb.rpc("single_login_claim", {
-    p_session_token: sessionToken,
-    p_takeover: takeover
-  });
-  if (error) throw error;
-  return data || {};
+async function checkSingleLogin(){
+  if(!singleLoginToken||singleLoginBusy||singleLoginStopping)return;singleLoginBusy=true;
+  try{const {data:{user}={}}=await sb.auth.getUser();if(!user)return;
+    const {data,error}=await sb.rpc("single_login_status");
+    if(error){console.error(error);return;}
+    if(!data?.ok||data.session_token!==singleLoginToken){singleLoginStopping=true;clearInterval(singleLoginTimer);singleLoginTimer=null;singleLoginToken=null;localStorage.removeItem(LOGIN_TOKEN_KEY);tasks=[];selected.clear();await sb.auth.signOut({scope:"local"});showLogin();msg("This account was logged out because it was taken over on another device or browser.");}
+  }finally{singleLoginBusy=false;}
 }
-
-async function claimSingleLogin(userId, takeover = false) {
-  singleLoginToken = newLoginToken();
-  const result = await singleLoginRPC(singleLoginToken, takeover);
-
-  if (result.conflict) {
-    singleLoginToken = null;
-    return { conflict: true };
-  }
-
-  if (!result.ok) {
-    singleLoginToken = null;
-    throw new Error(result.message || "Unable to start the single-login session.");
-  }
-
-  return { conflict: false };
-}
-
-async function checkSingleLogin() {
-  if (!singleLoginToken || singleLoginBusy || singleLoginStopping) return;
-
-  singleLoginBusy = true;
-  try {
-    const { data: { user } = {} } = await sb.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await sb
-      .from("active_login")
-      .select("user_id,session_token")
-      .eq("id", 1)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Single-login check failed:", error);
-      return;
-    }
-
-    if (!data || data.session_token !== singleLoginToken || data.user_id !== user.id) {
-      singleLoginStopping = true;
-      singleLoginToken = null;
-      clearInterval(singleLoginTimer);
-      singleLoginTimer = null;
-      tasks = [];
-      selected.clear();
-      await sb.auth.signOut({ scope: "local" });
-      showLogin();
-      msg("This dashboard was logged out because another login took over this account.");
-    }
-  } finally {
-    singleLoginBusy = false;
-  }
-}
-
-function startSingleLoginMonitor() {
-  clearInterval(singleLoginTimer);
-  singleLoginTimer = setInterval(checkSingleLogin, 2000);
-  checkSingleLogin();
-}
-
-function stopSingleLoginMonitor() {
-  clearInterval(singleLoginTimer);
-  singleLoginTimer = null;
-  singleLoginToken = null;
-}
+function startSingleLoginMonitor(){clearInterval(singleLoginTimer);singleLoginTimer=setInterval(checkSingleLogin,2000);checkSingleLogin();}
+function stopSingleLoginMonitor(){clearInterval(singleLoginTimer);singleLoginTimer=null;singleLoginToken=null;localStorage.removeItem(LOGIN_TOKEN_KEY);}
 
 /* =====================================================
    LOGOUT
@@ -4934,7 +5128,12 @@ function stopSingleLoginMonitor() {
 logoutBtn.onclick =
   async function() {
 
+    const tokenToRelease = singleLoginToken;
     stopSingleLoginMonitor();
+    if (tokenToRelease) {
+      try { await sb.rpc("single_login_release", { p_session_token: tokenToRelease }); }
+      catch (e) { console.warn("Could not release login lock:", e); }
+    }
 
     const {
       error
@@ -4997,133 +5196,26 @@ function askSingleLoginTakeover() {
 /* =====================================================
    LOGIN
 ===================================================== */
-
-loginBtn.onclick =
-  async function() {
-
-    const userEmail =
-      email.value.trim();
-
-    const userPassword =
-      password.value;
-
-
-    if (!userEmail) {
-
-      msg(
-        "Please enter your email."
-      );
-
-      return;
-
+loginBtn.onclick=async function(){
+  const userEmail=email.value.trim(),userPassword=password.value;
+  if(!userEmail){msg("Please enter your email.");return;}
+  if(!userPassword){msg("Please enter your password.");return;}
+  loginBtn.disabled=true;msg("Signing in...");
+  const {data,error}=await sb.auth.signInWithPassword({email:userEmail,password:userPassword});
+  loginBtn.disabled=false;
+  if(error){msg("Login failed: "+error.message);return;}
+  if(!data.session){msg("Login failed. No session created.");return;}
+  try{
+    let result=await claimSingleLogin(false);
+    if(result.conflict){
+      const takeover=await askSingleLoginTakeover();
+      if(!takeover){await sb.auth.signOut({scope:"local"});msg("Login cancelled. The existing login remains active.");return;}
+      result=await claimSingleLogin(true);
+      if(result.conflict){await sb.auth.signOut({scope:"local"});msg("The existing login changed while you were confirming. Please try again.");return;}
     }
-
-
-    if (!userPassword) {
-
-      msg(
-        "Please enter your password."
-      );
-
-      return;
-
-    }
-
-
-    loginBtn.disabled =
-      true;
-
-
-    msg(
-      "Signing in..."
-    );
-
-
-    const {
-      data,
-      error
-    } =
-      await sb.auth
-        .signInWithPassword({
-
-          email:
-            userEmail,
-
-          password:
-            userPassword
-
-        });
-
-
-    loginBtn.disabled =
-      false;
-
-
-    if (error) {
-
-      msg(
-        "Login failed: "
-        +
-        error.message
-      );
-
-      return;
-
-    }
-
-
-    if (!data.session) {
-
-      msg(
-        "Login failed. No session created."
-      );
-
-      return;
-
-    }
-
-    /*
-      Credentials are now verified. The RPC checks the single-login slot
-      WITHOUT replacing it. If it is occupied, the new user gets a choice.
-    */
-    try {
-      let takeover = false;
-      let result = await claimSingleLogin(data.user.id, false);
-
-      if (result.conflict) {
-        takeover = await askSingleLoginTakeover();
-
-        if (!takeover) {
-          await sb.auth.signOut({ scope: "local" });
-          msg("Login cancelled. The existing login remains active.");
-          return;
-        }
-
-        result = await claimSingleLogin(data.user.id, true);
-        if (result.conflict) {
-          await sb.auth.signOut({ scope: "local" });
-          msg("The existing login changed while you were confirming. Please try again.");
-          return;
-        }
-      }
-
-    } catch (lockError) {
-      await sb.auth.signOut({ scope: "local" });
-      console.error("Single-login RPC error:", lockError);
-      msg("Single-login setup error: " + (lockError.message || "Please run the new Supabase SQL setup."));
-      return;
-    }
-
-    singleLoginStopping = false;
-    msg("");
-
-    showApp();
-    startSingleLoginMonitor();
-
-    await loadTasks();
-
-  };
-
+  }catch(e){await sb.auth.signOut({scope:"local"});console.error(e);msg("Login setup error: "+(e.message||e));return;}
+  singleLoginStopping=false;msg("");showApp();startSingleLoginMonitor();await loadProfile(data.user);await loadTasks();
+};
 
 /* =====================================================
    ENTER KEY LOGIN
@@ -5148,118 +5240,37 @@ password.addEventListener(
 /* =====================================================
    AUTH STATE LISTENER
 ===================================================== */
-
-sb.auth.onAuthStateChange(
-  async function(
-    event,
-    session
-  ) {
-
-    if (session) {
-
-      if (singleLoginToken) {
-        showApp();
-        startSingleLoginMonitor();
-        await loadTasks();
-      }
-
-    }
-    else {
-
-      tasks = [];
-
-      selected.clear();
-
-      showLogin();
-
-    }
-
-  }
-);
-
+sb.auth.onAuthStateChange(async function(event,session){
+  if(session){
+    // The explicit login flow owns the single-login claim. On refresh, initializeApp handles it.
+    if(singleLoginToken){showApp();startSingleLoginMonitor();await loadProfile(session.user);await loadTasks();}
+  }else{tasks=[];selected.clear();stopSingleLoginMonitor();showLogin();}
+});
 
 /* =====================================================
    INITIAL AUTH CHECK
 ===================================================== */
-
-async function initializeApp() {
-
-  /*
-    This is the important fix.
-
-    Every time the URL is opened, first check whether
-    a valid Supabase session exists.
-
-    No session = login screen.
-    Valid session = dashboard.
-  */
-
-  const {
-    data,
-    error
-  } =
-    await sb.auth.getSession();
-
-
-  if (error) {
-
-    console.error(
-      error
-    );
-
-    showLogin();
-
-    return;
-
-  }
-
-
-  if (
-    data &&
-    data.session
-  ) {
-
-    try {
-      /* Re-claim this browser's existing session without taking over another session. */
-      const existingToken = newLoginToken();
-      const { data: claimResult, error: claimError } = await sb.rpc("single_login_claim", {
-        p_session_token: existingToken,
-        p_takeover: false
-      });
-
-      if (claimError) throw claimError;
-
-      if (claimResult?.conflict) {
-        await sb.auth.signOut({ scope: "local" });
-        showLogin();
-        msg("This account is already logged in on another browser or device. Please log in again there or use the takeover option.");
-        return;
+async function initializeApp(){
+  const {data,error}=await sb.auth.getSession();
+  if(error){console.error(error);showLogin();return;}
+  if(!data?.session){stopSingleLoginMonitor();showLogin();return;}
+  try{
+    const savedToken=localStorage.getItem(LOGIN_TOKEN_KEY);
+    if(savedToken){
+      const result=await claimSingleLogin(false,savedToken);
+      if(result.conflict){
+        // This browser lost the lock while closed. Ask the user before taking it back.
+        const takeover=await askSingleLoginTakeover();
+        if(!takeover){await sb.auth.signOut({scope:"local"});showLogin();msg("Login cancelled. The existing login remains active.");return;}
+        await claimSingleLogin(true);
       }
-
-      singleLoginToken = existingToken;
-    } catch (lockError) {
-      console.error("Single-login initialization failed:", lockError);
-      await sb.auth.signOut({ scope: "local" });
-      showLogin();
-      msg("Single-login setup error: " + (lockError.message || "Please run the new Supabase SQL setup."));
-      return;
+    }else{
+      const result=await claimSingleLogin(false);
+      if(result.conflict){await sb.auth.signOut({scope:"local"});showLogin();msg("This account is already logged in on another browser or device. Please log in again and choose the takeover option.");return;}
     }
-
-    singleLoginStopping = false;
-    showApp();
-    startSingleLoginMonitor();
-    await loadTasks();
-
-  }
-  else {
-
-    stopSingleLoginMonitor();
-    showLogin();
-
-  }
-
+    singleLoginStopping=false;showApp();startSingleLoginMonitor();await loadProfile(data.session.user);await loadTasks();
+  }catch(e){console.error("Single-login initialization failed:",e);await sb.auth.signOut({scope:"local"});showLogin();msg("Login setup error: "+(e.message||e));}
 }
-
 
 /* =====================================================
    START APPLICATION
