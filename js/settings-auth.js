@@ -95,20 +95,220 @@ window.addEventListener("click",e=>{
 
 
 /* =====================================================
-   AUTHENTICATION — restored without changing dashboard UI
+   SINGLE-SESSION AUTHENTICATION
+   Only one active dashboard session per user.
+   A new login replaces the previous session token.
+===================================================== */
+
+const SESSION_POLL_MS = 5000;
+const SESSION_TOKEN_KEY = "akash_dashboard_session_token";
+
+let currentSessionToken = null;
+let sessionCheckTimer = null;
+let sessionCheckRunning = false;
+let sessionInvalidated = false;
+let sessionVisibilityHandlerAdded = false;
+
+function createSessionToken(){
+  if(window.crypto && typeof window.crypto.randomUUID === "function"){
+    return window.crypto.randomUUID();
+  }
+
+  const bytes = new Uint8Array(24);
+  window.crypto.getRandomValues(bytes);
+  return Array.from(
+    bytes,
+    b => b.toString(16).padStart(2, "0")
+  ).join("");
+}
+
+async function registerCurrentSession(userId){
+  const token = createSessionToken();
+
+  const { error } = await sb
+    .from("user_sessions")
+    .upsert({
+      user_id: userId,
+      session_token: token,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "user_id" });
+
+  if(error){
+    console.error("Session registration failed:", error);
+    return false;
+  }
+
+  currentSessionToken = token;
+  sessionInvalidated = false;
+
+  sessionStorage.setItem(SESSION_TOKEN_KEY, token);
+
+  return true;
+}
+
+async function checkCurrentSession(){
+  if(
+    sessionInvalidated ||
+    sessionCheckRunning ||
+    !currentSessionToken
+  ){
+    return;
+  }
+
+  sessionCheckRunning = true;
+
+  try{
+    const {
+      data: { user },
+      error: userError
+    } = await sb.auth.getUser();
+
+    if(userError || !user){
+      return;
+    }
+
+    const { data, error } = await sb
+      .from("user_sessions")
+      .select("session_token")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if(error){
+      console.warn("Session control check failed:", error);
+      return;
+    }
+
+    if(
+      !data ||
+      data.session_token !== currentSessionToken
+    ){
+      await invalidateOldSession();
+    }
+  }catch(error){
+    console.warn("Session control check failed:", error);
+  }finally{
+    sessionCheckRunning = false;
+  }
+}
+
+async function invalidateOldSession(){
+  if(sessionInvalidated) return;
+
+  sessionInvalidated = true;
+
+  if(sessionCheckTimer){
+    clearInterval(sessionCheckTimer);
+    sessionCheckTimer = null;
+  }
+
+  currentSessionToken = null;
+  sessionStorage.removeItem(SESSION_TOKEN_KEY);
+
+  try{
+    await sb.auth.signOut({ scope: "local" });
+  }catch(error){
+    console.warn("Local sign-out failed:", error);
+  }
+
+  tasks = [];
+  selected.clear();
+  showLogin();
+
+  msg(
+    "You were signed out because this account was logged in on another device or browser."
+  );
+}
+
+function startSessionMonitor(){
+  if(sessionCheckTimer){
+    clearInterval(sessionCheckTimer);
+  }
+
+  sessionCheckTimer = setInterval(
+    checkCurrentSession,
+    SESSION_POLL_MS
+  );
+
+  if(!sessionVisibilityHandlerAdded){
+    document.addEventListener(
+      "visibilitychange",
+      function(){
+        if(document.visibilityState === "visible"){
+          checkCurrentSession();
+        }
+      }
+    );
+
+    sessionVisibilityHandlerAdded = true;
+  }
+}
+
+async function activateSession(session){
+  if(!session || !session.user){
+    showLogin();
+    return false;
+  }
+
+  const registered = await registerCurrentSession(
+    session.user.id
+  );
+
+  if(!registered){
+    await sb.auth.signOut({ scope: "local" });
+
+    tasks = [];
+    selected.clear();
+    showLogin();
+
+    msg(
+      "Login could not be completed. Please try again."
+    );
+
+    return false;
+  }
+
+  msg("");
+  showApp();
+  await loadTasks();
+  startSessionMonitor();
+
+  return true;
+}
+
+
+/* =====================================================
+   LOGOUT
 ===================================================== */
 
 logoutBtn.onclick = async function(){
-  const { error } = await sb.auth.signOut();
+  if(sessionCheckTimer){
+    clearInterval(sessionCheckTimer);
+    sessionCheckTimer = null;
+  }
+
+  currentSessionToken = null;
+  sessionInvalidated = true;
+  sessionStorage.removeItem(SESSION_TOKEN_KEY);
+
+  const { error } = await sb.auth.signOut({
+    scope: "local"
+  });
+
   if(error){
     alert("Logout failed:\n" + error.message);
     return;
   }
+
   tasks = [];
   selected.clear();
   showLogin();
   msg("");
 };
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
 
 loginBtn.onclick = async function(){
   const userEmail = email.value.trim();
@@ -118,6 +318,7 @@ loginBtn.onclick = async function(){
     msg("Please enter your email.");
     return;
   }
+
   if(!userPassword){
     msg("Please enter your password.");
     return;
@@ -142,43 +343,77 @@ loginBtn.onclick = async function(){
       return;
     }
 
-    msg("");
-    showApp();
-    await loadTasks();
+    await activateSession(data.session);
   }catch(err){
     console.error("Login error:", err);
-    msg("Login failed: " + (err?.message || "Unexpected error."));
+    msg(
+      "Login failed: " +
+      (err?.message || "Unexpected error.")
+    );
   }finally{
     loginBtn.disabled = false;
   }
 };
 
+
+/* =====================================================
+   ENTER KEY LOGIN
+===================================================== */
+
 password.addEventListener("keydown", function(e){
-  if(e.key === "Enter") loginBtn.click();
+  if(e.key === "Enter"){
+    loginBtn.click();
+  }
 });
+
+
+/* =====================================================
+   AUTH STATE LISTENER
+===================================================== */
 
 sb.auth.onAuthStateChange(async function(event, session){
   if(session){
-    showApp();
-    await loadTasks();
+    if(!currentSessionToken){
+      await activateSession(session);
+    }else{
+      showApp();
+      await loadTasks();
+    }
   }else{
+    if(sessionCheckTimer){
+      clearInterval(sessionCheckTimer);
+      sessionCheckTimer = null;
+    }
+
+    currentSessionToken = null;
+    sessionStorage.removeItem(SESSION_TOKEN_KEY);
+
     tasks = [];
     selected.clear();
     showLogin();
   }
 });
 
+
+/* =====================================================
+   INITIAL AUTH CHECK
+===================================================== */
+
 async function initializeApp(){
   try{
-    const { data, error } = await sb.auth.getSession();
+    const {
+      data,
+      error
+    } = await sb.auth.getSession();
+
     if(error){
       console.error("Session check failed:", error);
       showLogin();
       return;
     }
+
     if(data && data.session){
-      showApp();
-      await loadTasks();
+      await activateSession(data.session);
     }else{
       showLogin();
     }
