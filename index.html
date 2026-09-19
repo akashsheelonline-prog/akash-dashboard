@@ -289,12 +289,18 @@
     .setting-row:last-child{border-bottom:0}
     .setting-row label{font-weight:700;font-size:14px}
     .setting-row small{display:block;color:#64748b;font-weight:400;margin-top:3px}
+    .top-left{min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+    .top-left #todayLabel{margin-top:2px}
     .task-actions-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .task-actions-row.hidden{display:none!important}
     .task-actions-row .btn{padding:8px 12px;font-size:13px}
-    .task-filter-total{padding:10px 13px;border:1px solid #dbe1ea;background:#f8fafc;border-radius:8px;font-size:13px;font-weight:700;white-space:nowrap}
+    .task-filter-total{padding:10px 13px;border:1px solid #dbe1ea;background:#f8fafc;border-radius:8px;font-size:13px;font-weight:700;white-space:nowrap;margin-left:0}
+    #taskArea>.panel>.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:nowrap}
+    #taskArea>.panel>.toolbar .search{flex:1 1 auto;min-width:260px}
+    #taskArea>.panel>.toolbar select{flex:0 0 auto}
     .task-filter-total strong{color:var(--accent,#2563eb);font-size:15px}
     body.compact-tasks #taskArea td,body.compact-tasks #taskArea th{padding:7px 9px}
-    @media(max-width:720px){.top-account-actions{gap:5px}.top-account-btn{padding:7px 9px;font-size:12px}.task-actions-row .btn{flex:1}}
+    @media(max-width:720px){.top-account-actions{gap:5px}.top-account-btn{padding:7px 9px;font-size:12px}.task-actions-row{width:100%}.task-actions-row .btn{flex:1}.top{gap:12px}.top-account-actions{flex-wrap:wrap;justify-content:flex-end}#taskArea>.panel>.toolbar{flex-wrap:wrap}#taskArea>.panel>.toolbar .search{min-width:100%}.task-filter-total{margin-left:0}}
     .account-btn{display:flex;align-items:center;gap:9px;max-width:260px}
     .account-avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent,#2563eb);color:#fff;font-weight:800;font-size:12px}
     .account-label{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -363,6 +369,7 @@
     .top {
       display: flex;
       justify-content: space-between;
+      align-items: flex-start;
       align-items: center;
       margin-bottom: 22px;
     }
@@ -1224,31 +1231,20 @@
 
     <div class="top">
 
-      <div>
+      <div class="top-left">
+        <h1 id="pageTitle">Akash Dashboard</h1>
+        <div class="muted" id="todayLabel"></div>
 
-        <h1 id="pageTitle">
-          Akash Dashboard
-        </h1>
-
-        <div
-          class="muted"
-          id="todayLabel">
+        <div class="task-actions-row hidden" id="taskActionsRow" aria-label="Task actions">
+          <button class="btn primary" id="createBtn">+ Create</button>
+          <button class="btn secondary" id="editBtn" disabled>Edit</button>
+          <button class="btn danger" id="removeBtn" disabled>Remove</button>
+          <button class="btn warning" id="cancelBtn" disabled>Cancel</button>
+          <button class="btn success" id="completeBtn" disabled>Complete</button>
         </div>
-
       </div>
 
-
-      <div class="task-actions-row hidden" id="taskActionsRow">
-        <button class="btn primary" id="createBtn">+ Create</button>
-        <button class="btn secondary" id="editBtn" disabled>Edit</button>
-        <button class="btn danger" id="removeBtn" disabled>Remove</button>
-        <button class="btn warning" id="cancelBtn" disabled>Cancel</button>
-        <button class="btn success" id="completeBtn" disabled>Complete</button>
-      </div>
-
-      </div>
-
-      <div class="top-account-actions">
+      <div class="top-account-actions" aria-label="Account options">
         <button id="profileTopBtn" class="btn secondary top-account-btn" type="button">Profile</button>
         <button id="themeTopBtn" class="btn secondary top-account-btn" type="button">Theme</button>
         <button id="settingsTopBtn" class="btn secondary top-account-btn" type="button">Settings</button>
@@ -1262,11 +1258,6 @@
             <button type="button" class="theme-swatch" title="Red" data-theme="red" style="background:#dc2626"></button>
             <button type="button" class="theme-swatch" title="Dark" data-theme="dark" style="background:#0f172a"></button>
           </div>
-        </div>
-      </div>
-          <button type="button" id="settingsBtn"><span class="safe-icon">⚙</span> Settings</button>
-          <div class="account-divider"></div>
-          <button type="button" id="menuLogoutBtn"><span class="safe-icon">⇥</span> Logout</button>
         </div>
       </div>
 
@@ -1732,7 +1723,7 @@
     </div>
 
 
-    <!-- TASK VIEW -->
+    <!-- TASK VIEW: filters + task table only -->
     <div id="taskArea" class="hidden">
     <!-- FILTERS -->
 
