@@ -1093,7 +1093,7 @@
     </div>
 
     <div class="menu-search-wrap">
-      <span class="menu-search-icon">âŒ•</span>
+      <span class="menu-search-icon">⌕</span>
       <input
         id="menuSearch"
         class="menu-search"
@@ -1109,27 +1109,27 @@
         class="active"
         data-view="dashboard"
         data-search="dashboard home">
-        â–£ Dashboard
+        ▣ Dashboard
       </button>
 
       <button data-view="tasks" data-search="tasks task all new due today overdue upcoming completed cancelled create edit delete complete cancel">
-        â–¤ Tasks
+        ▤ Tasks
       </button>
 
       <button data-view="watermark" data-search="pdf watermark pdf tool pdf converter">
-        ðŸ’§ PDF Watermark
+        💧 PDF Watermark
       </button>
 
       <button data-view="compress" data-search="pdf compress compress pdf tool pdf converter">
-        ðŸ—œï¸ PDF Compress
+        🗜️ PDF Compress
       </button>
 
       <button data-view="image-converter" data-search="image converter image convert jpg jpeg png webp gif bmp svg">
-        ðŸ–¼ï¸ Image Converter
+        🖼️ Image Converter
       </button>
 
       <button data-view="image-resize" data-search="image resize resize image size pixel px inch inches cm mm kb mb">
-        ðŸ“ Image Resize
+        📐 Image Resize
       </button>
 
     </nav>
@@ -1189,14 +1189,14 @@
           class="btn warning"
           id="cancelBtn"
           disabled>
-          âœ• Cancel
+          ✕ Cancel
         </button>
 
         <button
           class="btn success"
           id="completeBtn"
           disabled>
-          âœ“ Complete
+          ✓ Complete
         </button>
 
       </div>
@@ -1205,11 +1205,11 @@
         <button id="accountBtn" class="btn secondary account-btn" type="button">
           <span id="accountAvatar" class="account-avatar">U</span>
           <span id="accountLabel" class="account-label">Account</span>
-          â–¾
+          ▾
         </button>
         <div id="accountMenu" class="account-menu hidden">
-          <button type="button" id="changeProfileBtn">ðŸ‘¤ Change Profile</button>
-          <button type="button" id="themeMenuBtn">ðŸŽ¨ Theme</button>
+          <button type="button" id="changeProfileBtn">👤 Change Profile</button>
+          <button type="button" id="themeMenuBtn">🎨 Theme</button>
           <div id="themeGrid" class="theme-grid hidden">
             <button type="button" class="theme-swatch" title="Ocean" data-theme="ocean" style="background:#2563eb"></button>
             <button type="button" class="theme-swatch" title="Green" data-theme="green" style="background:#059669"></button>
@@ -1218,9 +1218,9 @@
             <button type="button" class="theme-swatch" title="Red" data-theme="red" style="background:#dc2626"></button>
             <button type="button" class="theme-swatch" title="Dark" data-theme="dark" style="background:#0f172a"></button>
           </div>
-          <button type="button" id="settingsBtn">âš™ï¸ Settings</button>
+          <button type="button" id="settingsBtn">⚙️ Settings</button>
           <div class="account-divider"></div>
-          <button type="button" id="menuLogoutBtn">ðŸšª Logout</button>
+          <button type="button" id="menuLogoutBtn">🚪 Logout</button>
         </div>
       </div>
 
@@ -1240,13 +1240,13 @@
             <div class="toolbar">
               <div>
                 <b>PDF Watermark</b>
-                <div class="muted">Add a watermark to 1â€“10 PDF files</div>
+                <div class="muted">Add a watermark to 1–10 PDF files</div>
               </div>
             </div>
 
             <div style="padding:15px">
               <label class="wm-upload" for="wmFiles">
-                <div class="wm-upload-icon">ðŸ“„</div>
+                <div class="wm-upload-icon">📄</div>
                 <b>Select PDF files</b>
                 <div style="margin-top:8px;font-size:12px;color:#64748b">Click here or drag & drop PDFs</div>
                 <div class="muted" style="margin-top:5px">Maximum 10 PDF files</div>
@@ -1262,7 +1262,7 @@
               </div>
 
               <div id="wmResult" class="wm-result">
-                <div class="success" style="padding:12px;border-radius:9px">âœ“ Processing completed.</div>
+                <div class="success" style="padding:12px;border-radius:9px">✓ Processing completed.</div>
                 <div id="wmResultList" class="wm-result-list"></div>
                 <div style="margin-top:14px">
                   <button id="downloadAllWm" class="btn primary" disabled>Download All PDFs</button>
@@ -1341,7 +1341,7 @@
                          inputmode="numeric" aria-label="Opacity percentage">
                   <span id="wmOpacityValue" class="wm-range-value">35%</span>
                 </div>
-                <div class="muted">Type any whole number from 1â€“100 or use the slider.</div>
+                <div class="muted">Type any whole number from 1–100 or use the slider.</div>
               </div>
 
               <div class="field">
@@ -1350,7 +1350,7 @@
                   <input id="wmAngleRange" type="range" min="-360" max="360" step="1" value="45" aria-label="Angle slider">
                   <input id="wmAngle" class="wm-number-input" type="number" min="-360" max="360" step="1" value="45"
                          inputmode="numeric" aria-label="Angle in degrees">
-                  <span id="wmAngleValue" class="wm-range-value">45Â°</span>
+                  <span id="wmAngleValue" class="wm-range-value">45°</span>
                 </div>
                 <div class="muted">Positive and negative angles are supported.</div>
               </div>
@@ -1399,13 +1399,13 @@
         <div class="toolbar">
           <div>
             <b>PDF Compress</b>
-            <div class="muted">Compress 1â€“10 PDF files independently from PDF Watermark</div>
+            <div class="muted">Compress 1–10 PDF files independently from PDF Watermark</div>
           </div>
         </div>
 
         <div style="padding:15px">
           <label class="wm-upload" for="compressFilesInput">
-            <div class="wm-upload-icon">ðŸ—œï¸</div>
+            <div class="wm-upload-icon">🗜️</div>
             <b>Select PDF files</b>
             <div style="margin-top:8px;font-size:12px;color:#64748b">Click here or drag & drop PDFs</div>
             <div class="muted" style="margin-top:5px">Maximum 10 PDF files</div>
@@ -1419,18 +1419,18 @@
             <div class="field">
               <label>Compression Level</label>
               <select id="pdfCompressLevel">
-                <option value="20">20% smaller â€“ Light</option>
-                <option value="50" selected>50% smaller â€“ Balanced</option>
-                <option value="70">70% smaller â€“ Strong</option>
-                <option value="80">80% smaller â€“ Maximum</option>
+                <option value="20">20% smaller – Light</option>
+                <option value="50" selected>50% smaller – Balanced</option>
+                <option value="70">70% smaller – Strong</option>
+                <option value="80">80% smaller – Maximum</option>
               </select>
               <div class="muted" style="margin-top:5px">Target is best-effort. Actual reduction depends on PDF content.</div>
             </div>
             <div class="field">
               <label>Compression Mode</label>
               <select id="pdfCompressMode">
-                <option value="smart" selected>Smart â€“ preserve quality</option>
-                <option value="aggressive">Aggressive â€“ smaller file</option>
+                <option value="smart" selected>Smart – preserve quality</option>
+                <option value="aggressive">Aggressive – smaller file</option>
               </select>
             </div>
           </div>
@@ -1469,7 +1469,7 @@
           <div class="image-tool-grid">
             <div>
               <label class="image-upload" for="imageConverterInput">
-                <div class="image-upload-icon">ðŸ–¼ï¸</div>
+                <div class="image-upload-icon">🖼️</div>
                 <b>Select Images</b>
                 <div style="margin-top:8px;font-size:12px;color:#64748b">Click here or drag & drop images</div>
                 <div class="muted" style="margin-top:5px">Maximum 30 images</div>
@@ -1530,7 +1530,7 @@
         <div class="toolbar">
           <div>
             <b>Image Resize</b>
-            <div class="muted">Resize up to 30 images by pixels, inches, cm or mm â€” with an optional target file size</div>
+            <div class="muted">Resize up to 30 images by pixels, inches, cm or mm — with an optional target file size</div>
           </div>
         </div>
         <div style="padding:15px">
@@ -1540,7 +1540,7 @@
                 <div class="toolbar"><div><b>Resize Images</b><div class="muted">Upload images and set the final size.</div></div></div>
                 <div style="padding:15px">
                   <label class="image-upload" for="imageResizeInput">
-                    <div class="image-upload-icon">ðŸ“</div>
+                    <div class="image-upload-icon">📐</div>
                     <b>Select Images</b>
                     <div style="margin-top:8px;font-size:12px;color:#64748b">Click here or drag & drop images</div>
                     <div class="muted" style="margin-top:5px">Maximum 30 images</div>
@@ -1565,7 +1565,7 @@
                       <div class="field"><label>Quality <span id="resizeQualityValue">90%</span></label><input id="resizeQuality" type="range" min="10" max="100" value="90"></div>
                     </div>
                     <label class="image-check"><input id="resizeAutoScale" type="checkbox" checked> If needed, reduce dimensions further to reach the maximum KB</label>
-                    <div class="image-help"><b>Example:</b> 1 MB image â†’ Width <b>5</b>, Height <b>1</b>, Unit <b>cm</b>, Max File Size <b>200 KB</b>. The tool converts the physical size using DPI and can reduce quality/dimensions to reach the target.</div>
+                    <div class="image-help"><b>Example:</b> 1 MB image → Width <b>5</b>, Height <b>1</b>, Unit <b>cm</b>, Max File Size <b>200 KB</b>. The tool converts the physical size using DPI and can reduce quality/dimensions to reach the target.</div>
                   </div>
                   <div class="image-actions">
                     <button id="resizeImagesBtn" class="btn primary">Resize Images</button>
@@ -1579,7 +1579,7 @@
             <div class="crop-control-column">
               <div class="panel tool-subpanel crop-inline-panel">
                 <div class="toolbar">
-                  <div><b>Crop Image</b><div id="cropFileName" class="muted">Select â€œCropâ€ on an uploaded image.</div></div>
+                  <div><b>Crop Image</b><div id="cropFileName" class="muted">Select “Crop” on an uploaded image.</div></div>
                   <button id="cropResetBtn" class="btn secondary" type="button">Reset</button>
                 </div>
                 <div class="crop-inline-body">
@@ -3726,7 +3726,7 @@ function renderWatermarkFiles() {
   wmFileList.innerHTML = watermarkFiles.map((file, index) => `
     <div class="wm-file">
       <div class="wm-file-name" title="${esc(file.name)}">
-        ðŸ“„ ${esc(file.name)}
+        📄 ${esc(file.name)}
         <span class="wm-file-size">${formatBytes(file.size)}</span>
       </div>
       <button type="button" class="wm-remove" data-wm-index="${index}">Remove</button>
@@ -3854,7 +3854,7 @@ function syncAngleFromRange() {
   const value = safeNumber(wmAngleRange.value, -360, 360, 45);
   wmAngle.value = value;
   wmAngleRange.value = value;
-  wmAngleValue.textContent = `${value}Â°`;
+  wmAngleValue.textContent = `${value}°`;
 }
 
 function syncAngleFromInput() {
@@ -3863,7 +3863,7 @@ function syncAngleFromInput() {
   const value = safeNumber(raw, -360, 360, 45);
   wmAngle.value = value;
   wmAngleRange.value = value;
-  wmAngleValue.textContent = `${value}Â°`;
+  wmAngleValue.textContent = `${value}°`;
 }
 
 function getPreviewDimensions() {
@@ -3928,7 +3928,7 @@ function updatePagePreview() {
 
   wmColorValue.textContent = wmColor.value.toUpperCase();
   wmOpacityValue.textContent = `${getWatermarkOpacity()}%`;
-  wmAngleValue.textContent = `${angle}Â°`;
+  wmAngleValue.textContent = `${angle}°`;
 }
 
 wmOpacityRange.addEventListener("input", () => {
@@ -4105,7 +4105,7 @@ applyWm.addEventListener("click", async function () {
 
     wmResultList.innerHTML = watermarkedFiles.map(item => `
       <div class="wm-result-item">
-        <span title="${esc(item.name)}">âœ“ ${esc(item.name)}</span>
+        <span title="${esc(item.name)}">✓ ${esc(item.name)}</span>
       </div>
     `).join("");
 
@@ -4281,7 +4281,7 @@ async function compressPdfFile(file, onPageProgress) {
 function renderCompressFiles() {
   compressFileList.innerHTML = compressInputFiles.map((file, index) => `
     <div class="wm-file">
-      <div class="wm-file-name" title="${esc(file.name)}">ðŸ“„ ${esc(file.name)} <span class="wm-file-size">${formatBytes(file.size)}</span></div>
+      <div class="wm-file-name" title="${esc(file.name)}">📄 ${esc(file.name)} <span class="wm-file-size">${formatBytes(file.size)}</span></div>
       <button type="button" class="wm-remove" data-compress-index="${index}">Remove</button>
     </div>`).join("");
   compressStatus.textContent = compressInputFiles.length
@@ -4366,7 +4366,7 @@ compressPdfBtn.addEventListener("click", async function () {
         const pagePart = pageNo / pageCount;
         const overall = ((i + pagePart) / totalFiles) * 100;
         compressProgressFill.style.width = `${overall}%`;
-        compressProgressText.textContent = `Compressing ${i + 1} of ${totalFiles}: ${file.name} â€” page ${pageNo}/${pageCount}`;
+        compressProgressText.textContent = `Compressing ${i + 1} of ${totalFiles}: ${file.name} — page ${pageNo}/${pageCount}`;
       });
 
       compressedFiles.push(result);
@@ -4378,13 +4378,13 @@ compressPdfBtn.addEventListener("click", async function () {
     const after = compressedFiles.reduce((sum, x) => sum + x.compressedSize, 0);
     const saved = before ? Math.max(0, ((before - after) / before) * 100) : 0;
 
-    compressStatus.textContent = `Completed: ${formatBytes(before)} â†’ ${formatBytes(after)} (${saved.toFixed(1)}% actual reduction).`;
+    compressStatus.textContent = `Completed: ${formatBytes(before)} → ${formatBytes(after)} (${saved.toFixed(1)}% actual reduction).`;
     compressResultList.innerHTML = compressedFiles.map((x, index) => {
       const percent = x.originalSize ? Math.max(0, ((x.originalSize - x.compressedSize) / x.originalSize) * 100) : 0;
       const note = x.reduced ? `${percent.toFixed(1)}% smaller` : "already smaller / original kept";
       return `<div class="wm-result-item">
-        <span title="${esc(x.name)}">âœ“ ${esc(x.name)} <span class="muted">(${x.pages} pages)</span></span>
-        <span class="muted">${formatBytes(x.originalSize)} â†’ ${formatBytes(x.compressedSize)} (${note})</span>
+        <span title="${esc(x.name)}">✓ ${esc(x.name)} <span class="muted">(${x.pages} pages)</span></span>
+        <span class="muted">${formatBytes(x.originalSize)} → ${formatBytes(x.compressedSize)} (${note})</span>
       </div>`;
     }).join("");
 
@@ -4538,7 +4538,7 @@ function renderImageFileList(files, listEl, statusEl, setterName) {
       const crop = document.createElement("button");
       crop.className = "btn secondary";
       crop.type = "button";
-      crop.textContent = "âœ‚ Crop";
+      crop.textContent = "✂ Crop";
       crop.onclick = () => openCropEditor(index);
       actionWrap.appendChild(crop);
     }
@@ -4657,7 +4657,7 @@ function drawCropPreview(){
   const hs=Math.max(7,Math.min(12,10*scale)); ctx.fillStyle="#fff";
   [[x,y],[x+w/2,y],[x+w,y],[x+w,y+h/2],[x+w,y+h],[x+w/2,y+h],[x,y+h],[x,y+h/2]].forEach(([hx,hy])=>{ctx.fillRect(hx-hs/2,hy-hs/2,hs,hs);});
   ctx.restore();
-  cropInfo.textContent=`Crop: ${Math.round(cropState.w)} Ã— ${Math.round(cropState.h)} px`;
+  cropInfo.textContent=`Crop: ${Math.round(cropState.w)} × ${Math.round(cropState.h)} px`;
 }
 function cropPointerPoint(e){const r=cropCanvas.getBoundingClientRect();const sx=cropCanvas.width/(cropImage.naturalWidth||cropImage.width);const sy=cropCanvas.height/(cropImage.naturalHeight||cropImage.height);return {x:(e.clientX-r.left)/sx,y:(e.clientY-r.top)/sy};}
 function cropHandleAt(p){if(!cropState)return null;const t=Math.max(10,(cropImage.naturalWidth||cropImage.width)*.018);const pts={nw:[cropState.x,cropState.y],n:[cropState.x+cropState.w/2,cropState.y],ne:[cropState.x+cropState.w,cropState.y],e:[cropState.x+cropState.w,cropState.y+cropState.h/2],se:[cropState.x+cropState.w,cropState.y+cropState.h],s:[cropState.x+cropState.w/2,cropState.y+cropState.h],sw:[cropState.x,cropState.y+cropState.h],w:[cropState.x,cropState.y+cropState.h/2]};for(const [k,[x,y]] of Object.entries(pts)){if(Math.hypot(p.x-x,p.y-y)<=t)return k;}if(p.x>=cropState.x&&p.x<=cropState.x+cropState.w&&p.y>=cropState.y&&p.y<=cropState.y+cropState.h)return "move";return null;}
@@ -4747,7 +4747,7 @@ convertImagesBtn.onclick = async () => {
     }
     imageConverterProgressFill.style.width = "100%";
     imageConverterProgressText.textContent = `Completed ${convertedImageFiles.length} image${convertedImageFiles.length === 1 ? "" : "s"}.`;
-    imageConverterResultList.innerHTML = convertedImageFiles.map(item => `<div class="image-result-row"><div><b>${escapeHtml(item.name)}</b><br><small>${item.width} Ã— ${item.height} px Â· ${formatBytes(item.blob.size)}</small></div><span class="image-badge">${outputLabel(mime)}</span></div>`).join("");
+    imageConverterResultList.innerHTML = convertedImageFiles.map(item => `<div class="image-result-row"><div><b>${escapeHtml(item.name)}</b><br><small>${item.width} × ${item.height} px · ${formatBytes(item.blob.size)}</small></div><span class="image-badge">${outputLabel(mime)}</span></div>`).join("");
     imageConverterResult.classList.add("show");
     downloadConvertedBtn.disabled = !convertedImageFiles.length;
   } catch (error) {
@@ -4871,7 +4871,7 @@ resizeImagesBtn.onclick = async () => {
     }
     imageResizeProgressFill.style.width = "100%";
     imageResizeProgressText.textContent = `Completed ${resizedImageFiles.length} image${resizedImageFiles.length === 1 ? "" : "s"}.`;
-    imageResizeResultList.innerHTML = resizedImageFiles.map(item => `<div class="image-result-row"><div><b>${escapeHtml(item.name)}</b><br><small>${item.width} Ã— ${item.height} px Â· ${formatBytes(item.blob.size)}</small></div><span class="image-badge">${outputLabel(item.mime)}</span></div>`).join("");
+    imageResizeResultList.innerHTML = resizedImageFiles.map(item => `<div class="image-result-row"><div><b>${escapeHtml(item.name)}</b><br><small>${item.width} × ${item.height} px · ${formatBytes(item.blob.size)}</small></div><span class="image-badge">${outputLabel(item.mime)}</span></div>`).join("");
     imageResizeResult.classList.add("show"); downloadResizedBtn.disabled = !resizedImageFiles.length;
   } catch (error) {
     console.error(error); alert("Image resize stopped:\n" + (error?.message || error)); imageResizeProgressText.textContent = "Resize stopped.";
@@ -4895,7 +4895,7 @@ function cleanWatermarkTool(){
 document.getElementById("cleanWatermarkBtn").onclick=cleanWatermarkTool;
 document.getElementById("cleanCompressBtn").onclick=()=>{compressInputFiles=[];compressedFiles=[];compressFilesInput.value="";renderCompressFiles();compressResult.classList.remove("show");compressResultList.innerHTML="";downloadCompressed.disabled=true;compressProgress.classList.remove("show");compressProgressFill.style.width="0%";};
 document.getElementById("cleanConverterBtn").onclick=()=>{imageConverterFiles=[];convertedImageFiles=[];imageConverterInput.value="";renderImageFileList(imageConverterFiles,imageConverterList,imageConverterStatus,"converter");imageConverterResult.classList.remove("show");imageConverterResultList.innerHTML="";downloadConvertedBtn.disabled=true;imageConverterProgress.classList.remove("show");imageConverterProgressFill.style.width="0%";};
-document.getElementById("cleanResizeBtn").onclick=()=>{imageResizeFiles=[];resizedImageFiles=[];imageResizeInput.value="";cropIndex=-1;cropImage=null;cropState=null;cropFileName.textContent="Select â€œCropâ€ on an uploaded image.";showCropWorkspace(false);renderImageFileList(imageResizeFiles,imageResizeList,imageResizeStatus,"resize");imageResizeResult.classList.remove("show");imageResizeResultList.innerHTML="";downloadResizedBtn.disabled=true;imageResizeProgress.classList.remove("show");imageResizeProgressFill.style.width="0%";};
+document.getElementById("cleanResizeBtn").onclick=()=>{imageResizeFiles=[];resizedImageFiles=[];imageResizeInput.value="";cropIndex=-1;cropImage=null;cropState=null;cropFileName.textContent="Select “Crop” on an uploaded image.";showCropWorkspace(false);renderImageFileList(imageResizeFiles,imageResizeList,imageResizeStatus,"resize");imageResizeResult.classList.remove("show");imageResizeResultList.innerHTML="";downloadResizedBtn.disabled=true;imageResizeProgress.classList.remove("show");imageResizeProgressFill.style.width="0%";};
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
