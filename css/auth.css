@@ -1,38 +1,195 @@
+/* =====================================================
+   LOGIN SCREEN
+===================================================== */
 
-    /* SINGLE LOGIN CONFIRM MODAL */
-    .single-login-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 99999;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: rgba(15, 23, 42, .58);
-      backdrop-filter: blur(2px);
-    }
-    .single-login-modal.show { display: flex; }
-    .single-login-card {
-      width: min(460px, 100%);
-      background: #fff;
-      border-radius: 14px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.25);
-      padding: 24px;
-      border: 1px solid #e5e7eb;
-    }
-    .single-login-card h3 { margin: 0 0 10px; font-size: 20px; color: #111827; }
-    .single-login-card p { margin: 0; color: #4b5563; line-height: 1.55; font-size: 14px; }
-    .single-login-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    .single-login-actions button { min-width: 100px; }
+.login {
+  min-height: 100vh;
+  position: relative;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(248,250,252,.78), rgba(235,242,252,.58)),
+    url("../login-bg.svg") center/cover no-repeat;
+}
 
+.login::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,.20), rgba(255,255,255,.04) 52%, rgba(255,255,255,.18));
+  pointer-events: none;
+}
+
+.loginbox {
+  position: relative;
+  z-index: 1;
+  width: min(430px, 100%);
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,.78);
+  border-radius: 24px;
+  padding: 34px;
+  box-shadow: 0 24px 70px rgba(20,35,60,.18);
+}
+
+.loginbox h1 {
+  margin: 0 0 8px;
+  color: #14284b;
+  font-size: 30px;
+  letter-spacing: -.5px;
+}
+
+.loginbox .muted {
+  margin-bottom: 22px;
+  color: #64748b;
+}
+
+.loginbox input {
+  width: 100%;
+  padding: 13px 15px;
+  margin: 8px 0;
+  border: 1px solid #d7dfeb;
+  border-radius: 12px;
+  background: rgba(255,255,255,.82);
+  color: #14284b;
+  font: inherit;
+  outline: none;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.loginbox input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37,99,235,.10);
+}
+
+.loginbox #loginBtn {
+  margin-top: 12px;
+  min-height: 46px;
+  border-radius: 12px;
+  font-size: 15px;
+  box-shadow: 0 8px 22px rgba(37,99,235,.18);
+}
+
+/* =====================================================
+   SINGLE LOGIN CONFIRMATION MODAL
+===================================================== */
+
+.single-login-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15,23,42,.56);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+
+.single-login-modal.show {
+  display: flex;
+  animation: singleLoginFade .18s ease-out;
+}
+
+.single-login-card {
+  width: min(470px, 100%);
+  background: #fff;
+  border: 1px solid rgba(255,255,255,.9);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 28px 90px rgba(0,0,0,.25);
+  text-align: center;
+  animation: singleLoginCardIn .2s ease-out;
+}
+
+.single-login-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: 30px;
+}
+
+.single-login-card h3 {
+  margin: 0 0 12px;
+  color: #14284b;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.single-login-card p {
+  margin: 0 auto;
+  max-width: 390px;
+  color: #475569;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.single-login-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.single-login-actions button {
+  min-height: 46px;
+  border-radius: 11px;
+  border: 0;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+#singleLoginNo {
+  background: #dc2626;
+  color: #fff;
+}
+
+#singleLoginYes {
+  background: #2563eb;
+  color: #fff;
+}
+
+#singleLoginNo:hover,
+#singleLoginYes:hover {
+  filter: brightness(.95);
+}
+
+body.single-login-open {
+  overflow: hidden;
+}
+
+@keyframes singleLoginFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes singleLoginCardIn {
+  from { opacity: 0; transform: translateY(10px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Arial Black */
 @font-face {
   font-family: "Arial Black Custom";
   src: url("../fonts/ariblk.ttf") format("truetype");
   font-weight: 900;
   font-style: normal;
+}
+
+@media (max-width: 640px) {
+  .login { padding: 16px; }
+  .loginbox { padding: 26px 20px; border-radius: 20px; }
+  .loginbox h1 { font-size: 26px; }
+  .single-login-card { padding: 24px 20px; }
+  .single-login-actions { grid-template-columns: 1fr 1fr; }
 }
