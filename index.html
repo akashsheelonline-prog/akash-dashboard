@@ -743,6 +743,66 @@
       }
     }
 
+
+    /* IMAGE TOOLS */
+    .image-tool-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, .42fr);
+      gap: 18px;
+    }
+    .image-upload {
+      display: block; width: 100%; min-height: 170px; padding: 28px;
+      border: 2px dashed #cbd5e1; border-radius: 12px; text-align: center;
+      background: #f8fafc; cursor: pointer; transition: .15s;
+    }
+    .image-upload:hover, .image-upload:focus-within { border-color:#2563eb; background:#eff6ff; }
+    .image-upload input { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+    .image-upload-icon { font-size:36px; margin-bottom:8px; }
+    .format-note {
+      margin-top:10px; padding:9px 11px; border-radius:8px; background:#f1f5f9;
+      color:#475569; font-size:12px; text-align:left;
+    }
+    .image-file-list { margin-top:14px; display:grid; gap:8px; max-height:390px; overflow:auto; }
+    .image-file {
+      display:flex; align-items:center; gap:10px; padding:9px 11px; background:#fff;
+      border:1px solid #e5e9f0; border-radius:9px;
+    }
+    .image-thumb { width:48px; height:48px; object-fit:cover; border-radius:7px; background:#f1f5f9; flex:0 0 48px; }
+    .image-file-main { min-width:0; flex:1; }
+    .image-file-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; font-weight:700; }
+    .image-file-meta { color:#64748b; font-size:11px; margin-top:3px; }
+    .image-file-remove { border:0; background:#fee2e2; color:#991b1b; border-radius:7px; padding:6px 9px; cursor:pointer; font-weight:700; }
+    .image-settings { display:grid; gap:13px; }
+    .image-two { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .image-three { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+    .image-check { display:flex; align-items:center; gap:8px; font-size:13px; color:#334155; }
+    .image-check input { width:auto; }
+    .image-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:15px; }
+    .image-progress { margin-top:14px; display:none; }
+    .image-progress.show { display:block; }
+    .image-progress-bar { height:9px; background:#e5e7eb; border-radius:99px; overflow:hidden; }
+    .image-progress-fill { height:100%; width:0; background:#2563eb; transition:width .15s; }
+    .image-result { margin-top:14px; display:none; }
+    .image-result.show { display:block; }
+    .image-result-row {
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      padding:9px 11px; border:1px solid #e5e9f0; border-radius:8px; background:#fff;
+      font-size:12px; margin-top:7px;
+    }
+    .image-result-row small { color:#64748b; }
+    .image-badge { padding:3px 7px; border-radius:999px; background:#dcfce7; color:#166534; font-weight:700; font-size:11px; }
+    .image-help { padding:11px 12px; border-left:4px solid #2563eb; background:#eff6ff; border-radius:7px; color:#334155; font-size:12px; line-height:1.5; }
+    .image-size-target { display:flex; gap:8px; align-items:end; }
+    .image-size-target .field { flex:1; }
+    .image-size-target .unit-field { width:110px; flex:0 0 110px; }
+    .image-preview-box {
+      min-height:170px; border:1px solid #e5e9f0; border-radius:10px; background:#f8fafc;
+      display:grid; place-items:center; padding:14px; overflow:hidden;
+    }
+    .image-preview-box img { max-width:100%; max-height:280px; object-fit:contain; border-radius:6px; }
+    @media(max-width:900px){ .image-tool-grid{grid-template-columns:1fr;} }
+    @media(max-width:700px){ .image-two,.image-three{grid-template-columns:1fr;} .image-size-target{display:grid;grid-template-columns:1fr 110px;} }
+
   </style>
   <style>
 @font-face {
@@ -856,6 +916,14 @@
 
       <button data-view="compress">
         🗜️ PDF Compress
+      </button>
+
+      <button data-view="image-converter">
+        🖼️ Image Converter
+      </button>
+
+      <button data-view="image-resize">
+        📐 Image Resize
       </button>
 
     </nav>
@@ -1147,6 +1215,148 @@
 
           <div id="compressResult" class="wm-result">
             <div id="compressResultList" class="wm-result-list"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+
+    <!-- =====================================================
+         IMAGE CONVERTER
+    ===================================================== -->
+    <section id="imageConverterView" class="hidden">
+      <section class="panel">
+        <div class="toolbar">
+          <div>
+            <b>Image Converter</b>
+            <div class="muted">Convert up to 30 images at one time</div>
+          </div>
+        </div>
+        <div style="padding:15px">
+          <div class="image-tool-grid">
+            <div>
+              <label class="image-upload" for="imageConverterInput">
+                <div class="image-upload-icon">🖼️</div>
+                <b>Select Images</b>
+                <div style="margin-top:8px;font-size:12px;color:#64748b">Click here or drag & drop images</div>
+                <div class="muted" style="margin-top:5px">Maximum 30 images</div>
+                <input id="imageConverterInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.svg" multiple>
+              </label>
+              <div class="format-note"><b>Supported input formats:</b> JPG, JPEG, PNG, WEBP, GIF, BMP and SVG (browser support may vary for uncommon formats). GIF is converted from its first frame.</div>
+              <div id="imageConverterList" class="image-file-list"></div>
+              <div id="imageConverterStatus" class="wm-status">No images selected.</div>
+            </div>
+            <div>
+              <div class="panel" style="box-shadow:none;border:1px solid #e5e9f0">
+                <div style="padding:15px">
+                  <div class="image-settings">
+                    <div class="field">
+                      <label>Convert To</label>
+                      <select id="imageConvertFormat">
+                        <option value="image/jpeg">JPG / JPEG</option>
+                        <option value="image/png">PNG</option>
+                        <option value="image/webp">WEBP</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label>Image Quality <span id="imageConvertQualityValue">90%</span></label>
+                      <input id="imageConvertQuality" type="range" min="10" max="100" value="90">
+                    </div>
+                    <div class="field">
+                      <label>JPEG/WEBP Background</label>
+                      <input id="imageConvertBackground" type="color" value="#ffffff">
+                    </div>
+                    <div class="image-help">The original image dimensions are preserved. JPG does not support transparency, so transparent areas use the selected background color.</div>
+                  </div>
+                  <div class="image-actions">
+                    <button id="convertImagesBtn" class="btn primary">Convert Images</button>
+                    <button id="downloadConvertedBtn" class="btn secondary" disabled>Download Converted ZIP</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="imageConverterProgress" class="image-progress">
+            <div class="image-progress-bar"><div id="imageConverterProgressFill" class="image-progress-fill"></div></div>
+            <div id="imageConverterProgressText" class="wm-status">Preparing...</div>
+          </div>
+          <div id="imageConverterResult" class="image-result">
+            <b>Conversion Results</b>
+            <div id="imageConverterResultList"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- =====================================================
+         IMAGE RESIZE
+    ===================================================== -->
+    <section id="imageResizeView" class="hidden">
+      <section class="panel">
+        <div class="toolbar">
+          <div>
+            <b>Image Resize</b>
+            <div class="muted">Resize up to 30 images by pixels, inches, cm or mm — with an optional target file size</div>
+          </div>
+        </div>
+        <div style="padding:15px">
+          <div class="image-tool-grid">
+            <div>
+              <label class="image-upload" for="imageResizeInput">
+                <div class="image-upload-icon">📐</div>
+                <b>Select Images</b>
+                <div style="margin-top:8px;font-size:12px;color:#64748b">Click here or drag & drop images</div>
+                <div class="muted" style="margin-top:5px">Maximum 30 images</div>
+                <input id="imageResizeInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.svg" multiple>
+              </label>
+              <div class="format-note"><b>Supported input formats:</b> JPG, JPEG, PNG, WEBP, GIF, BMP and SVG. GIF is resized from its first frame.</div>
+              <div id="imageResizeList" class="image-file-list"></div>
+              <div id="imageResizeStatus" class="wm-status">No images selected.</div>
+            </div>
+            <div>
+              <div class="panel" style="box-shadow:none;border:1px solid #e5e9f0">
+                <div style="padding:15px">
+                  <div class="image-settings">
+                    <div class="image-two">
+                      <div class="field"><label>Width</label><input id="resizeWidth" type="number" min="1" step="0.01" placeholder="e.g. 5"></div>
+                      <div class="field"><label>Height</label><input id="resizeHeight" type="number" min="1" step="0.01" placeholder="e.g. 1"></div>
+                    </div>
+                    <div class="image-two">
+                      <div class="field"><label>Unit</label><select id="resizeUnit"><option value="px">Pixels (px)</option><option value="in">Inches (in)</option><option value="cm" selected>Centimetres (cm)</option><option value="mm">Millimetres (mm)</option></select></div>
+                      <div class="field"><label>Resolution (DPI)</label><input id="resizeDpi" type="number" min="1" max="1200" step="1" value="96"></div>
+                    </div>
+                    <label class="image-check"><input id="resizeKeepAspect" type="checkbox"> Maintain original aspect ratio</label>
+                    <div class="field">
+                      <label>Output Format</label>
+                      <select id="resizeFormat">
+                        <option value="original" selected>Same / best supported format</option>
+                        <option value="image/jpeg">JPG / JPEG</option>
+                        <option value="image/png">PNG</option>
+                        <option value="image/webp">WEBP</option>
+                      </select>
+                    </div>
+                    <div class="image-two">
+                      <div class="field"><label>Maximum File Size (KB) <span class="muted">optional</span></label><input id="resizeMaxKB" type="number" min="1" step="1" placeholder="e.g. 200"></div>
+                      <div class="field"><label>Quality <span id="resizeQualityValue">90%</span></label><input id="resizeQuality" type="range" min="10" max="100" value="90"></div>
+                    </div>
+                    <label class="image-check"><input id="resizeAutoScale" type="checkbox" checked> If needed, reduce dimensions further to reach the maximum KB</label>
+                    <div class="image-help"><b>Example:</b> Select a 1 MB image → Width <b>5</b>, Height <b>1</b>, Unit <b>cm</b>, Max File Size <b>200 KB</b>. The tool converts 5 × 1 cm to pixels using the selected DPI, then adjusts quality and, if enabled, dimensions until the file is at or below the target where technically possible.</div>
+                  </div>
+                  <div class="image-actions">
+                    <button id="resizeImagesBtn" class="btn primary">Resize Images</button>
+                    <button id="downloadResizedBtn" class="btn secondary" disabled>Download Resized ZIP</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="imageResizeProgress" class="image-progress">
+            <div class="image-progress-bar"><div id="imageResizeProgressFill" class="image-progress-fill"></div></div>
+            <div id="imageResizeProgressText" class="wm-status">Preparing...</div>
+          </div>
+          <div id="imageResizeResult" class="image-result">
+            <b>Resize Results</b>
+            <div id="imageResizeResultList"></div>
           </div>
         </div>
       </section>
@@ -3911,6 +4121,374 @@ syncOpacityFromRange();
 syncAngleFromRange();
 
 /* =====================================================
+   IMAGE CONVERTER + IMAGE RESIZE
+===================================================== */
+
+let imageConverterFiles = [];
+let imageResizeFiles = [];
+let convertedImageFiles = [];
+let resizedImageFiles = [];
+
+const imageConverterView = document.getElementById("imageConverterView");
+const imageResizeView = document.getElementById("imageResizeView");
+
+const imageConverterInput = document.getElementById("imageConverterInput");
+const imageConverterList = document.getElementById("imageConverterList");
+const imageConverterStatus = document.getElementById("imageConverterStatus");
+const imageConvertFormat = document.getElementById("imageConvertFormat");
+const imageConvertQuality = document.getElementById("imageConvertQuality");
+const imageConvertQualityValue = document.getElementById("imageConvertQualityValue");
+const imageConvertBackground = document.getElementById("imageConvertBackground");
+const convertImagesBtn = document.getElementById("convertImagesBtn");
+const downloadConvertedBtn = document.getElementById("downloadConvertedBtn");
+const imageConverterProgress = document.getElementById("imageConverterProgress");
+const imageConverterProgressFill = document.getElementById("imageConverterProgressFill");
+const imageConverterProgressText = document.getElementById("imageConverterProgressText");
+const imageConverterResult = document.getElementById("imageConverterResult");
+const imageConverterResultList = document.getElementById("imageConverterResultList");
+
+const imageResizeInput = document.getElementById("imageResizeInput");
+const imageResizeList = document.getElementById("imageResizeList");
+const imageResizeStatus = document.getElementById("imageResizeStatus");
+const resizeWidth = document.getElementById("resizeWidth");
+const resizeHeight = document.getElementById("resizeHeight");
+const resizeUnit = document.getElementById("resizeUnit");
+const resizeDpi = document.getElementById("resizeDpi");
+const resizeKeepAspect = document.getElementById("resizeKeepAspect");
+const resizeFormat = document.getElementById("resizeFormat");
+const resizeMaxKB = document.getElementById("resizeMaxKB");
+const resizeQuality = document.getElementById("resizeQuality");
+const resizeQualityValue = document.getElementById("resizeQualityValue");
+const resizeAutoScale = document.getElementById("resizeAutoScale");
+const resizeImagesBtn = document.getElementById("resizeImagesBtn");
+const downloadResizedBtn = document.getElementById("downloadResizedBtn");
+const imageResizeProgress = document.getElementById("imageResizeProgress");
+const imageResizeProgressFill = document.getElementById("imageResizeProgressFill");
+const imageResizeProgressText = document.getElementById("imageResizeProgressText");
+const imageResizeResult = document.getElementById("imageResizeResult");
+const imageResizeResultList = document.getElementById("imageResizeResultList");
+
+const IMAGE_MAX = 30;
+
+function nextFrame() {
+  return new Promise(resolve => requestAnimationFrame(() => resolve()));
+}
+
+function imageExtForMime(mime) {
+  if (mime === "image/jpeg") return ".jpg";
+  if (mime === "image/webp") return ".webp";
+  return ".png";
+}
+
+function outputLabel(mime) {
+  return mime === "image/jpeg" ? "JPG" : mime === "image/webp" ? "WEBP" : "PNG";
+}
+
+function baseName(name) {
+  return name.replace(/\\.[^/.]+$/, "");
+}
+
+function fileLooksLikeImage(file) {
+  const ext = (file.name.split(".").pop() || "").toLowerCase();
+  return file.type.startsWith("image/") || ["jpg","jpeg","png","webp","gif","bmp","svg"].includes(ext);
+}
+
+function dedupeFiles(existing, incoming) {
+  const map = new Map(existing.map(f => [f.name + "|" + f.size + "|" + f.lastModified, f]));
+  incoming.forEach(f => { if (!map.has(f.name + "|" + f.size + "|" + f.lastModified)) map.set(f.name + "|" + f.size + "|" + f.lastModified, f); });
+  return Array.from(map.values()).slice(0, IMAGE_MAX);
+}
+
+function renderImageFileList(files, listEl, statusEl, setterName) {
+  listEl.innerHTML = "";
+  files.forEach((file, index) => {
+    const row = document.createElement("div");
+    row.className = "image-file";
+    const img = document.createElement("img");
+    img.className = "image-thumb";
+    img.alt = "";
+    img.src = URL.createObjectURL(file);
+    img.onload = () => URL.revokeObjectURL(img.src);
+    const main = document.createElement("div");
+    main.className = "image-file-main";
+    const name = document.createElement("div");
+    name.className = "image-file-name";
+    name.textContent = file.name;
+    const meta = document.createElement("div");
+    meta.className = "image-file-meta";
+    meta.textContent = formatBytes(file.size);
+    main.append(name, meta);
+    const remove = document.createElement("button");
+    remove.className = "image-file-remove";
+    remove.type = "button";
+    remove.textContent = "Remove";
+    remove.onclick = () => {
+      if (setterName === "converter") imageConverterFiles.splice(index, 1);
+      else imageResizeFiles.splice(index, 1);
+      renderImageFileList(setterName === "converter" ? imageConverterFiles : imageResizeFiles, listEl, statusEl, setterName);
+      if (setterName === "converter") { convertedImageFiles = []; downloadConvertedBtn.disabled = true; }
+      else { resizedImageFiles = []; downloadResizedBtn.disabled = true; }
+    };
+    row.append(img, main, remove);
+    listEl.appendChild(row);
+  });
+  statusEl.textContent = files.length ? `${files.length} image${files.length === 1 ? "" : "s"} selected.` : "No images selected.";
+}
+
+function acceptImageFiles(fileList) {
+  const incoming = Array.from(fileList || []).filter(fileLooksLikeImage);
+  if (!incoming.length) { alert("Please select valid image files."); return []; }
+  if (incoming.length > IMAGE_MAX) alert("Maximum 30 images are allowed. Only the first 30 valid images will be used.");
+  return incoming;
+}
+
+imageConverterInput.addEventListener("change", e => {
+  imageConverterFiles = dedupeFiles(imageConverterFiles, acceptImageFiles(e.target.files));
+  renderImageFileList(imageConverterFiles, imageConverterList, imageConverterStatus, "converter");
+  imageConverterInput.value = "";
+});
+
+imageResizeInput.addEventListener("change", e => {
+  imageResizeFiles = dedupeFiles(imageResizeFiles, acceptImageFiles(e.target.files));
+  renderImageFileList(imageResizeFiles, imageResizeList, imageResizeStatus, "resize");
+  imageResizeInput.value = "";
+});
+
+function addDropZone(zone, setter) {
+  ["dragenter","dragover"].forEach(type => zone.addEventListener(type, e => { e.preventDefault(); zone.style.borderColor = "#2563eb"; }));
+  ["dragleave","drop"].forEach(type => zone.addEventListener(type, e => { e.preventDefault(); zone.style.borderColor = "#cbd5e1"; }));
+  zone.addEventListener("drop", e => {
+    const files = acceptImageFiles(e.dataTransfer.files);
+    if (setter === "converter") { imageConverterFiles = dedupeFiles(imageConverterFiles, files); renderImageFileList(imageConverterFiles, imageConverterList, imageConverterStatus, "converter"); }
+    else { imageResizeFiles = dedupeFiles(imageResizeFiles, files); renderImageFileList(imageResizeFiles, imageResizeList, imageResizeStatus, "resize"); }
+  });
+}
+addDropZone(document.querySelector('label[for="imageConverterInput"]'), "converter");
+addDropZone(document.querySelector('label[for="imageResizeInput"]'), "resize");
+
+imageConvertQuality.oninput = () => imageConvertQualityValue.textContent = imageConvertQuality.value + "%";
+resizeQuality.oninput = () => resizeQualityValue.textContent = resizeQuality.value + "%";
+
+async function loadImageFile(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    img.decoding = "async";
+    img.src = url;
+    await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = () => reject(new Error("This image format cannot be decoded by this browser.")); });
+    try { await img.decode(); } catch (_) {}
+    return img;
+  } finally {
+    // Keep the object URL alive until Image has decoded.
+    URL.revokeObjectURL(url);
+  }
+}
+
+function createCanvas(width, height, background, mime) {
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(width));
+  canvas.height = Math.max(1, Math.round(height));
+  const ctx = canvas.getContext("2d", { alpha: mime !== "image/jpeg" });
+  if (mime === "image/jpeg") { ctx.fillStyle = background || "#ffffff"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  return { canvas, ctx };
+}
+
+function canvasBlob(canvas, mime, quality) {
+  return new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Browser could not create the output image.")), mime, quality));
+}
+
+async function renderImageBlob(img, width, height, mime, quality, background) {
+  const { canvas, ctx } = createCanvas(width, height, background, mime);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  const blob = await canvasBlob(canvas, mime, quality);
+  return { blob, width: canvas.width, height: canvas.height };
+}
+
+function mimeFromOriginal(file) {
+  const ext = (file.name.split(".").pop() || "").toLowerCase();
+  if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
+  if (ext === "webp") return "image/webp";
+  if (ext === "png") return "image/png";
+  return "image/png";
+}
+
+async function convertOneImage(file, mime, quality, background) {
+  const img = await loadImageFile(file);
+  const result = await renderImageBlob(img, img.naturalWidth || img.width, img.naturalHeight || img.height, mime, quality, background);
+  const ext = imageExtForMime(mime);
+  return { file, blob: result.blob, width: result.width, height: result.height, name: baseName(file.name) + ext };
+}
+
+convertImagesBtn.onclick = async () => {
+  if (!imageConverterFiles.length) { alert("Please select at least 1 image."); return; }
+  convertedImageFiles = [];
+  downloadConvertedBtn.disabled = true;
+  imageConverterResult.classList.remove("show");
+  imageConverterProgress.classList.add("show");
+  convertImagesBtn.disabled = true;
+  const mime = imageConvertFormat.value;
+  const quality = Number(imageConvertQuality.value) / 100;
+  try {
+    for (let i = 0; i < imageConverterFiles.length; i++) {
+      const file = imageConverterFiles[i];
+      imageConverterProgressText.textContent = `Converting ${i + 1} of ${imageConverterFiles.length}: ${file.name}`;
+      imageConverterProgressFill.style.width = `${Math.round(i / imageConverterFiles.length * 100)}%`;
+      await nextFrame();
+      const item = await convertOneImage(file, mime, quality, imageConvertBackground.value);
+      convertedImageFiles.push(item);
+      await nextFrame();
+    }
+    imageConverterProgressFill.style.width = "100%";
+    imageConverterProgressText.textContent = `Completed ${convertedImageFiles.length} image${convertedImageFiles.length === 1 ? "" : "s"}.`;
+    imageConverterResultList.innerHTML = convertedImageFiles.map(item => `<div class="image-result-row"><div><b>${escapeHtml(item.name)}</b><br><small>${item.width} × ${item.height} px · ${formatBytes(item.blob.size)}</small></div><span class="image-badge">${outputLabel(mime)}</span></div>`).join("");
+    imageConverterResult.classList.add("show");
+    downloadConvertedBtn.disabled = !convertedImageFiles.length;
+  } catch (error) {
+    console.error(error);
+    alert("Image conversion stopped:\n" + (error?.message || error));
+    imageConverterProgressText.textContent = "Conversion stopped.";
+  } finally { convertImagesBtn.disabled = false; }
+};
+
+downloadConvertedBtn.onclick = async () => {
+  if (!convertedImageFiles.length) return;
+  downloadConvertedBtn.disabled = true;
+  try {
+    const zip = new JSZip();
+    convertedImageFiles.forEach(item => zip.file(item.name, item.blob));
+    const blob = await zip.generateAsync({ type:"blob", compression:"DEFLATE", compressionOptions:{level:6} });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "Converted_Images.zip"; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  } catch (e) { alert("Unable to create ZIP file:\n" + (e?.message || e)); }
+  finally { downloadConvertedBtn.disabled = false; }
+};
+
+function unitToPx(value, unit, dpi) {
+  if (!Number.isFinite(value) || value <= 0) return null;
+  if (unit === "px") return value;
+  if (unit === "in") return value * dpi;
+  if (unit === "cm") return value * dpi / 2.54;
+  if (unit === "mm") return value * dpi / 25.4;
+  return value;
+}
+
+function getResizeDimensions(img) {
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  const dpi = Math.max(1, Number(resizeDpi.value) || 96);
+  const wVal = Number(resizeWidth.value), hVal = Number(resizeHeight.value);
+  let w = unitToPx(wVal, resizeUnit.value, dpi);
+  let h = unitToPx(hVal, resizeUnit.value, dpi);
+  if (!w && !h) return { width: iw, height: ih };
+  if (resizeKeepAspect.checked) {
+    if (w && h) { const scale = Math.min(w / iw, h / ih); w = iw * scale; h = ih * scale; }
+    else if (w) { h = iw ? ih * (w / iw) : ih; }
+    else { w = ih ? iw * (h / ih) : iw; }
+  } else {
+    w = w || iw; h = h || ih;
+  }
+  return { width: Math.max(1, Math.round(w)), height: Math.max(1, Math.round(h)) };
+}
+
+async function encodeWithinTarget(img, width, height, mime, initialQuality, background, maxKB, allowScale) {
+  let w = Math.max(1, Math.round(width)), h = Math.max(1, Math.round(height));
+  const target = maxKB > 0 ? maxKB * 1024 : 0;
+  let quality = Math.max(0.1, Math.min(1, initialQuality));
+  let result = await renderImageBlob(img, w, h, mime, quality, background);
+  if (!target || result.blob.size <= target) return result;
+
+  // For JPEG/WEBP, first reduce quality without changing the requested dimensions.
+  if (mime !== "image/png") {
+    let lo = 0.05, hi = quality, best = null;
+    for (let i = 0; i < 7; i++) {
+      const q = (lo + hi) / 2;
+      const trial = await renderImageBlob(img, w, h, mime, q, background);
+      if (trial.blob.size <= target) { best = trial; lo = q; }
+      else hi = q;
+    }
+    if (best) return best;
+  }
+
+  if (!allowScale) return result;
+
+  // If quality alone is not enough, scale dimensions down gradually.
+  for (let pass = 0; pass < 9; pass++) {
+    const ratio = Math.max(0.25, Math.min(0.92, Math.sqrt(target / Math.max(1, result.blob.size)) * 0.96));
+    const nw = Math.max(1, Math.floor(w * ratio));
+    const nh = Math.max(1, Math.floor(h * ratio));
+    if (nw === w && nh === h) break;
+    w = nw; h = nh;
+    if (mime !== "image/png") {
+      let lo = 0.05, hi = quality, best = null;
+      for (let i = 0; i < 7; i++) {
+        const q = (lo + hi) / 2;
+        const trial = await renderImageBlob(img, w, h, mime, q, background);
+        if (trial.blob.size <= target) { best = trial; lo = q; } else hi = q;
+      }
+      result = best || await renderImageBlob(img, w, h, mime, 0.05, background);
+    } else {
+      result = await renderImageBlob(img, w, h, mime, quality, background);
+    }
+    if (result.blob.size <= target) return result;
+    await nextFrame();
+  }
+  return result;
+}
+
+async function resizeOneImage(file) {
+  const img = await loadImageFile(file);
+  const dims = getResizeDimensions(img);
+  let mime = resizeFormat.value === "original" ? mimeFromOriginal(file) : resizeFormat.value;
+  if (mime === "image/gif") mime = "image/png";
+  const maxKB = Number(resizeMaxKB.value) > 0 ? Number(resizeMaxKB.value) : 0;
+  const result = await encodeWithinTarget(img, dims.width, dims.height, mime, Number(resizeQuality.value)/100, "#ffffff", maxKB, resizeAutoScale.checked);
+  return { file, blob: result.blob, width: result.width, height: result.height, name: baseName(file.name) + imageExtForMime(mime), mime };
+}
+
+resizeImagesBtn.onclick = async () => {
+  if (!imageResizeFiles.length) { alert("Please select at least 1 image."); return; }
+  const w = Number(resizeWidth.value), h = Number(resizeHeight.value);
+  if ((!w || w <= 0) && (!h || h <= 0)) {
+    alert("Please enter a width or height.");
+    return;
+  }
+  resizedImageFiles = []; downloadResizedBtn.disabled = true; imageResizeResult.classList.remove("show"); imageResizeProgress.classList.add("show"); resizeImagesBtn.disabled = true;
+  try {
+    for (let i = 0; i < imageResizeFiles.length; i++) {
+      const file = imageResizeFiles[i];
+      imageResizeProgressText.textContent = `Resizing ${i + 1} of ${imageResizeFiles.length}: ${file.name}`;
+      imageResizeProgressFill.style.width = `${Math.round(i / imageResizeFiles.length * 100)}%`;
+      await nextFrame();
+      resizedImageFiles.push(await resizeOneImage(file));
+      await nextFrame();
+    }
+    imageResizeProgressFill.style.width = "100%";
+    imageResizeProgressText.textContent = `Completed ${resizedImageFiles.length} image${resizedImageFiles.length === 1 ? "" : "s"}.`;
+    imageResizeResultList.innerHTML = resizedImageFiles.map(item => `<div class="image-result-row"><div><b>${escapeHtml(item.name)}</b><br><small>${item.width} × ${item.height} px · ${formatBytes(item.blob.size)}</small></div><span class="image-badge">${outputLabel(item.mime)}</span></div>`).join("");
+    imageResizeResult.classList.add("show"); downloadResizedBtn.disabled = !resizedImageFiles.length;
+  } catch (error) {
+    console.error(error); alert("Image resize stopped:\n" + (error?.message || error)); imageResizeProgressText.textContent = "Resize stopped.";
+  } finally { resizeImagesBtn.disabled = false; }
+};
+
+downloadResizedBtn.onclick = async () => {
+  if (!resizedImageFiles.length) return;
+  downloadResizedBtn.disabled = true;
+  try {
+    const zip = new JSZip(); resizedImageFiles.forEach(item => zip.file(item.name, item.blob));
+    const blob = await zip.generateAsync({ type:"blob", compression:"DEFLATE", compressionOptions:{level:6} });
+    const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href=url; a.download="Resized_Images.zip"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),5000);
+  } catch(e) { alert("Unable to create ZIP file:\n" + (e?.message || e)); }
+  finally { downloadResizedBtn.disabled = false; }
+};
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+}
+
+/* =====================================================
    NAVIGATION
 ===================================================== */
 
@@ -3944,13 +4522,19 @@ document
 
           const isWatermark = newView === "watermark";
           const isCompress = newView === "compress";
+          const isImageConverter = newView === "image-converter";
+          const isImageResize = newView === "image-resize";
           const isPdfTool = isWatermark || isCompress;
+          const isImageTool = isImageConverter || isImageResize;
+          const isSpecialTool = isPdfTool || isImageTool;
 
           watermarkView.classList.toggle("hidden", !isWatermark);
           compressView.classList.toggle("hidden", !isCompress);
-          document.querySelector(".main > .cards")?.classList.toggle("hidden", isPdfTool);
-          document.querySelector(".main > .panel")?.classList.toggle("hidden", isPdfTool);
-          document.querySelector(".main > .top .actions")?.classList.toggle("hidden", isPdfTool);
+          imageConverterView.classList.toggle("hidden", !isImageConverter);
+          imageResizeView.classList.toggle("hidden", !isImageResize);
+          document.querySelector(".main > .cards")?.classList.toggle("hidden", isSpecialTool);
+          document.querySelector(".main > .panel")?.classList.toggle("hidden", isSpecialTool);
+          document.querySelector(".main > .top .actions")?.classList.toggle("hidden", isSpecialTool);
 
 
           document
@@ -4005,12 +4589,21 @@ document
 
             compress:
               "PDF Compress"
+
+            ,
+            "image-converter":
+              "Image Converter",
+
+            "image-resize":
+              "Image Resize"
           };
 
 
-          if (!isPdfTool) {
+          if (!isSpecialTool) {
             watermarkView.classList.add("hidden");
             compressView.classList.add("hidden");
+            imageConverterView.classList.add("hidden");
+            imageResizeView.classList.add("hidden");
             document.querySelector(".main > .cards")?.classList.remove("hidden");
             document.querySelector(".main > .panel")?.classList.remove("hidden");
             document.querySelector(".main > .top .actions")?.classList.remove("hidden");
