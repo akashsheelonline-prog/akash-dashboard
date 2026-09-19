@@ -4999,11 +4999,45 @@ loginBtn.onclick =
 
     }
 
+    /*
+      The password has been verified, but do NOT take over the existing
+      dashboard session yet. First check whether another user currently
+      owns the single-login slot. This lets the new user explicitly choose
+      whether to take over the existing session.
+    */
     try {
+      const { data: currentLock, error: lockCheckError } = await sb
+        .from("active_login")
+        .select("user_id,session_token,updated_at")
+        .eq("id", 1)
+        .maybeSingle();
+
+      if (lockCheckError) {
+        await sb.auth.signOut({ scope: "local" });
+        msg("Single-login lock check failed: " + lockCheckError.message);
+        return;
+      }
+
+      if (currentLock && currentLock.user_id && currentLock.user_id !== data.user.id) {
+        const takeOver = window.confirm(
+          "Another user is already logged in to this dashboard.\n\n" +
+          "Do you want to log that user out and continue with your login?\n\n" +
+          "Yes = Log out the existing user and continue\n" +
+          "No = Cancel this login"
+        );
+
+        if (!takeOver) {
+          await sb.auth.signOut({ scope: "local" });
+          msg("Login cancelled. The existing user remains logged in.");
+          return;
+        }
+      }
+
+      /* Only after confirmation do we claim/take over the single slot. */
       await claimSingleLogin(data.user.id);
     } catch (lockError) {
       await sb.auth.signOut({ scope: "local" });
-      msg(lockError.message);
+      msg(lockError.message || "Unable to start the single-login session.");
       return;
     }
 
