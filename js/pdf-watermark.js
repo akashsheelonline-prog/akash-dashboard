@@ -353,7 +353,7 @@ async function applyWatermarkToPdf(file) {
   let font;
 
   if (wmFont.value === "ArialBlack") {
-    const fontResponse = await fetch("./ariblk.ttf");
+    const fontResponse = await fetch("./fonts/ariblk.ttf");
     if (!fontResponse.ok) {
       throw new Error("Arial Black font file could not be loaded.");
     }
