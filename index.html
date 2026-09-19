@@ -885,6 +885,37 @@
 
   </style>
   <style>
+    /* SINGLE LOGIN CONFIRM MODAL */
+    .single-login-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(15, 23, 42, .58);
+      backdrop-filter: blur(2px);
+    }
+    .single-login-modal.show { display: flex; }
+    .single-login-card {
+      width: min(460px, 100%);
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      padding: 24px;
+      border: 1px solid #e5e7eb;
+    }
+    .single-login-card h3 { margin: 0 0 10px; font-size: 20px; color: #111827; }
+    .single-login-card p { margin: 0; color: #4b5563; line-height: 1.55; font-size: 14px; }
+    .single-login-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .single-login-actions button { min-width: 100px; }
+
 @font-face {
   font-family: "Arial Black Custom";
   src: url("./ariblk.ttf") format("truetype");
@@ -940,6 +971,21 @@
 
 </div>
 
+
+
+<!-- =====================================================
+     SINGLE LOGIN CONFIRMATION
+===================================================== -->
+<div id="singleLoginModal" class="single-login-modal" role="dialog" aria-modal="true" aria-labelledby="singleLoginTitle">
+  <div class="single-login-card">
+    <h3 id="singleLoginTitle">Account Already Logged In</h3>
+    <p id="singleLoginText">This account is already logged in on another browser or device. Do you want to lock out that login and continue here?</p>
+    <div class="single-login-actions">
+      <button id="singleLoginNo" class="btn">No, Cancel</button>
+      <button id="singleLoginYes" class="btn primary">Yes, Lock Out &amp; Login</button>
+    </div>
+  </div>
+</div>
 
 <!-- =====================================================
      DASHBOARD
@@ -1976,6 +2022,15 @@ const pageTitle =
 
 const todayLabel =
   document.getElementById("todayLabel");
+
+const singleLoginModal =
+  document.getElementById("singleLoginModal");
+
+const singleLoginYes =
+  document.getElementById("singleLoginYes");
+
+const singleLoginNo =
+  document.getElementById("singleLoginNo");
 
 
 /* =====================================================
@@ -4912,6 +4967,34 @@ logoutBtn.onclick =
 
 
 /* =====================================================
+   SINGLE LOGIN CONFIRMATION
+===================================================== */
+
+function askSingleLoginTakeover() {
+  return new Promise(resolve => {
+    singleLoginModal.classList.add("show");
+    singleLoginYes.focus();
+
+    const finish = value => {
+      singleLoginModal.classList.remove("show");
+      singleLoginYes.onclick = null;
+      singleLoginNo.onclick = null;
+      document.removeEventListener("keydown", onKeyDown);
+      resolve(value);
+    };
+
+    const onKeyDown = event => {
+      if (event.key === "Escape") finish(false);
+      if (event.key === "Enter") finish(true);
+    };
+
+    singleLoginYes.onclick = () => finish(true);
+    singleLoginNo.onclick = () => finish(false);
+    document.addEventListener("keydown", onKeyDown);
+  });
+}
+
+/* =====================================================
    LOGIN
 ===================================================== */
 
@@ -5018,22 +5101,22 @@ loginBtn.onclick =
         return;
       }
 
-      if (currentLock && currentLock.user_id && currentLock.user_id !== data.user.id) {
-        const takeOver = window.confirm(
-          "Another user is already logged in to this dashboard.\n\n" +
-          "Do you want to log that user out and continue with your login?\n\n" +
-          "Yes = Log out the existing user and continue\n" +
-          "No = Cancel this login"
-        );
+      /*
+        IMPORTANT: Any active lock must be confirmed before it is replaced,
+        including when the same account is already logged in elsewhere.
+        The existing lock is NOT changed when the user clicks No.
+      */
+      if (currentLock && currentLock.user_id && currentLock.session_token) {
+        const takeOver = await askSingleLoginTakeover();
 
         if (!takeOver) {
           await sb.auth.signOut({ scope: "local" });
-          msg("Login cancelled. The existing user remains logged in.");
+          msg("Login cancelled. The existing login remains active.");
           return;
         }
       }
 
-      /* Only after confirmation do we claim/take over the single slot. */
+      /* Only after the user clicks Yes (when a lock exists) do we replace the lock. */
       await claimSingleLogin(data.user.id);
     } catch (lockError) {
       await sb.auth.signOut({ scope: "local" });
