@@ -343,6 +343,77 @@ loginBtn.onclick = async function(){
       return;
     }
 
+    /*
+      A session may already be active for this account.
+      Ask before replacing it.
+
+      YES  -> this new device becomes active and the old device
+              will be signed out by the session monitor.
+      NO   -> keep the old device active and sign out this
+              newly-created local session.
+    */
+    const userId = data.session.user?.id;
+
+    if(!userId){
+      await sb.auth.signOut({ scope: "local" });
+      msg("Login failed. User information was not available.");
+      return;
+    }
+
+    const {
+      data: existingSession,
+      error: existingSessionError
+    } = await sb
+      .from("user_sessions")
+      .select("session_token")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if(existingSessionError){
+      console.error(
+        "Existing session check failed:",
+        existingSessionError
+      );
+
+      await sb.auth.signOut({ scope: "local" });
+
+      msg(
+        "Unable to check the existing login. Please try again."
+      );
+
+      return;
+    }
+
+    if(
+      existingSession?.session_token &&
+      existingSession.session_token !== currentSessionToken
+    ){
+      const replaceExisting = window.confirm(
+        "This account is already logged in on another device or browser.\n\n" +
+        "Do you want to log out the other session and continue here?\n\n" +
+        "Yes = log out the other device and continue here.\n" +
+        "No = keep the other device logged in."
+      );
+
+      if(!replaceExisting){
+        await sb.auth.signOut({ scope: "local" });
+
+        currentSessionToken = null;
+        sessionStorage.removeItem(SESSION_TOKEN_KEY);
+
+        tasks = [];
+        selected.clear();
+
+        showLogin();
+
+        msg(
+          "Login cancelled. The existing session is still active."
+        );
+
+        return;
+      }
+    }
+
     await activateSession(data.session);
   }catch(err){
     console.error("Login error:", err);
