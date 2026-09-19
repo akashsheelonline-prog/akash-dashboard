@@ -257,6 +257,22 @@
     .crop-controls input{width:100%;padding:9px;border:1px solid #d6dce6;border-radius:8px}
     .image-file-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
     .clean-btn{border-color:#fecaca!important;color:#991b1b!important;background:#fff!important}
+    .resize-workspace-grid{display:grid;grid-template-columns:minmax(420px,1.05fr) minmax(420px,.95fr);gap:16px;align-items:start}
+    .tool-subpanel{box-shadow:none;border:1px solid #e5e9f0;min-width:0}
+    .crop-inline-panel{position:sticky;top:18px}
+    .crop-inline-body{padding:15px}
+    .crop-empty{min-height:430px;border:1px dashed #cbd5e1;border-radius:12px;display:grid;place-items:center;text-align:center;color:#64748b;padding:25px}
+    .crop-preview-wrap{min-height:430px;display:grid;place-items:center;background:#111827;border-radius:12px;padding:12px;overflow:hidden}
+    #cropCanvas{max-width:100%;max-height:62vh;background:#fff;touch-action:none;cursor:crosshair;border-radius:4px}
+    .crop-hint{margin-top:9px;line-height:1.45}
+    .crop-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .crop-info{margin-top:10px;padding:9px 11px;background:#f8fafc;border-radius:8px;font-size:12px}
+    .task-quick-filters{display:flex;flex-wrap:wrap;gap:8px;padding:12px 15px;border-bottom:1px solid #e5e9f0}
+    .task-filter-btn{border:1px solid #dbe1ea;background:#fff;border-radius:999px;padding:7px 12px;font-weight:700;cursor:pointer;color:#334155}
+    .task-filter-btn.active{background:var(--accent,#2563eb);border-color:var(--accent,#2563eb);color:#fff}
+    @media(max-width:1100px){.resize-workspace-grid{grid-template-columns:1fr}.crop-inline-panel{position:static}}
+    @media(max-width:720px){.resize-workspace-grid{grid-template-columns:1fr}.crop-preview-wrap,.crop-empty{min-height:320px}.crop-actions .btn{flex:1}}
+
     body.theme-ocean{--accent:#2563eb;--sidebar:#0f172a;--bg:#f5f7fb}
     body.theme-green{--accent:#059669;--sidebar:#0f2922;--bg:#f3faf7}
     body.theme-purple{--accent:#7c3aed;--sidebar:#201337;--bg:#f7f5ff}
@@ -1021,10 +1037,10 @@
 <div id="singleLoginModal" class="single-login-modal" role="dialog" aria-modal="true" aria-labelledby="singleLoginTitle">
   <div class="single-login-card">
     <h3 id="singleLoginTitle">Account Already Logged In</h3>
-    <p id="singleLoginText">This account is already logged in on another browser or device. Do you want to lock out that login and continue here?</p>
+    <p id="singleLoginText">This account is already logged in on another browser or device. Do you want to logout that login and continue here?</p>
     <div class="single-login-actions">
       <button id="singleLoginNo" class="btn">No, Cancel</button>
-      <button id="singleLoginYes" class="btn primary">Yes, Lock Out &amp; Login</button>
+      <button id="singleLoginYes" class="btn primary">Yes, Logout &amp; Login</button>
     </div>
   </div>
 </div>
@@ -1042,27 +1058,6 @@
     <div class="profile-actions">
       <button id="profileCancelBtn" class="btn secondary">Cancel</button>
       <button id="profileSaveBtn" class="btn primary">Save Changes</button>
-    </div>
-  </div>
-</div>
-
-<div id="cropModal" class="modal" role="dialog" aria-modal="true">
-  <div class="crop-modal-box">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-      <div><h2 style="margin:0">Crop Image</h2><div id="cropFileName" class="muted"></div></div>
-      <button id="cropCloseBtn" class="btn secondary">Close</button>
-    </div>
-    <div class="crop-preview-wrap" style="margin-top:14px"><canvas id="cropCanvas"></canvas></div>
-    <div class="crop-controls">
-      <div><label class="muted">X</label><input id="cropX" type="number" min="0" step="1"></div>
-      <div><label class="muted">Y</label><input id="cropY" type="number" min="0" step="1"></div>
-      <div><label class="muted">Width</label><input id="cropW" type="number" min="1" step="1"></div>
-      <div><label class="muted">Height</label><input id="cropH" type="number" min="1" step="1"></div>
-    </div>
-    <div class="muted" style="margin-top:8px">Enter crop area in original image pixels. The preview updates as you change the values.</div>
-    <div class="profile-actions">
-      <button id="cropResetBtn" class="btn secondary">Reset</button>
-      <button id="cropApplyBtn" class="btn primary">Apply Crop</button>
     </div>
   </div>
 </div>
@@ -1099,33 +1094,8 @@
         ▣ Dashboard
       </button>
 
-      <button data-view="all" data-search="all tasks task list">
-        ▤ All Tasks
-      </button>
-
-      <button data-view="new" data-search="new task create add">
-        ＋ New
-      </button>
-      
-
-      <button data-view="due" data-search="due today today">
-        ◷ Due Today
-      </button>
-
-      <button data-view="overdue" data-search="overdue late">
-        ⚠ Overdue
-      </button>
-
-      <button data-view="upcoming" data-search="upcoming future">
-        ◫ Upcoming
-      </button>
-
-      <button data-view="completed" data-search="completed done">
-        ✓ Completed
-      </button>
-
-      <button data-view="cancelled" data-search="cancelled canceled">
-        ✕ Cancelled
+      <button data-view="tasks" data-search="tasks task all new due today overdue upcoming completed cancelled create edit delete complete cancel">
+        ▤ Tasks
       </button>
 
       <button data-view="watermark" data-search="pdf watermark pdf tool pdf converter">
@@ -1188,7 +1158,7 @@
           class="btn danger"
           id="removeBtn"
           disabled>
-          Remove
+          Delete
         </button>
 
         <button
@@ -1546,23 +1516,22 @@
           </div>
         </div>
         <div style="padding:15px">
-          <div class="image-tool-grid">
-            <div>
-              <label class="image-upload" for="imageResizeInput">
-                <div class="image-upload-icon">📐</div>
-                <b>Select Images</b>
-                <div style="margin-top:8px;font-size:12px;color:#64748b">Click here or drag & drop images</div>
-                <div class="muted" style="margin-top:5px">Maximum 30 images</div>
-                <input id="imageResizeInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.svg" multiple>
-              </label>
-              <div class="format-note"><b>Supported input formats:</b> JPG, JPEG, PNG, WEBP, GIF, BMP and SVG. GIF is resized from its first frame.</div>
-              <div id="imageResizeList" class="image-file-list"></div>
-              <div id="imageResizeStatus" class="wm-status">No images selected.</div>
-            </div>
-            <div>
-              <div class="panel" style="box-shadow:none;border:1px solid #e5e9f0">
+          <div class="resize-workspace-grid">
+            <div class="resize-control-column">
+              <div class="panel tool-subpanel">
+                <div class="toolbar"><div><b>Resize Images</b><div class="muted">Upload images and set the final size.</div></div></div>
                 <div style="padding:15px">
-                  <div class="image-settings">
+                  <label class="image-upload" for="imageResizeInput">
+                    <div class="image-upload-icon">📐</div>
+                    <b>Select Images</b>
+                    <div style="margin-top:8px;font-size:12px;color:#64748b">Click here or drag & drop images</div>
+                    <div class="muted" style="margin-top:5px">Maximum 30 images</div>
+                    <input id="imageResizeInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.svg" multiple>
+                  </label>
+                  <div class="format-note"><b>Supported input formats:</b> JPG, JPEG, PNG, WEBP, GIF, BMP and SVG. GIF is resized from its first frame.</div>
+                  <div id="imageResizeList" class="image-file-list"></div>
+                  <div id="imageResizeStatus" class="wm-status">No images selected.</div>
+                  <div class="image-settings" style="margin-top:12px">
                     <div class="image-two">
                       <div class="field"><label>Width</label><input id="resizeWidth" type="number" min="1" step="0.01" placeholder="e.g. 5"></div>
                       <div class="field"><label>Height</label><input id="resizeHeight" type="number" min="1" step="0.01" placeholder="e.g. 1"></div>
@@ -1572,21 +1541,13 @@
                       <div class="field"><label>Resolution (DPI)</label><input id="resizeDpi" type="number" min="1" max="1200" step="1" value="96"></div>
                     </div>
                     <label class="image-check"><input id="resizeKeepAspect" type="checkbox"> Maintain original aspect ratio</label>
-                    <div class="field">
-                      <label>Output Format</label>
-                      <select id="resizeFormat">
-                        <option value="original" selected>Same / best supported format</option>
-                        <option value="image/jpeg">JPG / JPEG</option>
-                        <option value="image/png">PNG</option>
-                        <option value="image/webp">WEBP</option>
-                      </select>
-                    </div>
+                    <div class="field"><label>Output Format</label><select id="resizeFormat"><option value="original" selected>Same / best supported format</option><option value="image/jpeg">JPG / JPEG</option><option value="image/png">PNG</option><option value="image/webp">WEBP</option></select></div>
                     <div class="image-two">
                       <div class="field"><label>Maximum File Size (KB) <span class="muted">optional</span></label><input id="resizeMaxKB" type="number" min="1" step="1" placeholder="e.g. 200"></div>
                       <div class="field"><label>Quality <span id="resizeQualityValue">90%</span></label><input id="resizeQuality" type="range" min="10" max="100" value="90"></div>
                     </div>
                     <label class="image-check"><input id="resizeAutoScale" type="checkbox" checked> If needed, reduce dimensions further to reach the maximum KB</label>
-                    <div class="image-help"><b>Example:</b> Select a 1 MB image → Width <b>5</b>, Height <b>1</b>, Unit <b>cm</b>, Max File Size <b>200 KB</b>. The tool converts 5 × 1 cm to pixels using the selected DPI, then adjusts quality and, if enabled, dimensions until the file is at or below the target where technically possible.</div>
+                    <div class="image-help"><b>Example:</b> 1 MB image → Width <b>5</b>, Height <b>1</b>, Unit <b>cm</b>, Max File Size <b>200 KB</b>. The tool converts the physical size using DPI and can reduce quality/dimensions to reach the target.</div>
                   </div>
                   <div class="image-actions">
                     <button id="resizeImagesBtn" class="btn primary">Resize Images</button>
@@ -1596,19 +1557,32 @@
                 </div>
               </div>
             </div>
+
+            <div class="crop-control-column">
+              <div class="panel tool-subpanel crop-inline-panel">
+                <div class="toolbar">
+                  <div><b>Crop Image</b><div id="cropFileName" class="muted">Select “Crop” on an uploaded image.</div></div>
+                  <button id="cropResetBtn" class="btn secondary" type="button">Reset</button>
+                </div>
+                <div class="crop-inline-body">
+                  <div id="cropEmpty" class="crop-empty">Choose an image from the list to crop it here.</div>
+                  <div id="cropCanvasWrap" class="crop-preview-wrap hidden"><canvas id="cropCanvas"></canvas></div>
+                  <div id="cropHint" class="muted crop-hint hidden">Drag the crop box or drag any edge/corner with your mouse or finger. The crop area is shown inside the bright box.</div>
+                  <div class="crop-actions hidden" id="cropActions">
+                    <button id="cropApplyBtn" class="btn primary" type="button">Apply Crop</button>
+                    <button id="cropDownloadBtn" class="btn secondary" type="button">Download Cropped Image</button>
+                    <button id="cropResizeBtn" class="btn success" type="button">Resize Cropped Image</button>
+                  </div>
+                  <div id="cropInfo" class="crop-info hidden"></div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div id="imageResizeProgress" class="image-progress">
-            <div class="image-progress-bar"><div id="imageResizeProgressFill" class="image-progress-fill"></div></div>
-            <div id="imageResizeProgressText" class="wm-status">Preparing...</div>
-          </div>
-          <div id="imageResizeResult" class="image-result">
-            <b>Resize Results</b>
-            <div id="imageResizeResultList"></div>
-          </div>
+          <div id="imageResizeProgress" class="image-progress"><div class="image-progress-bar"><div id="imageResizeProgressFill" class="image-progress-fill"></div></div><div id="imageResizeProgressText" class="wm-status">Preparing...</div></div>
+          <div id="imageResizeResult" class="image-result"><b>Resize Results</b><div id="imageResizeResultList"></div></div>
         </div>
       </section>
     </section>
-
 
     <section class="cards">
 
@@ -1691,6 +1665,20 @@
 
     </section>
 
+
+    <!-- TASK VIEW -->
+    <section id="taskQuickFilters" class="panel hidden" style="margin-bottom:22px">
+      <div class="toolbar"><div><b>Tasks</b><div class="muted">Create, edit, delete, complete and cancel tasks from this section.</div></div></div>
+      <div class="task-quick-filters">
+        <button type="button" class="task-filter-btn active" data-task-filter="all">All <span id="taskCountAll">0</span></button>
+        <button type="button" class="task-filter-btn" data-task-filter="New">New <span id="taskCountNew">0</span></button>
+        <button type="button" class="task-filter-btn" data-task-filter="due">Due Today <span id="taskCountDue">0</span></button>
+        <button type="button" class="task-filter-btn" data-task-filter="overdue">Overdue <span id="taskCountOverdue">0</span></button>
+        <button type="button" class="task-filter-btn" data-task-filter="upcoming">Upcoming <span id="taskCountUpcoming">0</span></button>
+        <button type="button" class="task-filter-btn" data-task-filter="Completed">Completed <span id="taskCountCompleted">0</span></button>
+        <button type="button" class="task-filter-btn" data-task-filter="Cancelled">Cancelled <span id="taskCountCancelled">0</span></button>
+      </div>
+    </section>
 
     <!-- FILTERS -->
 
@@ -2019,6 +2007,8 @@ let selected =
 
 let view =
   "dashboard";
+
+let quickTaskFilter = "all";
 
 let editingId =
   null;
@@ -2388,6 +2378,12 @@ function filtered() {
   const st =
     statusFilter.value;
 
+  if (view === "tasks" && quickTaskFilter !== "all") {
+    if (quickTaskFilter === "due") a = a.filter(t => dueState(t) === "due");
+    else if (quickTaskFilter === "overdue") a = a.filter(t => dueState(t) === "overdue");
+    else if (quickTaskFilter === "upcoming") a = a.filter(t => t.status === "New" && t.due_date > todayISO());
+    else a = a.filter(t => t.status === quickTaskFilter);
+  }
 
   if (
     view === "new"
@@ -2592,6 +2588,16 @@ function render() {
         t.status ===
         "Cancelled"
     ).length;
+
+  const qCount = id => { const el=document.getElementById(id); if(el) el.textContent=String(0); };
+  qCount("taskCountAll");
+  const qAll=document.getElementById("taskCountAll"); if(qAll) qAll.textContent=tasks.length;
+  const qNew=document.getElementById("taskCountNew"); if(qNew) qNew.textContent=tasks.filter(t=>t.status==="New").length;
+  const qDue=document.getElementById("taskCountDue"); if(qDue) qDue.textContent=tasks.filter(t=>dueState(t)==="due").length;
+  const qOver=document.getElementById("taskCountOverdue"); if(qOver) qOver.textContent=tasks.filter(t=>dueState(t)==="overdue").length;
+  const qUp=document.getElementById("taskCountUpcoming"); if(qUp) qUp.textContent=tasks.filter(t=>t.status==="New"&&t.due_date>todayISO()).length;
+  const qComp=document.getElementById("taskCountCompleted"); if(qComp) qComp.textContent=tasks.filter(t=>t.status==="Completed").length;
+  const qCan=document.getElementById("taskCountCancelled"); if(qCan) qCan.textContent=tasks.filter(t=>t.status==="Cancelled").length;
 
 
   const a =
@@ -3001,12 +3007,10 @@ function closeTaskModal() {
    CREATE BUTTON
 ===================================================== */
 
-createBtn.onclick =
-  function() {
-
-    openCreateModal();
-
-  };
+createBtn.onclick = function() {
+  if(view !== "tasks") return;
+  openCreateModal();
+};
 
 
 /* =====================================================
@@ -3598,6 +3602,15 @@ selectAll.onchange =
   }
 );
 
+
+/* =====================================================
+   TASK QUICK FILTERS
+===================================================== */
+document.querySelectorAll("[data-task-filter]").forEach(btn=>btn.addEventListener("click",()=>{
+  quickTaskFilter=btn.dataset.taskFilter;
+  document.querySelectorAll("[data-task-filter]").forEach(b=>b.classList.toggle("active",b===btn));
+  selected.clear(); render();
+}));
 
 /* =====================================================
    PDF WATERMARK + PDF COMPRESS FUNCTIONS
@@ -4489,7 +4502,7 @@ function renderImageFileList(files, listEl, statusEl, setterName) {
       const crop = document.createElement("button");
       crop.className = "btn secondary";
       crop.type = "button";
-      crop.textContent = "Crop";
+      crop.textContent = "✂ Crop";
       crop.onclick = () => openCropEditor(index);
       actionWrap.appendChild(crop);
     }
@@ -4547,68 +4560,83 @@ resizeQuality.oninput = () => resizeQualityValue.textContent = resizeQuality.val
 
 let cropIndex = -1;
 let cropImage = null;
-const cropModal = document.getElementById("cropModal");
+let cropState = null;
+let cropPointer = null;
 const cropCanvas = document.getElementById("cropCanvas");
-const cropX = document.getElementById("cropX");
-const cropY = document.getElementById("cropY");
-const cropW = document.getElementById("cropW");
-const cropH = document.getElementById("cropH");
 const cropFileName = document.getElementById("cropFileName");
+const cropCanvasWrap = document.getElementById("cropCanvasWrap");
+const cropEmpty = document.getElementById("cropEmpty");
+const cropHint = document.getElementById("cropHint");
+const cropActions = document.getElementById("cropActions");
+const cropInfo = document.getElementById("cropInfo");
+const cropResetBtn = document.getElementById("cropResetBtn");
+const cropApplyBtn = document.getElementById("cropApplyBtn");
+const cropDownloadBtn = document.getElementById("cropDownloadBtn");
+const cropResizeBtn = document.getElementById("cropResizeBtn");
 
-async function openCropEditor(index) {
-  const file = imageResizeFiles[index];
-  if (!file) return;
-  cropIndex = index;
-  cropFileName.textContent = file.name;
-  const url = URL.createObjectURL(file);
-  const img = new Image();
-  img.src = url;
-  await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;});
-  URL.revokeObjectURL(url);
-  cropImage = img;
-  cropX.value = 0; cropY.value = 0; cropW.value = img.naturalWidth; cropH.value = img.naturalHeight;
-  cropModal.classList.add("show");
-  drawCropPreview();
+function showCropWorkspace(show){
+  cropEmpty.classList.toggle("hidden",show);
+  cropCanvasWrap.classList.toggle("hidden",!show);
+  cropHint.classList.toggle("hidden",!show);
+  cropActions.classList.toggle("hidden",!show);
+  cropInfo.classList.toggle("hidden",!show);
+  cropResetBtn.disabled=!show;
 }
 
-function cropValues() {
-  if (!cropImage) return null;
-  const iw=cropImage.naturalWidth, ih=cropImage.naturalHeight;
-  let x=Math.max(0,Math.min(iw-1,Number(cropX.value)||0));
-  let y=Math.max(0,Math.min(ih-1,Number(cropY.value)||0));
-  let w=Math.max(1,Math.min(iw-x,Number(cropW.value)||iw));
-  let h=Math.max(1,Math.min(ih-y,Number(cropH.value)||ih));
-  cropX.value=Math.round(x); cropY.value=Math.round(y); cropW.value=Math.round(w); cropH.value=Math.round(h);
-  return {x,y,w,h};
+async function openCropEditor(index){
+  const file=imageResizeFiles[index]; if(!file)return;
+  cropIndex=index; cropFileName.textContent=file.name;
+  const url=URL.createObjectURL(file); const img=new Image(); img.src=url;
+  try{await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;});}
+  finally{URL.revokeObjectURL(url);}
+  cropImage=img;
+  cropState={x:0,y:0,w:img.naturalWidth||img.width,h:img.naturalHeight||img.height};
+  showCropWorkspace(true); drawCropPreview();
+  document.getElementById("cropCanvasWrap").scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 
+function cropScale(){
+  if(!cropImage)return 1;
+  const maxW=Math.max(320,Math.min(760,cropCanvas.parentElement?.clientWidth-24||760));
+  const maxH=Math.max(280,Math.min(620,window.innerHeight*.58));
+  return Math.min(maxW/(cropImage.naturalWidth||cropImage.width),maxH/(cropImage.naturalHeight||cropImage.height),1);
+}
+function clampCrop(){
+  if(!cropImage||!cropState)return;
+  const iw=cropImage.naturalWidth||cropImage.width, ih=cropImage.naturalHeight||cropImage.height;
+  cropState.x=Math.max(0,Math.min(iw-1,cropState.x)); cropState.y=Math.max(0,Math.min(ih-1,cropState.y));
+  cropState.w=Math.max(1,Math.min(iw-cropState.x,cropState.w)); cropState.h=Math.max(1,Math.min(ih-cropState.y,cropState.h));
+}
 function drawCropPreview(){
-  if(!cropImage) return;
-  const c=cropValues(); if(!c) return;
-  const maxW=820,maxH=480,scale=Math.min(maxW/cropImage.naturalWidth,maxH/cropImage.naturalHeight,1);
-  cropCanvas.width=Math.max(1,Math.round(cropImage.naturalWidth*scale));
-  cropCanvas.height=Math.max(1,Math.round(cropImage.naturalHeight*scale));
-  const ctx=cropCanvas.getContext("2d");
-  ctx.drawImage(cropImage,0,0,cropCanvas.width,cropCanvas.height);
-  ctx.fillStyle="rgba(0,0,0,.48)";
-  ctx.fillRect(0,0,cropCanvas.width,cropCanvas.height);
-  ctx.clearRect(c.x*scale,c.y*scale,c.w*scale,c.h*scale);
-  ctx.drawImage(cropImage,c.x,c.y,c.w,c.h,c.x*scale,c.y*scale,c.w*scale,c.h*scale);
-  ctx.strokeStyle="#fff";ctx.lineWidth=2;ctx.strokeRect(c.x*scale,c.y*scale,c.w*scale,c.h*scale);
+  if(!cropImage||!cropState)return;
+  clampCrop(); const scale=cropScale();
+  const iw=cropImage.naturalWidth||cropImage.width, ih=cropImage.naturalHeight||cropImage.height;
+  cropCanvas.width=Math.max(1,Math.round(iw*scale)); cropCanvas.height=Math.max(1,Math.round(ih*scale));
+  const ctx=cropCanvas.getContext("2d"); ctx.clearRect(0,0,cropCanvas.width,cropCanvas.height); ctx.drawImage(cropImage,0,0,cropCanvas.width,cropCanvas.height);
+  const x=cropState.x*scale,y=cropState.y*scale,w=cropState.w*scale,h=cropState.h*scale;
+  ctx.save(); ctx.fillStyle="rgba(0,0,0,.52)"; ctx.fillRect(0,0,cropCanvas.width,cropCanvas.height); ctx.clearRect(x,y,w,h); ctx.drawImage(cropImage,cropState.x,cropState.y,cropState.w,cropState.h,x,y,w,h);
+  ctx.strokeStyle="#fff";ctx.lineWidth=2;ctx.strokeRect(x,y,w,h);
+  ctx.strokeStyle="rgba(255,255,255,.55)";ctx.lineWidth=1;
+  for(let i=1;i<3;i++){ctx.beginPath();ctx.moveTo(x+w*i/3,y);ctx.lineTo(x+w*i/3,y+h);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y+h*i/3);ctx.lineTo(x+w,y+h*i/3);ctx.stroke();}
+  const hs=Math.max(7,Math.min(12,10*scale)); ctx.fillStyle="#fff";
+  [[x,y],[x+w/2,y],[x+w,y],[x+w,y+h/2],[x+w,y+h],[x+w/2,y+h],[x,y+h],[x,y+h/2]].forEach(([hx,hy])=>{ctx.fillRect(hx-hs/2,hy-hs/2,hs,hs);});
+  ctx.restore();
+  cropInfo.textContent=`Crop: ${Math.round(cropState.w)} × ${Math.round(cropState.h)} px`;
 }
-[cropX,cropY,cropW,cropH].forEach(el=>el.addEventListener("input",drawCropPreview));
-document.getElementById("cropResetBtn").onclick=()=>{if(!cropImage)return;cropX.value=0;cropY.value=0;cropW.value=cropImage.naturalWidth;cropH.value=cropImage.naturalHeight;drawCropPreview();};
-document.getElementById("cropCloseBtn").onclick=()=>{cropModal.classList.remove("show");cropImage=null;cropIndex=-1;};
-document.getElementById("cropApplyBtn").onclick=async()=>{
-  if(!cropImage||cropIndex<0)return; const c=cropValues(); if(!c)return;
-  const canvas=document.createElement("canvas");canvas.width=c.w;canvas.height=c.h;const ctx=canvas.getContext("2d");ctx.drawImage(cropImage,c.x,c.y,c.w,c.h,0,0,c.w,c.h);
-  const blob=await canvasBlob(canvas,"image/png",1);
-  const old=imageResizeFiles[cropIndex];
-  imageResizeFiles[cropIndex]=new File([blob],baseName(old.name)+"_cropped.png",{type:"image/png",lastModified:Date.now()});
-  renderImageFileList(imageResizeFiles,imageResizeList,imageResizeStatus,"resize");
-  resizedImageFiles=[];downloadResizedBtn.disabled=true;imageResizeResult.classList.remove("show");
-  cropModal.classList.remove("show");cropImage=null;cropIndex=-1;
-};
+function cropPointerPoint(e){const r=cropCanvas.getBoundingClientRect();const sx=cropCanvas.width/(cropImage.naturalWidth||cropImage.width);const sy=cropCanvas.height/(cropImage.naturalHeight||cropImage.height);return {x:(e.clientX-r.left)/sx,y:(e.clientY-r.top)/sy};}
+function cropHandleAt(p){if(!cropState)return null;const t=Math.max(10,(cropImage.naturalWidth||cropImage.width)*.018);const pts={nw:[cropState.x,cropState.y],n:[cropState.x+cropState.w/2,cropState.y],ne:[cropState.x+cropState.w,cropState.y],e:[cropState.x+cropState.w,cropState.y+cropState.h/2],se:[cropState.x+cropState.w,cropState.y+cropState.h],s:[cropState.x+cropState.w/2,cropState.y+cropState.h],sw:[cropState.x,cropState.y+cropState.h],w:[cropState.x,cropState.y+cropState.h/2]};for(const [k,[x,y]] of Object.entries(pts)){if(Math.hypot(p.x-x,p.y-y)<=t)return k;}if(p.x>=cropState.x&&p.x<=cropState.x+cropState.w&&p.y>=cropState.y&&p.y<=cropState.y+cropState.h)return "move";return null;}
+function cursorForHandle(h){return ({nw:"nwse-resize",se:"nwse-resize",ne:"nesw-resize",sw:"nesw-resize",n:"ns-resize",s:"ns-resize",e:"ew-resize",w:"ew-resize",move:"move"})[h]||"crosshair";}
+cropCanvas.addEventListener("pointerdown",e=>{if(!cropImage)return;const p=cropPointerPoint(e);const h=cropHandleAt(p);if(!h)return;cropCanvas.setPointerCapture(e.pointerId);cropPointer={handle:h,startX:p.x,startY:p.y,orig:{...cropState}};cropCanvas.style.cursor=cursorForHandle(h);});
+cropCanvas.addEventListener("pointermove",e=>{if(!cropImage||!cropPointer){if(cropImage){cropCanvas.style.cursor=cursorForHandle(cropHandleAt(cropPointerPoint(e)));}return;}const p=cropPointerPoint(e),dX=p.x-cropPointer.startX,dY=p.y-cropPointer.startY,o=cropPointer.orig;let x=o.x,y=o.y,w=o.w,h=o.h;const min=20,iw=cropImage.naturalWidth||cropImage.width,ih=cropImage.naturalHeight||cropImage.height;switch(cropPointer.handle){case"move":x=Math.max(0,Math.min(iw-w,o.x+dX));y=Math.max(0,Math.min(ih-h,o.y+dY));break;case"w":x=Math.max(0,Math.min(o.x+o.w-min,o.x+dX));w=o.w-(x-o.x);break;case"e":w=Math.max(min,Math.min(iw-o.x,o.w+dX));break;case"n":y=Math.max(0,Math.min(o.y+o.h-min,o.y+dY));h=o.h-(y-o.y);break;case"s":h=Math.max(min,Math.min(ih-o.y,o.h+dY));break;case"nw":x=Math.max(0,Math.min(o.x+o.w-min,o.x+dX));y=Math.max(0,Math.min(o.y+o.h-min,o.y+dY));w=o.w-(x-o.x);h=o.h-(y-o.y);break;case"ne":y=Math.max(0,Math.min(o.y+o.h-min,o.y+dY));w=Math.max(min,Math.min(iw-o.x,o.w+dX));h=o.h-(y-o.y);break;case"sw":x=Math.max(0,Math.min(o.x+o.w-min,o.x+dX));w=o.w-(x-o.x);h=Math.max(min,Math.min(ih-o.y,o.h+dY));break;case"se":w=Math.max(min,Math.min(iw-o.x,o.w+dX));h=Math.max(min,Math.min(ih-o.y,o.h+dY));break;}cropState={x,y,w,h};drawCropPreview();});
+cropCanvas.addEventListener("pointerup",()=>{cropPointer=null;cropCanvas.style.cursor="crosshair";});
+cropCanvas.addEventListener("pointercancel",()=>{cropPointer=null;cropCanvas.style.cursor="crosshair";});
+cropResetBtn.onclick=()=>{if(!cropImage)return;cropState={x:0,y:0,w:cropImage.naturalWidth||cropImage.width,h:cropImage.naturalHeight||cropImage.height};drawCropPreview();};
+async function getCroppedBlob(){if(!cropImage||!cropState)return null;const c=document.createElement("canvas");c.width=Math.round(cropState.w);c.height=Math.round(cropState.h);const ctx=c.getContext("2d");ctx.drawImage(cropImage,cropState.x,cropState.y,cropState.w,cropState.h,0,0,c.width,c.height);return await canvasBlob(c,"image/png",1);}
+cropDownloadBtn.onclick=async()=>{const blob=await getCroppedBlob();if(!blob)return;const old=imageResizeFiles[cropIndex];const name=baseName(old?.name||"cropped")+"_cropped.png";const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);};
+cropApplyBtn.onclick=async()=>{const blob=await getCroppedBlob();if(!blob||cropIndex<0)return;const old=imageResizeFiles[cropIndex];imageResizeFiles[cropIndex]=new File([blob],baseName(old.name)+"_cropped.png",{type:"image/png",lastModified:Date.now()});renderImageFileList(imageResizeFiles,imageResizeList,imageResizeStatus,"resize");resizedImageFiles=[];downloadResizedBtn.disabled=true;imageResizeResult.classList.remove("show");openCropEditor(cropIndex);};
+cropResizeBtn.onclick=async()=>{const blob=await getCroppedBlob();if(!blob||cropIndex<0)return;const old=imageResizeFiles[cropIndex];const cropped=new File([blob],baseName(old.name)+"_cropped.png",{type:"image/png",lastModified:Date.now()});imageResizeFiles[cropIndex]=cropped;renderImageFileList(imageResizeFiles,imageResizeList,imageResizeStatus,"resize");resizedImageFiles=[];downloadResizedBtn.disabled=true;imageResizeResult.classList.remove("show");document.querySelector("#imageResizeView .resize-control-column")?.scrollIntoView({behavior:"smooth",block:"start"});setTimeout(()=>document.getElementById("resizeWidth")?.focus(),500);};
+window.addEventListener("resize",()=>{if(cropImage)drawCropPreview();});
+
 
 async function loadImageFile(file) {
   const url = URL.createObjectURL(file);
@@ -4831,7 +4859,7 @@ function cleanWatermarkTool(){
 document.getElementById("cleanWatermarkBtn").onclick=cleanWatermarkTool;
 document.getElementById("cleanCompressBtn").onclick=()=>{compressInputFiles=[];compressedFiles=[];compressFilesInput.value="";renderCompressFiles();compressResult.classList.remove("show");compressResultList.innerHTML="";downloadCompressed.disabled=true;compressProgress.classList.remove("show");compressProgressFill.style.width="0%";};
 document.getElementById("cleanConverterBtn").onclick=()=>{imageConverterFiles=[];convertedImageFiles=[];imageConverterInput.value="";renderImageFileList(imageConverterFiles,imageConverterList,imageConverterStatus,"converter");imageConverterResult.classList.remove("show");imageConverterResultList.innerHTML="";downloadConvertedBtn.disabled=true;imageConverterProgress.classList.remove("show");imageConverterProgressFill.style.width="0%";};
-document.getElementById("cleanResizeBtn").onclick=()=>{imageResizeFiles=[];resizedImageFiles=[];imageResizeInput.value="";renderImageFileList(imageResizeFiles,imageResizeList,imageResizeStatus,"resize");imageResizeResult.classList.remove("show");imageResizeResultList.innerHTML="";downloadResizedBtn.disabled=true;imageResizeProgress.classList.remove("show");imageResizeProgressFill.style.width="0%";};
+document.getElementById("cleanResizeBtn").onclick=()=>{imageResizeFiles=[];resizedImageFiles=[];imageResizeInput.value="";cropIndex=-1;cropImage=null;cropState=null;cropFileName.textContent="Select “Crop” on an uploaded image.";showCropWorkspace(false);renderImageFileList(imageResizeFiles,imageResizeList,imageResizeStatus,"resize");imageResizeResult.classList.remove("show");imageResizeResultList.innerHTML="";downloadResizedBtn.disabled=true;imageResizeProgress.classList.remove("show");imageResizeProgressFill.style.width="0%";};
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
@@ -4913,16 +4941,7 @@ document
             New button opens Create modal.
           */
 
-          if (
-            newView === "new"
-          ) {
-
-            openCreateModal();
-
-            return;
-
-          }
-
+          const isTasks = newView === "tasks";
           const isWatermark = newView === "watermark";
           const isCompress = newView === "compress";
           const isImageConverter = newView === "image-converter";
@@ -4930,6 +4949,7 @@ document
           const isPdfTool = isWatermark || isCompress;
           const isImageTool = isImageConverter || isImageResize;
           const isSpecialTool = isPdfTool || isImageTool;
+          const taskQuickFilters = document.getElementById("taskQuickFilters");
 
           watermarkView.classList.toggle("hidden", !isWatermark);
           compressView.classList.toggle("hidden", !isCompress);
@@ -4937,7 +4957,8 @@ document
           imageResizeView.classList.toggle("hidden", !isImageResize);
           document.querySelector(".main > .cards")?.classList.toggle("hidden", isSpecialTool);
           document.querySelector(".main > .panel")?.classList.toggle("hidden", isSpecialTool);
-          document.querySelector(".main > .top .actions")?.classList.toggle("hidden", isSpecialTool);
+          document.querySelector(".main > .top .actions")?.classList.toggle("hidden", !isTasks);
+          taskQuickFilters?.classList.toggle("hidden", !isTasks);
 
 
           document
@@ -4969,23 +4990,8 @@ document
             dashboard:
               "Akash Dashboard",
 
-            all:
-              "All Tasks",
-
-            due:
-              "Due Today",
-
-            overdue:
-              "Overdue",
-
-            upcoming:
-              "Upcoming",
-
-            completed:
-              "Completed",
-
-            cancelled:
-              "Cancelled",
+            tasks:
+              "Tasks",
 
             watermark:
               "PDF Watermark",
@@ -5009,7 +5015,8 @@ document
             imageResizeView.classList.add("hidden");
             document.querySelector(".main > .cards")?.classList.remove("hidden");
             document.querySelector(".main > .panel")?.classList.remove("hidden");
-            document.querySelector(".main > .top .actions")?.classList.remove("hidden");
+            document.querySelector(".main > .top .actions")?.classList.toggle("hidden", !isTasks);
+            document.getElementById("taskQuickFilters")?.classList.toggle("hidden", !isTasks);
           }
 
           pageTitle.textContent =
@@ -5048,6 +5055,8 @@ function applyTheme(theme){
   document.querySelectorAll(".theme-swatch").forEach(x=>x.classList.toggle("active",x.dataset.theme===(theme||"ocean")));
 }
 applyTheme(localStorage.getItem("akash_theme")||"ocean");
+if(document.getElementById("taskQuickFilters")){document.getElementById("taskQuickFilters").classList.add("hidden");}
+if(document.querySelector(".main > .top .actions")){document.querySelector(".main > .top .actions").classList.add("hidden");}
 
 function openProfileModal(settings=false){
   accountMenu.classList.add("hidden");
