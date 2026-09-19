@@ -34,6 +34,8 @@
 
     .login {
       min-height: 100vh;
+      position: relative;
+      z-index: 100;
       display: grid;
       place-items: center;
       padding: 20px;
@@ -109,6 +111,14 @@
 
     /* APP */
 
+    #app {
+      display: none !important;
+    }
+
+    #app.authenticated {
+      display: flex !important;
+    }
+
     .app {
       display: flex;
       min-height: 100vh;
@@ -156,6 +166,21 @@
     .menu-search:focus {
       border-color: #60a5fa;
       box-shadow: 0 0 0 2px #2563eb33;
+    }
+
+    .safe-icon {
+      display:inline-flex;
+      width:18px;
+      height:18px;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+      font-weight:700;
+    }
+    .safe-inline-icon {display:inline-block;font-size:10px;font-weight:800;letter-spacing:.3px;margin-right:4px;}
+    .safe-file-icon, .safe-image-icon {
+      font-weight:800;
+      letter-spacing:.3px;
     }
 
     .menu-search-icon {
@@ -217,6 +242,27 @@
       font-size: 14px;
       cursor: pointer;
       margin: 2px 0;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nav-icon svg {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .nav button:hover,
@@ -234,6 +280,21 @@
 
     /* ACCOUNT MENU / THEMES */
     .account-wrap{position:relative;display:flex;align-items:center}
+    .top-account-actions{display:flex;align-items:center;gap:8px;position:relative}
+    .top-account-btn{padding:8px 12px;font-size:13px;white-space:nowrap}
+    .theme-popover{position:absolute;right:0;top:calc(100% + 8px);width:220px;background:#fff;border:1px solid #e5e9f0;border-radius:12px;box-shadow:0 18px 45px #0002;padding:10px;z-index:5000}
+    .theme-popover-title{font-size:12px;font-weight:800;color:#475569;margin:0 0 8px}
+    .settings-modal-box{width:min(520px,100%);background:#fff;border-radius:14px;padding:22px;box-shadow:0 20px 60px #0004}
+    .setting-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid #edf0f4}
+    .setting-row:last-child{border-bottom:0}
+    .setting-row label{font-weight:700;font-size:14px}
+    .setting-row small{display:block;color:#64748b;font-weight:400;margin-top:3px}
+    .task-actions-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .task-actions-row .btn{padding:8px 12px;font-size:13px}
+    .task-filter-total{padding:10px 13px;border:1px solid #dbe1ea;background:#f8fafc;border-radius:8px;font-size:13px;font-weight:700;white-space:nowrap}
+    .task-filter-total strong{color:var(--accent,#2563eb);font-size:15px}
+    body.compact-tasks #taskArea td,body.compact-tasks #taskArea th{padding:7px 9px}
+    @media(max-width:720px){.top-account-actions{gap:5px}.top-account-btn{padding:7px 9px;font-size:12px}.task-actions-row .btn{flex:1}}
     .account-btn{display:flex;align-items:center;gap:9px;max-width:260px}
     .account-avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent,#2563eb);color:#fff;font-weight:800;font-size:12px}
     .account-label{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1065,18 +1126,32 @@
 
 <div id="profileModal" class="modal" role="dialog" aria-modal="true">
   <div class="profile-modal-box">
-    <h2 id="profileModalTitle" style="margin:0 0 6px">Change Profile</h2>
-    <div id="profileModalSub" class="muted">Update your display name and password. Email cannot be changed here.</div>
+    <h2 style="margin:0 0 6px">Profile</h2>
+    <div class="muted">Update your display name and password. Email cannot be changed.</div>
     <div class="profile-grid" style="margin-top:18px">
       <div><label>Display Name</label><input id="profileNameInput" type="text" maxlength="80" placeholder="Your name"></div>
       <div><label>Email (cannot be changed)</label><input id="profileEmailInput" type="email" disabled></div>
       <div><label>New Password (optional)</label><input id="profilePasswordInput" type="password" autocomplete="new-password" placeholder="Leave blank to keep current password"></div>
-      <div id="settingsSection" class="settings-note hidden">Settings: You can keep your selected theme for this browser. Your profile name is saved to Supabase. Password changes are handled securely by Supabase Authentication; passwords are not stored as plain text in a SQL table.</div>
     </div>
     <div class="profile-actions">
       <button id="profileCancelBtn" class="btn secondary">Cancel</button>
       <button id="profileSaveBtn" class="btn primary">Save Changes</button>
     </div>
+  </div>
+</div>
+
+<div id="settingsModal" class="modal" role="dialog" aria-modal="true">
+  <div class="settings-modal-box">
+    <h2 style="margin:0 0 6px">Settings</h2>
+    <div class="muted">Dashboard preferences and task behaviour.</div>
+    <div style="margin-top:14px">
+      <div class="setting-row"><div><label>Task notifications</label><small>Show browser reminders for due tasks.</small></div><input id="settingNotifications" type="checkbox"></div>
+      <div class="setting-row"><div><label>Confirm before remove</label><small>Ask before permanently removing selected tasks.</small></div><input id="settingConfirmRemove" type="checkbox" checked></div>
+      <div class="setting-row"><div><label>Auto refresh tasks</label><small>Refresh task data periodically while the dashboard is open.</small></div><input id="settingAutoRefresh" type="checkbox"></div>
+      <div class="setting-row"><div><label>Compact task table</label><small>Use smaller row spacing in the task list.</small></div><input id="settingCompact" type="checkbox"></div>
+      <div class="setting-row"><div><label>Date format</label><small>Choose how dates are displayed.</small></div><select id="settingDateFormat"><option value="yyyy-mm-dd">YYYY-MM-DD</option><option value="dd-mm-yyyy">DD-MM-YYYY</option><option value="dd-mmm-yyyy">DD-MMM-YYYY</option></select></div>
+    </div>
+    <div class="profile-actions"><button id="settingsCloseBtn" class="btn secondary">Close</button><button id="settingsSaveBtn" class="btn primary">Save Settings</button></div>
   </div>
 </div>
 
@@ -1093,7 +1168,7 @@
     </div>
 
     <div class="menu-search-wrap">
-      <span class="menu-search-icon">⌕</span>
+      <span class="menu-search-icon"></span>
       <input
         id="menuSearch"
         class="menu-search"
@@ -1109,27 +1184,27 @@
         class="active"
         data-view="dashboard"
         data-search="dashboard home">
-        ▣ Dashboard
+        <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg></span><span>Dashboard</span>
       </button>
 
       <button data-view="tasks" data-search="tasks task all new due today overdue upcoming completed cancelled create edit delete complete cancel">
-        ▤ Tasks
+        <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm2 4h8M8 12h8M8 16h5"/></svg></span><span>Tasks</span>
       </button>
 
       <button data-view="watermark" data-search="pdf watermark pdf tool pdf converter">
-        💧 PDF Watermark
+        <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h10l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm9 1v4h4M8 15c2.5-3 5.5-3 8 0M8 19c2.5-3 5.5-3 8 0"/></svg></span><span>PDF Watermark</span>
       </button>
 
       <button data-view="compress" data-search="pdf compress compress pdf tool pdf converter">
-        🗜️ PDF Compress
+        <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h10l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm9 1v4h4M9 12h6M9 16h6"/></svg></span><span>PDF Compress</span>
       </button>
 
       <button data-view="image-converter" data-search="image converter image convert jpg jpeg png webp gif bmp svg">
-        🖼️ Image Converter
+        <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="9" r="1.5"/><path d="m6 17 4-4 3 3 2-2 3 3"/></svg></span><span>Image Converter</span>
       </button>
 
       <button data-view="image-resize" data-search="image resize resize image size pixel px inch inches cm mm kb mb">
-        📐 Image Resize
+        <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8h8v8H8zM4 9h3M4 15h3M17 9h3M17 15h3M9 4v3M15 4v3M9 17v3M15 17v3"/></svg></span><span>Image Resize</span>
       </button>
 
     </nav>
@@ -1163,54 +1238,23 @@
       </div>
 
 
-      <div class="actions">
-
-        <button
-          class="btn primary"
-          id="createBtn">
-          + Create
-        </button>
-
-        <button
-          class="btn secondary"
-          id="editBtn"
-          disabled>
-          Edit
-        </button>
-
-        <button
-          class="btn danger"
-          id="removeBtn"
-          disabled>
-          Remove
-        </button>
-
-        <button
-          class="btn warning"
-          id="cancelBtn"
-          disabled>
-          ✕ Cancel
-        </button>
-
-        <button
-          class="btn success"
-          id="completeBtn"
-          disabled>
-          ✓ Complete
-        </button>
+      <div class="task-actions-row hidden" id="taskActionsRow">
+        <button class="btn primary" id="createBtn">+ Create</button>
+        <button class="btn secondary" id="editBtn" disabled>Edit</button>
+        <button class="btn danger" id="removeBtn" disabled>Remove</button>
+        <button class="btn warning" id="cancelBtn" disabled>Cancel</button>
+        <button class="btn success" id="completeBtn" disabled>Complete</button>
+      </div>
 
       </div>
 
-      <div class="account-wrap">
-        <button id="accountBtn" class="btn secondary account-btn" type="button">
-          <span id="accountAvatar" class="account-avatar">U</span>
-          <span id="accountLabel" class="account-label">Account</span>
-          ▾
-        </button>
-        <div id="accountMenu" class="account-menu hidden">
-          <button type="button" id="changeProfileBtn">👤 Change Profile</button>
-          <button type="button" id="themeMenuBtn">🎨 Theme</button>
-          <div id="themeGrid" class="theme-grid hidden">
+      <div class="top-account-actions">
+        <button id="profileTopBtn" class="btn secondary top-account-btn" type="button">Profile</button>
+        <button id="themeTopBtn" class="btn secondary top-account-btn" type="button">Theme</button>
+        <button id="settingsTopBtn" class="btn secondary top-account-btn" type="button">Settings</button>
+        <div id="themePopover" class="theme-popover hidden">
+          <div class="theme-popover-title">Choose dashboard theme</div>
+          <div class="theme-grid">
             <button type="button" class="theme-swatch" title="Ocean" data-theme="ocean" style="background:#2563eb"></button>
             <button type="button" class="theme-swatch" title="Green" data-theme="green" style="background:#059669"></button>
             <button type="button" class="theme-swatch" title="Purple" data-theme="purple" style="background:#7c3aed"></button>
@@ -1218,9 +1262,11 @@
             <button type="button" class="theme-swatch" title="Red" data-theme="red" style="background:#dc2626"></button>
             <button type="button" class="theme-swatch" title="Dark" data-theme="dark" style="background:#0f172a"></button>
           </div>
-          <button type="button" id="settingsBtn">⚙️ Settings</button>
+        </div>
+      </div>
+          <button type="button" id="settingsBtn"><span class="safe-icon">⚙</span> Settings</button>
           <div class="account-divider"></div>
-          <button type="button" id="menuLogoutBtn">🚪 Logout</button>
+          <button type="button" id="menuLogoutBtn"><span class="safe-icon">⇥</span> Logout</button>
         </div>
       </div>
 
@@ -1246,7 +1292,7 @@
 
             <div style="padding:15px">
               <label class="wm-upload" for="wmFiles">
-                <div class="wm-upload-icon">📄</div>
+                <div class="wm-upload-icon safe-file-icon" aria-hidden="true">PDF</div>
                 <b>Select PDF files</b>
                 <div style="margin-top:8px;font-size:12px;color:#64748b">Click here or drag & drop PDFs</div>
                 <div class="muted" style="margin-top:5px">Maximum 10 PDF files</div>
@@ -1405,7 +1451,7 @@
 
         <div style="padding:15px">
           <label class="wm-upload" for="compressFilesInput">
-            <div class="wm-upload-icon">🗜️</div>
+            <div class="wm-upload-icon safe-file-icon" aria-hidden="true">ZIP</div>
             <b>Select PDF files</b>
             <div style="margin-top:8px;font-size:12px;color:#64748b">Click here or drag & drop PDFs</div>
             <div class="muted" style="margin-top:5px">Maximum 10 PDF files</div>
@@ -1469,7 +1515,7 @@
           <div class="image-tool-grid">
             <div>
               <label class="image-upload" for="imageConverterInput">
-                <div class="image-upload-icon">🖼️</div>
+                <div class="image-upload-icon safe-image-icon" aria-hidden="true">IMG</div>
                 <b>Select Images</b>
                 <div style="margin-top:8px;font-size:12px;color:#64748b">Click here or drag & drop images</div>
                 <div class="muted" style="margin-top:5px">Maximum 30 images</div>
@@ -1540,7 +1586,7 @@
                 <div class="toolbar"><div><b>Resize Images</b><div class="muted">Upload images and set the final size.</div></div></div>
                 <div style="padding:15px">
                   <label class="image-upload" for="imageResizeInput">
-                    <div class="image-upload-icon">📐</div>
+                    <div class="image-upload-icon safe-image-icon" aria-hidden="true">↔</div>
                     <b>Select Images</b>
                     <div style="margin-top:8px;font-size:12px;color:#64748b">Click here or drag & drop images</div>
                     <div class="muted" style="margin-top:5px">Maximum 30 images</div>
@@ -1688,22 +1734,6 @@
 
     <!-- TASK VIEW -->
     <div id="taskArea" class="hidden">
-    <section id="taskQuickFilters" class="panel" style="margin-bottom:14px">
-      <div class="task-toolbar-head">
-        <div><b>Tasks</b><div class="muted">Manage your tasks from one place.</div></div>
-        <div class="task-total-box">Total Rows: <strong id="taskVisibleCount">0</strong></div>
-      </div>
-      <div class="task-quick-filters">
-        <button type="button" class="task-filter-btn active" data-task-filter="all">All <span id="taskCountAll">0</span></button>
-        <button type="button" class="task-filter-btn" data-task-filter="New">New <span id="taskCountNew">0</span></button>
-        <button type="button" class="task-filter-btn" data-task-filter="due">Due Task <span id="taskCountDue">0</span></button>
-        <button type="button" class="task-filter-btn" data-task-filter="overdue">Overdue Task <span id="taskCountOverdue">0</span></button>
-        <button type="button" class="task-filter-btn" data-task-filter="upcoming">Upcoming Task <span id="taskCountUpcoming">0</span></button>
-        <button type="button" class="task-filter-btn" data-task-filter="Completed">Completed Task <span id="taskCountCompleted">0</span></button>
-        <button type="button" class="task-filter-btn" data-task-filter="Cancelled">Cancelled Task <span id="taskCountCancelled">0</span></button>
-      </div>
-    </section>
-
     <!-- FILTERS -->
 
     <section class="panel">
@@ -1784,6 +1814,8 @@
           </option>
 
         </select>
+
+        <div class="task-filter-total">Total Rows: <strong id="taskVisibleCount">0</strong></div>
 
       </div>
 
@@ -2058,6 +2090,13 @@ let editingId =
 const login =
   document.getElementById("login");
 
+const dashboardCards = document.getElementById("dashboardCards");
+const taskArea = document.getElementById("taskArea");
+
+// Defensive initial state: never render task counters or task table before authentication.
+dashboardCards?.classList.add("hidden");
+taskArea?.classList.add("hidden");
+
 const app =
   document.getElementById("app");
 
@@ -2269,16 +2308,15 @@ function msg(text) {
 
 function showLogin() {
 
-  app.classList.add(
-    "hidden"
-  );
+  /* Never expose authenticated dashboard/task content on the login screen. */
+  app.classList.remove("authenticated");
+  app.classList.add("hidden");
+  login.classList.remove("hidden");
 
-  login.classList.remove(
-    "hidden"
-  );
+  if (dashboardCards) dashboardCards.classList.add("hidden");
+  if (taskArea) taskArea.classList.add("hidden");
 
-  password.value =
-    "";
+  password.value = "";
 
 }
 
@@ -2296,6 +2334,7 @@ function showApp() {
   app.classList.remove(
     "hidden"
   );
+  app.classList.add("authenticated");
 
   todayLabel.textContent =
     new Date().toLocaleDateString(
@@ -3726,7 +3765,7 @@ function renderWatermarkFiles() {
   wmFileList.innerHTML = watermarkFiles.map((file, index) => `
     <div class="wm-file">
       <div class="wm-file-name" title="${esc(file.name)}">
-        📄 ${esc(file.name)}
+        <span class="safe-inline-icon">PDF</span> ${esc(file.name)}
         <span class="wm-file-size">${formatBytes(file.size)}</span>
       </div>
       <button type="button" class="wm-remove" data-wm-index="${index}">Remove</button>
@@ -4281,7 +4320,7 @@ async function compressPdfFile(file, onPageProgress) {
 function renderCompressFiles() {
   compressFileList.innerHTML = compressInputFiles.map((file, index) => `
     <div class="wm-file">
-      <div class="wm-file-name" title="${esc(file.name)}">📄 ${esc(file.name)} <span class="wm-file-size">${formatBytes(file.size)}</span></div>
+      <div class="wm-file-name" title="${esc(file.name)}"><span class="safe-inline-icon">PDF</span> ${esc(file.name)} <span class="wm-file-size">${formatBytes(file.size)}</span></div>
       <button type="button" class="wm-remove" data-compress-index="${index}">Remove</button>
     </div>`).join("");
   compressStatus.textContent = compressInputFiles.length
@@ -4986,7 +5025,7 @@ document
           const isPdfTool = isWatermark || isCompress;
           const isImageTool = isImageConverter || isImageResize;
           const isSpecialTool = isPdfTool || isImageTool;
-          const taskQuickFilters = document.getElementById("taskQuickFilters");
+          const taskActionsRow = document.getElementById("taskActionsRow");
           const taskArea = document.getElementById("taskArea");
           const dashboardCards = document.getElementById("dashboardCards");
 
@@ -4996,7 +5035,7 @@ document
           imageResizeView.classList.toggle("hidden", !isImageResize);
           dashboardCards?.classList.toggle("hidden", !isDashboard);
           taskArea?.classList.toggle("hidden", !isTasks);
-          document.querySelector(".main > .top .actions")?.classList.toggle("hidden", !isTasks);
+          taskActionsRow?.classList.toggle("hidden", !isTasks);
 
 
           document
@@ -5053,7 +5092,7 @@ document
             imageResizeView.classList.add("hidden");
             dashboardCards?.classList.toggle("hidden", !isDashboard);
             taskArea?.classList.toggle("hidden", !isTasks);
-            document.querySelector(".main > .top .actions")?.classList.toggle("hidden", !isTasks);
+            taskActionsRow?.classList.toggle("hidden", !isTasks);
           }
 
           pageTitle.textContent =
@@ -5071,19 +5110,23 @@ document
 
 
 /* =====================================================
-   ACCOUNT / PROFILE / THEME
+   PROFILE / THEME / SETTINGS
 ===================================================== */
-const accountBtn=document.getElementById("accountBtn");
-const accountMenu=document.getElementById("accountMenu");
-const accountLabel=document.getElementById("accountLabel");
-const accountAvatar=document.getElementById("accountAvatar");
 const profileModal=document.getElementById("profileModal");
+const settingsModal=document.getElementById("settingsModal");
 const profileNameInput=document.getElementById("profileNameInput");
 const profileEmailInput=document.getElementById("profileEmailInput");
 const profilePasswordInput=document.getElementById("profilePasswordInput");
-const settingsSection=document.getElementById("settingsSection");
 const profileSaveBtn=document.getElementById("profileSaveBtn");
 const profileCancelBtn=document.getElementById("profileCancelBtn");
+const themePopover=document.getElementById("themePopover");
+const settingsCloseBtn=document.getElementById("settingsCloseBtn");
+const settingsSaveBtn=document.getElementById("settingsSaveBtn");
+const settingNotifications=document.getElementById("settingNotifications");
+const settingConfirmRemove=document.getElementById("settingConfirmRemove");
+const settingAutoRefresh=document.getElementById("settingAutoRefresh");
+const settingCompact=document.getElementById("settingCompact");
+const settingDateFormat=document.getElementById("settingDateFormat");
 
 function applyTheme(theme){
   document.body.classList.remove("theme-ocean","theme-green","theme-purple","theme-orange","theme-red","theme-dark");
@@ -5092,238 +5135,74 @@ function applyTheme(theme){
   document.querySelectorAll(".theme-swatch").forEach(x=>x.classList.toggle("active",x.dataset.theme===(theme||"ocean")));
 }
 applyTheme(localStorage.getItem("akash_theme")||"ocean");
-if(document.getElementById("taskArea")){document.getElementById("taskArea").classList.add("hidden");}
-if(document.getElementById("dashboardCards")){document.getElementById("dashboardCards").classList.remove("hidden");}
-if(document.querySelector(".main > .top .actions")){document.querySelector(".main > .top .actions").classList.add("hidden");}
 
-function openProfileModal(settings=false){
-  accountMenu.classList.add("hidden");
-  profileModal.classList.add("show");
-  settingsSection.classList.toggle("hidden",!settings);
-  profileSaveBtn.classList.toggle("hidden",settings);
-  profileNameInput.disabled=settings;profilePasswordInput.disabled=settings;
-  if(settings){profileNameInput.value="";profilePasswordInput.value="";}
+function loadLocalSettings(){
+  settingNotifications.checked=localStorage.getItem("akash_notifications")==="1";
+  settingConfirmRemove.checked=localStorage.getItem("akash_confirm_remove")!=="0";
+  settingAutoRefresh.checked=localStorage.getItem("akash_auto_refresh")==="1";
+  settingCompact.checked=localStorage.getItem("akash_compact")==="1";
+  settingDateFormat.value=localStorage.getItem("akash_date_format")||"yyyy-mm-dd";
+  document.body.classList.toggle("compact-tasks",settingCompact.checked);
 }
-document.getElementById("changeProfileBtn").onclick=()=>openProfileModal(false);
-document.getElementById("settingsBtn").onclick=()=>openProfileModal(true);
-accountBtn.onclick=()=>accountMenu.classList.toggle("hidden");
-document.getElementById("themeMenuBtn").onclick=()=>document.getElementById("themeGrid").classList.toggle("hidden");
-document.querySelectorAll(".theme-swatch").forEach(btn=>btn.onclick=async()=>{
-  applyTheme(btn.dataset.theme);
-  try{const {data:{user}}=await sb.auth.getUser();if(user)await sb.from("profiles").upsert({id:user.id,email:user.email,theme:btn.dataset.theme,updated_at:new Date().toISOString()},{onConflict:"id"});}catch(e){console.warn("Theme preference could not be saved:",e);}
-});
-document.getElementById("menuLogoutBtn").onclick=()=>logoutBtn.click();
-profileCancelBtn.onclick=()=>profileModal.classList.remove("show");
-window.addEventListener("click",e=>{if(!e.target.closest(".account-wrap"))accountMenu.classList.add("hidden");if(e.target===profileModal)profileModal.classList.remove("show");});
+loadLocalSettings();
 
-async function loadProfile(user){
+async function openProfile(){
+  themePopover.classList.add("hidden");
+  const {data:{user}}=await sb.auth.getUser();
   if(!user)return;
   profileEmailInput.value=user.email||"";
   let name=user.user_metadata?.display_name||user.user_metadata?.full_name||"";
-  const {data}=await sb.from("profiles").select("full_name,theme").eq("id",user.id).maybeSingle();
-  if(data?.full_name)name=data.full_name;
-  if(data?.theme)applyTheme(data.theme);
-  accountLabel.textContent=name||user.email||"Account";
-  accountAvatar.textContent=(name||user.email||"U").trim().charAt(0).toUpperCase();
-  profileNameInput.value=name;profileEmailInput.value=user.email||"";
+  try{const {data}=await sb.from("profiles").select("full_name").eq("id",user.id).maybeSingle();if(data?.full_name)name=data.full_name;}catch(e){}
+  profileNameInput.value=name;
+  profilePasswordInput.value="";
+  profileModal.classList.add("show");
 }
+
+document.getElementById("profileTopBtn").onclick=openProfile;
+document.getElementById("themeTopBtn").onclick=()=>{settingsModal.classList.remove("show");themePopover.classList.toggle("hidden");};
+document.getElementById("settingsTopBtn").onclick=()=>{themePopover.classList.add("hidden");loadLocalSettings();settingsModal.classList.add("show");};
+
+document.querySelectorAll(".theme-swatch").forEach(btn=>btn.onclick=async()=>{
+  applyTheme(btn.dataset.theme);
+  themePopover.classList.add("hidden");
+  try{const {data:{user}}=await sb.auth.getUser();if(user)await sb.from("profiles").upsert({id:user.id,email:user.email,theme:btn.dataset.theme,updated_at:new Date().toISOString()},{onConflict:"id"});}catch(e){console.warn("Theme preference could not be saved:",e);}
+});
+
+profileCancelBtn.onclick=()=>profileModal.classList.remove("show");
+settingsCloseBtn.onclick=()=>settingsModal.classList.remove("show");
 profileSaveBtn.onclick=async()=>{
-  const {data:{user}}=await sb.auth.getUser();if(!user)return;
-  const name=profileNameInput.value.trim();const newPassword=profilePasswordInput.value;
+  const {data:{user}}=await sb.auth.getUser();
+  if(!user)return;
+  const name=profileNameInput.value.trim();
+  const password=profilePasswordInput.value;
+  if(!name){alert("Please enter your name.");return;}
   profileSaveBtn.disabled=true;
   try{
-    const {error:profileError}=await sb.from("profiles").upsert({id:user.id,email:user.email,full_name:name,theme:localStorage.getItem("akash_theme")||"ocean",updated_at:new Date().toISOString()},{onConflict:"id"});
-    if(profileError)throw profileError;
-    const updates={data:{display_name:name}};
-    if(newPassword){if(newPassword.length<6)throw new Error("Password must be at least 6 characters.");updates.password=newPassword;}
-    const {error:authError}=await sb.auth.updateUser(updates);if(authError)throw authError;
-    await loadProfile({...user,user_metadata:{...(user.user_metadata||{}),display_name:name}});
-    profilePasswordInput.value="";profileModal.classList.remove("show");alert("Profile updated successfully.");
-  }catch(e){alert("Unable to update profile:\n"+(e.message||e));}
+    await sb.from("profiles").upsert({id:user.id,email:user.email,full_name:name,updated_at:new Date().toISOString()},{onConflict:"id"});
+    await sb.auth.updateUser({data:{display_name:name,full_name:name}});
+    if(password){if(password.length<6)throw new Error("Password must be at least 6 characters.");const {error}=await sb.auth.updateUser({password});if(error)throw error;}
+    alert("Profile updated successfully.");
+    profileModal.classList.remove("show");
+    if(typeof loadTasks==='function')loadTasks();
+  }catch(e){alert(e.message||"Unable to update profile.");}
   finally{profileSaveBtn.disabled=false;}
 };
 
-/* =====================================================
-   SINGLE-LOGIN LOCK
-===================================================== */
-let singleLoginToken=null;let singleLoginTimer=null;let singleLoginBusy=false;let singleLoginStopping=false;
-const LOGIN_TOKEN_KEY="akash_single_login_token";
-function newLoginToken(){return window.crypto?.randomUUID?window.crypto.randomUUID():`${Date.now()}-${Math.random().toString(36).slice(2)}`;}
-async function singleLoginRPC(token,takeover=false){const {data,error}=await sb.rpc("single_login_claim",{p_session_token:token,p_takeover:takeover});if(error)throw error;return data||{};}
-async function claimSingleLogin(takeover=false,token=null){
-  singleLoginToken=token||newLoginToken();
-  const result=await singleLoginRPC(singleLoginToken,takeover);
-  if(result.conflict){singleLoginToken=null;return {conflict:true};}
-  if(!result.ok){singleLoginToken=null;throw new Error(result.message||"Unable to start the login session.");}
-  localStorage.setItem(LOGIN_TOKEN_KEY,singleLoginToken);return {conflict:false};
-}
-async function checkSingleLogin(){
-  if(!singleLoginToken||singleLoginBusy||singleLoginStopping)return;singleLoginBusy=true;
-  try{const {data:{user}={}}=await sb.auth.getUser();if(!user)return;
-    const {data,error}=await sb.rpc("single_login_status");
-    if(error){console.error(error);return;}
-    if(!data?.ok||data.session_token!==singleLoginToken){singleLoginStopping=true;clearInterval(singleLoginTimer);singleLoginTimer=null;singleLoginToken=null;localStorage.removeItem(LOGIN_TOKEN_KEY);tasks=[];selected.clear();await sb.auth.signOut({scope:"local"});showLogin();msg("This account was logged out because it was taken over on another device or browser.");}
-  }finally{singleLoginBusy=false;}
-}
-function startSingleLoginMonitor(){clearInterval(singleLoginTimer);singleLoginTimer=setInterval(checkSingleLogin,2000);checkSingleLogin();}
-function stopSingleLoginMonitor(){clearInterval(singleLoginTimer);singleLoginTimer=null;singleLoginToken=null;localStorage.removeItem(LOGIN_TOKEN_KEY);}
-
-/* =====================================================
-   LOGOUT
-===================================================== */
-
-logoutBtn.onclick =
-  async function() {
-
-    const tokenToRelease = singleLoginToken;
-    stopSingleLoginMonitor();
-    if (tokenToRelease) {
-      try { await sb.rpc("single_login_release", { p_session_token: tokenToRelease }); }
-      catch (e) { console.warn("Could not release login lock:", e); }
-    }
-
-    const {
-      error
-    } =
-      await sb.auth.signOut();
-
-
-    if (error) {
-
-      alert(
-        "Logout failed:\n"
-        +
-        error.message
-      );
-
-      return;
-
-    }
-
-
-    tasks = [];
-
-    selected.clear();
-
-    showLogin();
-
-    msg("");
-
-  };
-
-
-/* =====================================================
-   SINGLE LOGIN CONFIRMATION
-===================================================== */
-
-function askSingleLoginTakeover() {
-  return new Promise(resolve => {
-    singleLoginModal.classList.add("show");
-    singleLoginYes.focus();
-
-    const finish = value => {
-      singleLoginModal.classList.remove("show");
-      singleLoginYes.onclick = null;
-      singleLoginNo.onclick = null;
-      document.removeEventListener("keydown", onKeyDown);
-      resolve(value);
-    };
-
-    const onKeyDown = event => {
-      if (event.key === "Escape") finish(false);
-      if (event.key === "Enter") finish(true);
-    };
-
-    singleLoginYes.onclick = () => finish(true);
-    singleLoginNo.onclick = () => finish(false);
-    document.addEventListener("keydown", onKeyDown);
-  });
-}
-
-/* =====================================================
-   LOGIN
-===================================================== */
-loginBtn.onclick=async function(){
-  const userEmail=email.value.trim(),userPassword=password.value;
-  if(!userEmail){msg("Please enter your email.");return;}
-  if(!userPassword){msg("Please enter your password.");return;}
-  loginBtn.disabled=true;msg("Signing in...");
-  const {data,error}=await sb.auth.signInWithPassword({email:userEmail,password:userPassword});
-  loginBtn.disabled=false;
-  if(error){msg("Login failed: "+error.message);return;}
-  if(!data.session){msg("Login failed. No session created.");return;}
-  try{
-    let result=await claimSingleLogin(false);
-    if(result.conflict){
-      const takeover=await askSingleLoginTakeover();
-      if(!takeover){await sb.auth.signOut({scope:"local"});msg("Login cancelled. The existing login remains active.");return;}
-      result=await claimSingleLogin(true);
-      if(result.conflict){await sb.auth.signOut({scope:"local"});msg("The existing login changed while you were confirming. Please try again.");return;}
-    }
-  }catch(e){await sb.auth.signOut({scope:"local"});console.error(e);msg("Login setup error: "+(e.message||e));return;}
-  singleLoginStopping=false;msg("");showApp();startSingleLoginMonitor();await loadProfile(data.user);await loadTasks();
+settingsSaveBtn.onclick=()=>{
+  localStorage.setItem("akash_notifications",settingNotifications.checked?"1":"0");
+  localStorage.setItem("akash_confirm_remove",settingConfirmRemove.checked?"1":"0");
+  localStorage.setItem("akash_auto_refresh",settingAutoRefresh.checked?"1":"0");
+  localStorage.setItem("akash_compact",settingCompact.checked?"1":"0");
+  localStorage.setItem("akash_date_format",settingDateFormat.value);
+  document.body.classList.toggle("compact-tasks",settingCompact.checked);
+  settingsModal.classList.remove("show");
 };
 
-/* =====================================================
-   ENTER KEY LOGIN
-===================================================== */
-
-password.addEventListener(
-  "keydown",
-  function(e) {
-
-    if (
-      e.key === "Enter"
-    ) {
-
-      loginBtn.click();
-
-    }
-
-  }
-);
-
-
-/* =====================================================
-   AUTH STATE LISTENER
-===================================================== */
-sb.auth.onAuthStateChange(async function(event,session){
-  if(session){
-    // The explicit login flow owns the single-login claim. On refresh, initializeApp handles it.
-    if(singleLoginToken){showApp();startSingleLoginMonitor();await loadProfile(session.user);await loadTasks();}
-  }else{tasks=[];selected.clear();stopSingleLoginMonitor();showLogin();}
+window.addEventListener("click",e=>{
+  if(!e.target.closest(".top-account-actions"))themePopover.classList.add("hidden");
+  if(e.target===profileModal)profileModal.classList.remove("show");
+  if(e.target===settingsModal)settingsModal.classList.remove("show");
 });
-
-/* =====================================================
-   INITIAL AUTH CHECK
-===================================================== */
-async function initializeApp(){
-  const {data,error}=await sb.auth.getSession();
-  if(error){console.error(error);showLogin();return;}
-  if(!data?.session){stopSingleLoginMonitor();showLogin();return;}
-  try{
-    const savedToken=localStorage.getItem(LOGIN_TOKEN_KEY);
-    if(savedToken){
-      const result=await claimSingleLogin(false,savedToken);
-      if(result.conflict){
-        // This browser lost the lock while closed. Ask the user before taking it back.
-        const takeover=await askSingleLoginTakeover();
-        if(!takeover){await sb.auth.signOut({scope:"local"});showLogin();msg("Login cancelled. The existing login remains active.");return;}
-        await claimSingleLogin(true);
-      }
-    }else{
-      const result=await claimSingleLogin(false);
-      if(result.conflict){await sb.auth.signOut({scope:"local"});showLogin();msg("This account is already logged in on another browser or device. Please log in again and choose the takeover option.");return;}
-    }
-    singleLoginStopping=false;showApp();startSingleLoginMonitor();await loadProfile(data.session.user);await loadTasks();
-  }catch(e){console.error("Single-login initialization failed:",e);await sb.auth.signOut({scope:"local"});showLogin();msg("Login setup error: "+(e.message||e));}
-}
-
-/* =====================================================
-   START APPLICATION
-===================================================== */
-
-initializeApp();
 
 </script>
 
