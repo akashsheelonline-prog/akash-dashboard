@@ -4840,15 +4840,10 @@ document
 ===================================================== */
 
 /*
-  Supabase Auth normally allows the same account to have sessions on
-  multiple browsers/devices. This dashboard adds a small singleton lock
-  in public.active_login. Each successful login claims the single slot.
-  Every open dashboard checks the slot every 2 seconds; if another login
-  claims it, the older dashboard signs out immediately.
-
-  Run the SQL supplied with this version once in Supabase SQL Editor.
+  The single-login decision is handled by a SECURITY DEFINER RPC in
+  Supabase. This is important because RLS must not prevent the new login
+  from checking whether the single slot is already occupied.
 */
-
 let singleLoginToken = null;
 let singleLoginTimer = null;
 let singleLoginBusy = false;
@@ -4859,25 +4854,30 @@ function newLoginToken() {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
 }
 
-async function claimSingleLogin(userId) {
+async function singleLoginRPC(sessionToken, takeover = false) {
+  const { data, error } = await sb.rpc("single_login_claim", {
+    p_session_token: sessionToken,
+    p_takeover: takeover
+  });
+  if (error) throw error;
+  return data || {};
+}
+
+async function claimSingleLogin(userId, takeover = false) {
   singleLoginToken = newLoginToken();
+  const result = await singleLoginRPC(singleLoginToken, takeover);
 
-  const { error } = await sb
-    .from("active_login")
-    .upsert({
-      id: 1,
-      user_id: userId,
-      session_token: singleLoginToken,
-      updated_at: new Date().toISOString()
-    }, { onConflict: "id" });
-
-  if (error) {
-    console.error("Single-login lock setup error:", error);
+  if (result.conflict) {
     singleLoginToken = null;
-    throw new Error(
-      "Single-login lock is not configured in Supabase. Please run the SQL setup provided with this version."
-    );
+    return { conflict: true };
   }
+
+  if (!result.ok) {
+    singleLoginToken = null;
+    throw new Error(result.message || "Unable to start the single-login session.");
+  }
+
+  return { conflict: false };
 }
 
 async function checkSingleLogin() {
@@ -4906,9 +4906,9 @@ async function checkSingleLogin() {
       singleLoginTimer = null;
       tasks = [];
       selected.clear();
-      showLogin();
-      msg("This dashboard was logged out because another user signed in.");
       await sb.auth.signOut({ scope: "local" });
+      showLogin();
+      msg("This dashboard was logged out because another login took over this account.");
     }
   } finally {
     singleLoginBusy = false;
@@ -5083,44 +5083,34 @@ loginBtn.onclick =
     }
 
     /*
-      The password has been verified, but do NOT take over the existing
-      dashboard session yet. First check whether another user currently
-      owns the single-login slot. This lets the new user explicitly choose
-      whether to take over the existing session.
+      Credentials are now verified. The RPC checks the single-login slot
+      WITHOUT replacing it. If it is occupied, the new user gets a choice.
     */
     try {
-      const { data: currentLock, error: lockCheckError } = await sb
-        .from("active_login")
-        .select("id,user_id,session_token,updated_at")
-        .eq("id", 1)
-        .maybeSingle();
+      let takeover = false;
+      let result = await claimSingleLogin(data.user.id, false);
 
-      if (lockCheckError) {
-        await sb.auth.signOut({ scope: "local" });
-        msg("Single-login lock check failed: " + lockCheckError.message);
-        return;
-      }
+      if (result.conflict) {
+        takeover = await askSingleLoginTakeover();
 
-      /*
-        IMPORTANT: Any active lock must be confirmed before it is replaced,
-        including when the same account is already logged in elsewhere.
-        The existing lock is NOT changed when the user clicks No.
-      */
-      if (currentLock && currentLock.user_id && currentLock.session_token) {
-        const takeOver = await askSingleLoginTakeover();
-
-        if (!takeOver) {
+        if (!takeover) {
           await sb.auth.signOut({ scope: "local" });
           msg("Login cancelled. The existing login remains active.");
           return;
         }
+
+        result = await claimSingleLogin(data.user.id, true);
+        if (result.conflict) {
+          await sb.auth.signOut({ scope: "local" });
+          msg("The existing login changed while you were confirming. Please try again.");
+          return;
+        }
       }
 
-      /* Only after the user clicks Yes (when a lock exists) do we replace the lock. */
-      await claimSingleLogin(data.user.id);
     } catch (lockError) {
       await sb.auth.signOut({ scope: "local" });
-      msg(lockError.message || "Unable to start the single-login session.");
+      console.error("Single-login RPC error:", lockError);
+      msg("Single-login setup error: " + (lockError.message || "Please run the new Supabase SQL setup."));
       return;
     }
 
@@ -5229,32 +5219,29 @@ async function initializeApp() {
     data.session
   ) {
 
-    const { data: lockRow, error: lockError } = await sb
-      .from("active_login")
-      .select("user_id,session_token")
-      .eq("id", 1)
-      .maybeSingle();
-
-    if (lockError) {
-      console.error("Single-login lock check failed:", lockError);
-      showLogin();
-      msg("Single-login lock is not configured. Please run the SQL setup provided with this version.");
-      return;
-    }
-
-    if (lockRow && lockRow.user_id !== data.session.user.id) {
-      await sb.auth.signOut({ scope: "local" });
-      showLogin();
-      msg("Another user is currently signed in.");
-      return;
-    }
-
     try {
-      await claimSingleLogin(data.session.user.id);
-    } catch (lockClaimError) {
+      /* Re-claim this browser's existing session without taking over another session. */
+      const existingToken = newLoginToken();
+      const { data: claimResult, error: claimError } = await sb.rpc("single_login_claim", {
+        p_session_token: existingToken,
+        p_takeover: false
+      });
+
+      if (claimError) throw claimError;
+
+      if (claimResult?.conflict) {
+        await sb.auth.signOut({ scope: "local" });
+        showLogin();
+        msg("This account is already logged in on another browser or device. Please log in again there or use the takeover option.");
+        return;
+      }
+
+      singleLoginToken = existingToken;
+    } catch (lockError) {
+      console.error("Single-login initialization failed:", lockError);
       await sb.auth.signOut({ scope: "local" });
       showLogin();
-      msg(lockClaimError.message);
+      msg("Single-login setup error: " + (lockError.message || "Please run the new Supabase SQL setup."));
       return;
     }
 
